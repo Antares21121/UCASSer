@@ -1,40 +1,60 @@
-<p align="center">
-<a href="https://flarum.org/"><img src="https://flarum.org/images/flarum.svg"></a>
-</p>
+# 校园公共论坛 · Phase 0
 
-<p align="center">
-<a href="https://packagist.org/packages/flarum/core"><img src="https://poser.pugx.org/flarum/core/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/flarum/core"><img src="https://poser.pugx.org/flarum/core/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/flarum/core"><img src="https://poser.pugx.org/flarum/core/license.svg" alt="License"></a>
-</p>
+以校园生活参与者共同维护的公益公共论坛。永久免费，服务校园信息聚合、公共资料索引、课程测评和互助交流。本阶段提供基础工程与运维能力，业务模块见 [路线图](docs/roadmap.md)。论坛名称、正式域名、邮件服务和生产服务器均由部署者配置。
 
-## About Flarum
+技术栈：Flarum 2.0.0-rc.8、PHP 8.3.35、Composer 2.10.3、MariaDB 11.4.13、Nginx 1.30.1；管理脚本使用 Python 3.11+ 标准库。依赖版本由 `composer.lock` 固定。
 
-**[Flarum](https://flarum.org/) is a delightfully simple discussion platform for your website.** It's fast and easy to use, with all the features you need to run a successful community. It is designed to be:
+**版本边界**：沿用仓库 `2.x` 的 `^2.0.0-rc.8` 核心与官方扩展清单，本机与团队使用同一锁文件。截至 2026-10-09，2.0 仍为 RC，本阶段仅开发使用；生产启动、配置桥接和镜像构建均拒绝 RC/beta/dev 核心，等待正式 2.x 发布后再验证上线。见 [版本决策](docs/decisions/001-runtime.md)。
 
-* **Fast and simple.** No clutter, no bloat, no complex dependencies. Flarum is built with PHP so it’s quick and easy to deploy. The interface is powered by Mithril, a performant JavaScript framework with a tiny footprint.
+## 快速开始：团队首选 Docker Compose
 
-* **Beautiful and responsive.** This is forum software for humans. Flarum is carefully designed to be consistent and intuitive across platforms, out-of-the-box.
+安装 Git、Python 3.11+、Docker Engine/Desktop 和 Compose v2（建议 2.24+）。Windows Docker Desktop 需要可用的 WSL2 或 Hyper-V 后端，Linux 容器模式。
 
-* **Powerful and extensible.** Customize, extend, and integrate Flarum to suit your community. Flarum’s architecture is amazingly flexible, with a powerful Extension API.
+```console
+git clone https://github.com/Antares21121/UCASSer.git
+cd UCASSer
+python scripts/forum.py doctor
+python scripts/forum.py setup
+python scripts/forum.py start
+python scripts/forum.py install
+python scripts/forum.py healthcheck
+```
 
-![screenshot](https://flarum.org/assets/flarum/home-screenshot.png)
+打开 `http://127.0.0.1:8080`。setup 仅在 `.env` 不存在时初始化配置并生成本机随机数据库密码；install 在终端安全询问管理员账号、邮箱和密码，拒绝再次安装或使用非空数据库。不要让安装向导直接暴露于公网。
 
-## Installation
+## Windows 无 Docker 的替代方案
 
-Read the **[Installation guide](https://docs.flarum.org/install)** to get started. For support, refer to the [documentation](https://docs.flarum.org/), and ask questions on the [community forum](https://discuss.flarum.org/) or [Discord chat](https://flarum.org/discord/).
+```console
+python scripts/forum.py --backend native bootstrap-native
+python scripts/forum.py --backend native setup
+python scripts/forum.py --backend native start
+python scripts/forum.py --backend native install
+python scripts/forum.py --backend native healthcheck
+```
 
-## Contributing
+下载版本和校验值由 `scripts/runtime-lock.json` 固定，所有工具和数据库均在工作区，不安装系统服务。只绑定 `127.0.0.1`，不能用于生产。首次下载需连接官方 PHP、MariaDB、Composer 和 GitHub/Packagist。
 
-Thank you for considering contributing to Flarum! Please read the **[Contributing guide](https://docs.flarum.org/contributing)** to learn how you can help.
+## 常用命令
 
-This repository only holds the Flarum skeleton application. Most development happens in [flarum/core](https://github.com/flarum/core).
+| 行为 | 命令 |
+|---|---|
+| 检查工具 | `python scripts/forum.py doctor` |
+| 初始化 / 同步锁定依赖 | `python scripts/forum.py setup` |
+| 启动 | `python scripts/forum.py start` |
+| 停止（保留数据） | `python scripts/forum.py stop` |
+| 状态 / 日志 | `python scripts/forum.py status` / `python scripts/forum.py logs` |
+| 应用与数据库健康 | `python scripts/forum.py healthcheck` |
+| 备份 / 列出备份 | `python scripts/forum.py backup` / `python scripts/forum.py backups` |
+| 依赖与运行版本 | `python scripts/forum.py versions` |
 
-## Security Vulnerabilities
+Windows 替代方案在脚本名之后加 `--backend native`，例如 `python scripts/forum.py --backend native stop`。恢复必须使用新工作区、新数据库和明确目标，操作见 [备份恢复](docs/backup-recovery.md)。
 
-If you discover a security vulnerability within Flarum, please follow our [security policy](https://github.com/flarum/core/security/policy) so we can address it promptly.
+## 协作与验证
 
-## License
+- [开发环境同步手册](docs/development.md)：新开发者按文档安装相同工具、依赖和配置，不复制队友密码或数据库。
+- [架构](docs/architecture.md)、[部署](docs/deployment.md)、[安全](docs/security.md)、[权限](docs/permissions.md)。
+- [本次环境与验证报告](docs/verification.md)：Windows 实际安装、重启持久化、备份及隔离恢复已经验证；Docker/HTTPS 未在本机运行。
+- 自动检查：`python -m pip install -r tests/requirements.txt`，然后 `python scripts/check.py` 和 `python -m unittest discover -s tests -p "test_*.py" -v`。
+- `python tests/smoke.py --backend docker` 是会真实安装和重启服务的集成检查，只用于全新、无用户数据的开发环境。
 
-Flarum is open-source software licensed under the [MIT License](https://github.com/flarum/flarum/blob/master/LICENSE).
-
+保留 Flarum 原有 `site.php`、`public/`、`storage/`、`extend.php` 和许可证。上游说明存于 [upstream-README.md](docs/upstream-README.md)。不提交 `.env`、管理员凭据、`vendor/`、工具、运行时数据或备份。

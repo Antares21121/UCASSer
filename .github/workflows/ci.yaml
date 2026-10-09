@@ -1,0 +1,41 @@
+name: Phase 0 checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  infrastructure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - name: Static checks and launcher behavior
+        run: |
+          python -m pip install -r tests/requirements.txt
+          python scripts/check.py
+          python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Build reproducible development image and dependencies
+        run: python scripts/forum.py setup
+      - name: Validate Compose, PHP and Nginx syntax
+        run: |
+          docker compose config --quiet
+          docker compose run --rm --no-deps app sh -c 'find config scripts public -name "*.php" -exec php -l {} \;'
+          docker compose run --rm --no-deps app composer validate --strict --no-check-all
+          docker compose run --rm --no-deps app composer check-platform-reqs --no-dev
+          docker compose up -d --wait
+          docker compose exec -T web nginx -t
+      - name: Real install, restart, backup and isolated restore
+        run: python tests/smoke.py --backend docker
+      - name: Security audit (no ignored advisories)
+        run: python scripts/audit.py --backend docker
+      - name: Preserve diagnostics without secrets or backups
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-verification
+          path: .runtime/verification.json
+          if-no-files-found: ignore
+      - name: Stop services without deleting data
+        if: always()
+        run: docker compose stop

@@ -40,7 +40,8 @@
         "flarum/sticky": "*",
         "flarum/subscriptions": "*",
         "flarum/suspend": "*",
-        "flarum/tags": "*"
+        "flarum/tags": "*",
+        "php": "^8.3"
     },
     "config": {
         "preferred-install": "dist",

@@ -7,5 +7,26 @@ vendor
 server
 core
 studio.json
-composer.lock
+
+# Local configuration, tools, database, backups and generated files
+.env
+.env.*
+!.env.example
+auth.json
+.runtime/
+.tools/
+backups/
+__pycache__/
+*.pyc
+/storage/**
+!/storage/**/
+!/storage/**/.gitignore
+/public/assets/**
+!/public/assets/**/
+!/public/assets/**/.gitignore
+*.log
+*.sql
+*.sql.gz
+*.pem
+*.key
 

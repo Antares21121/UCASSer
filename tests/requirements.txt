@@ -1,0 +1,2 @@
+# Static CI checks only. Launcher and unit tests use the Python standard library.
+PyYAML==6.0.2

@@ -1,0 +1,11 @@
+FROM composer:2.10.3 AS composer
+FROM php:8.3.35-fpm-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libonig-dev libicu-dev libxml2-dev git unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j2 gd mbstring pdo_mysql zip intl dom opcache \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/forum.ini
+COPY docker/php/zz-forum.conf /usr/local/etc/php-fpm.d/zz-forum.conf
+WORKDIR /var/www/forum
