@@ -47,8 +47,8 @@ jobs:
           import subprocess, re
           from pathlib import Path
           from scripts.forum import read_env
-          values = read_env(Path('.env')) if Path('.env').exists() else {}
-          secrets = [v for k, v in values.items() if 'PASSWORD' in k and v]
+          env_files = [Path('.env'), *Path('.runtime').glob('restore-verification-*/.env')]
+          secrets = [v for path in env_files if path.exists() for k, v in read_env(path).items() if 'PASSWORD' in k and v]
           password = Path('.runtime/admin-initial-password.txt')
           if password.exists():
               secrets.append(password.read_text().strip())
@@ -64,6 +64,14 @@ jobs:
               output = re.sub(r'/(confirm|reset|gdpr/erasure/confirm)/[^\s?"<>]+', r'/\1/[REDACTED]', output)
               output = re.sub(r'([A-Z]+ /[^\s?]*)\?\S+', r'\1?[REDACTED]', output)
               print(output)
+          for path in [Path('.runtime/last-error.log'), *Path('.runtime').glob('restore-verification-*/.runtime/last-error.log')]:
+              if not path.exists():
+                  continue
+              output = path.read_text(errors='replace')
+              for secret in secrets:
+                  output = output.replace(secret, '[REDACTED]')
+              output = re.sub(r'/(confirm|reset|gdpr/erasure/confirm)/[^\s?"<>]+', r'/\1/[REDACTED]', output)
+              print('Redacted launcher diagnostic: ' + output[-12000:])
           PY
       - name: Preserve diagnostics without secrets or backups
         if: always()
