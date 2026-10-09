@@ -11,6 +11,7 @@
 - 全部论坛数据库表（账号、设置、帖子、权限等）。
 - 全部 `public/assets/` 和 `storage/`；当前用户上传为头像等 assets 文件。
 - `composer.json`、`composer.lock`、环境桥接、`extend.php` 和运行时版本锁。
+- `extensions/` 内自有扩展源码、迁移、前端产物及包清单，排除 `node_modules`。
 - `manifest.json` 中的逐文件 SHA256、原数据库名、版本与非敏感运行参数。
 
 外层 ZIP 对应 `.sha256` 文件，名称为 `forum-数据库名-UTC时间-随机后缀.zip`。环境变量中的数据库/邮件密码与 `.env` 不归档；Flarum 后台保存在数据库中的 SMTP 凭据仍会随 SQL 导出。备份会含用户数据和私有应用日志，必须按敏感数据保存；当前没有加密和异地上传实现。生产应单独配置加密、异地保存、保留期与访问审计。
@@ -29,7 +30,7 @@ Windows 加 `--backend native`。备份期间论坛短暂不可写，数据库�
 必须使用新工作区、新数据库、新端口/Compose 项目名。恢复脚本不默认覆盖原数据库：要求 `--target-db` 等于新环境的 `DB_NAME`、目标数据库为空、目标无 `config.php`，并且数据库名不能与备份原名相同。数据库名确认是覆盖风险确认，自动化可显式使用 `--confirm 新数据库名`，不能省略目标。
 
 1. 在单独目录克隆所需提交，安装 Python 和 Docker，或下载便携运行时。不要在正在服务用户的工作区演练。
-2. 从备份 ZIP 提取 `composer.json` 和 `composer.lock` 到新工作区；核对来源与 SHA256。自定义扩展源码需使用备份对应的 Git 提交；本阶段只有 `extend.php`。脚本要求目标锁文件与归档完全一致。
+2. 核对备份来源与 SHA256，在新工作区检出备份对应的 Git 提交；需要取回未提交的开发源码时，从可信 ZIP 提取 `composer.json`、`composer.lock` 和 `extensions/`，然后安装依赖。脚本在导入前校验目标锁文件与扩展逐文件内容；文本只允许换行差异，其他内容必须一致。
 3. 将 `.env.example` 复制为新目录的 `.env`，设置例如 `DB_NAME=campus_restore_20261009`、`COMPOSE_PROJECT_NAME=campus-restore-20261009`、`HTTP_PORT=8081`、`APP_URL=http://127.0.0.1:8081`。密码留空交给 setup 生成新值。Windows 再设置 `NATIVE_DB_PORT=3308`，以免连接原数据库。
 4. 运行 `setup`、`start`；它们只在新数据卷/目录初始化空数据库，不运行论坛安装。**不要运行 install**，否则恢复会拒绝已配置目标。
 5. 复制可信备份 ZIP 及对应 `.sha256` 到新机器私有目录，保留原文件名。执行恢复：

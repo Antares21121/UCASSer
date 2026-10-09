@@ -1,4 +1,4 @@
-# Phase 0 环境检查与实际验证报告
+# 工程与校园业务实际验证报告
 
 验证日期：2026-10-09（Asia/Shanghai）。Phase 0 开发工程已完成；生产上线等待正式 Flarum 2.x。此报告区分实际执行与尚待验证事项。
 
@@ -128,6 +128,11 @@ python scripts/forum.py --backend native healthcheck
 | `python scripts/dev_mail.py --backend native --check` | SMTP 本地收信、纯文本邮箱读取、旧设置恢复通过；未向外部投递 |
 | 静态、PHP 语法、管理脚本行为 | Python AST/JSON/YAML/Git 排除与 PHP 语法通过；14 项行为测试全部通过 |
 | Composer validate / audit、npm audit | 通过，无已报告漏洞或停止维护包；没有忽略公告 |
-| GitHub 新业务 PR CI | 待实际远程运行确认；流程已包含 Linux Docker 新安装、业务隔离恢复、阶段 1–11、Chromium 与依赖审计 |
+| 全新 Windows 业务安装 | 独立工作区、新数据库、新端口：安装、七项迁移、分区配置及 14 条标注示例创建通过；原开发实例保留且健康 |
+| GitHub 新业务 PR CI | `a40bec6` 全流程通过；Linux Docker 新安装、重启、业务隔离恢复、阶段 1–11、六项 Chromium 流程及依赖审计 |
 
 尚未上线：正式 HTTPS、外发 SMTP、只读生产卷、异地加密备份/调度/告警和稳定 2.x 升级。匿名评价按路线图允许的方案关闭，后端拒绝匿名请求；原生语言仍为已安装英文包，校园模块为中文。当前搜索验收包含 23 条匹配记录的真实分页，规模扩大后需另行压测。完整命令见 [testing.md](testing.md)，新开发者环境同步见 [development.md](development.md)。
+
+远程证据：[PR #2 验收](https://github.com/Antares21121/UCASSer/actions/runs/37979625114)、[分支推送验收](https://github.com/Antares21121/UCASSer/actions/runs/37979619401)。两次运行使用业务修复提交 `a40bec6`；后续仅交接文档变更的提交，其 checks 仍以对应 GitHub 记录为准。
+
+全新环境最初发现两项目录准备问题：便携实例缺少 formatter 缓存目录；Linux 的锁定审计扩展声明空的 common 前端目录，但 Composer 包不包含空目录，运行账户无法在依赖路径创建它。`scripts/prepare-runtime.php` 在安装阶段补齐目录，setup 使用一次性 Docker 容器准备，不依赖服务已启动。生产镜像也在构建阶段准备；没有修改依赖源码、依赖版本或授予运行账户 vendor 写权限。上述 Windows 全新安装与 Linux 全流程均在修复后通过。
