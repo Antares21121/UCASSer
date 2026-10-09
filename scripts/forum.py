@@ -224,6 +224,11 @@ class Forum:
         if not lock_exists and self.values.get('APP_ENV') == 'production':
             raise ValueError('Production requires a reviewed composer.lock')
         self.composer('install' if lock_exists else 'update', '--prefer-dist', '--no-dev', '--no-interaction', '--no-plugins', '--no-scripts')
+        if self.args.backend == 'docker':
+            # Named volumes hide the checkout's tracked placeholder directories.
+            # mkdir is idempotent and retains all existing application data.
+            self.compose('run', '--rm', '--no-deps', '-u', '0', 'app', 'sh', '-c',
+                         'mkdir -p storage/cache storage/formatter storage/less storage/locale storage/logs storage/sessions storage/tmp storage/views public/assets/avatars && chown -R www-data:www-data storage public/assets')
         print('Setup OK; passwords stored privately in env file; next: start, install')
 
     def db_bin(self, name):

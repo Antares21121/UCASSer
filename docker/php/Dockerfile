@@ -9,3 +9,5 @@ COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/forum.ini
 COPY docker/php/zz-forum.conf /usr/local/etc/php-fpm.d/zz-forum.conf
 WORKDIR /var/www/forum
+RUN mkdir -p storage/cache storage/formatter storage/less storage/locale storage/logs storage/sessions storage/tmp storage/views public/assets/avatars \
+    && chown -R www-data:www-data storage public/assets
