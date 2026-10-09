@@ -34,6 +34,7 @@
 | `python scripts/forum.py --backend native versions` | core 2.0.0-rc.8、PHP 8.3.35、MariaDB 11.4.13、debug off；Flarum 提示推荐 MariaDB 11.8，当前 11.4.13 已完成实际安装/恢复验证 |
 | core/扩展清单与 `origin/2.x` 比对 | 上游约束与设置全部保留；无降级 |
 | Git 排除与交付文件秘密扫描 | 私有配置、运行时、依赖、数据库和备份不交付；生成秘密未出现在交付文件 |
+| GitHub Actions：Ubuntu Docker 全流程 | 提交 `f3b1503` 的镜像构建、Compose/PHP/Nginx 检查、真实安装/重启/备份/隔离恢复与严格审计通过，见下方远程记录 |
 
 ## 备份与隔离恢复证据
 
@@ -49,7 +50,11 @@
 
 ## 未实测与后续边界
 
-本机没有 Docker Engine/Compose；容器构建、Compose 服务、Nginx `-t`、Docker 备份恢复不能声称已本机通过。GitHub Actions 定义了上述真实 Docker 检查，执行结果以 PR 的 Checks 为准。生产 HTTPS、证书续期、只读卷权限、SMTP、生产恢复与告警需后续暂存/生产验证；本阶段没有连接生产服务器。
+本机没有 Docker Engine/Compose；不能声称容器已本机运行。上述 Docker 检查已在 GitHub Actions 的 Ubuntu 24.04 环境实际通过：[成功执行记录](https://github.com/Antares21121/UCASSer/actions/runs/37946896525)，对应提交 `f3b1503`。PR 为 [#1](https://github.com/Antares21121/UCASSer/pull/1)，目标分支 `2.x`；最新提交结果仍以 PR 的 Checks 为准。
+
+首轮 Docker smoke 在安装后返回 500，脱敏日志定位到新 storage 卷缺少 formatter/sessions 子目录；已通过镜像预建和 setup 幂等补齐目录修复，没有删卷或清空数据。修复后 Docker smoke 全流程和审计通过。CI 仅上传不含凭据的 verification.json，失败诊断会脱敏数据库/邮件/测试管理员密码，不上传数据库、备份或完整环境配置。
+
+生产 HTTPS、证书续期、只读卷权限、SMTP、生产恢复与告警需后续暂存/生产验证；本阶段没有连接生产服务器。
 
 生产受到三层发布限制：Python 校验、PHP 环境桥接和生产 Dockerfile 构建都要求锁定的正式 2.x，当前 RC 被拒绝。等待上游正式发布后重新解析依赖、验证迁移、扩展和恢复，再上线。
 

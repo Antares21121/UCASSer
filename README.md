@@ -10,6 +10,8 @@
 
 安装 Git、Python 3.11+、Docker Engine/Desktop 和 Compose v2（建议 2.24+）。Windows Docker Desktop 需要可用的 WSL2 或 Hyper-V 后端，Linux 容器模式。
 
+PR 合并前，克隆后先执行 `git switch codex/phase0-infrastructure` 获取本阶段文件；合并后使用默认 `2.x` 分支。
+
 ```console
 git clone https://github.com/Antares21121/UCASSer.git
 cd UCASSer

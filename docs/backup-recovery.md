@@ -52,4 +52,4 @@ python scripts/forum.py --backend native restore --archive "E:\private-backups\f
 - Windows 与 Docker 的备份文件布局不同，恢复脚本会明确拒绝跨后端；数据库 SQL 可迁移，文件需由运维解包并将 tar/目录转换到目标 assets/storage 卷，再验证。该跨后端自动转换尚未实现，不能声称已测试。
 - 用于自动化的 `--confirm` 是调用者的显式确认。本次演练仅对自动生成的新数据库使用，不代表允许覆盖生产数据。
 
-本次已完成实际数据库导出、文件备份和隔离恢复，证据见 [verification.md](verification.md)；Docker 演练由 CI 提供，尚未在本机运行。
+本次 Windows 本机与 GitHub Actions 的 Docker 演练均完成实际数据库导出、文件备份和隔离恢复，证据见 [verification.md](verification.md)。本机没有 Docker，远程 CI 结果不作为本机运行记录。

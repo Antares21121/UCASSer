@@ -30,6 +30,8 @@ python scripts/forum.py setup
 
 `setup` 生成本机 `.env` 和随机密码，构建固定版本镜像，运行 `composer install --no-dev --no-plugins --no-scripts`。已有 `.env` 不重置字段或密码；已有 `composer.lock` 不做依赖升级。生成密码只保存在私有文件中，终端不打印。
 
+Docker 的 storage/assets 命名卷会遮住源代码中的占位目录；镜像与 setup 会创建 formatter、sessions 等必需子目录，并设置 www-data 所有权。重复 setup 只补齐目录，不清空现有数据。
+
 核心和官方扩展约束沿用仓库原始清单，扩展 `*` 的实际版本由 composer.lock 固定。Composer 清单检查使用 `validate --strict --no-check-all`，仅跳过上游通配符/精确约束的风格警告，仍验证配置和锁文件一致性。
 
 4. 检查 `.env` 中的端口、名称和 `APP_URL`。默认 `http://127.0.0.1:8080`。修改端口时同时修改 `HTTP_PORT` 和 `APP_URL`。不要把 `HTTP_BIND` 改为公网地址来分享安装向导。

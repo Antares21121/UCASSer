@@ -91,4 +91,4 @@ python scripts/forum.py --profile production --env-file .env.production healthch
 
 ## 尚待生产环境验证
 
-镜像构建、Nginx/FPM 实际配置、卷权限、证书读取与续期、HTTPS、外发邮件、生产恢复和告警均需暂存环境验证。CI 文件已定义 Docker 实例检查，但本次未在 GitHub 上触发执行。没有生产服务器凭据不妨碍完成本地基础设施。
+开发镜像构建、Compose 运行、Nginx 配置与 Docker 备份恢复已通过 GitHub Actions。生产镜像、只读卷权限、证书读取与续期、HTTPS、外发邮件、生产恢复和告警仍需正式版发布后的暂存环境验证。没有生产服务器凭据不妨碍完成本地基础设施。
