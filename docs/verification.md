@@ -111,4 +111,23 @@ python scripts/forum.py --backend native healthcheck
 - `tests/smoke.py`
 - `tests/test_launcher.py`
 
-本机生成且不上传：`.env`、`config.php`、`vendor/`、`.tools/`、`.runtime/`、数据库文件、运行缓存、上传资源与 `backups/`。校园业务、中文语言包、匿名机制、课程算法和复杂资料库尚未实现；下一阶段前三项见 [roadmap.md](roadmap.md)。
+本机生成且不上传：`.env`、`config.php`、`vendor/`、`.tools/`、`.runtime/`、数据库文件、运行缓存、上传资源与 `backups/`。上述内容为 Phase 0 历史记录；当前校园业务状态以下面的阶段 1–12 验收为准。
+
+## 阶段 1–12 开发验收（2026-10-10）
+
+本机沿用 Flarum 2.0.0-rc.8、PHP 8.3.35、MariaDB 11.4.13，新增本地校园扩展。Composer 共 167 包，原有 166 包版本未改变；Node 22.18.0/npm 10.9.3 使用新 package-lock.json 构建自己的前端。不修改 vendor，不向正式环境写入。
+
+| 实际执行 | 结果 |
+|---|---|
+| campus enable/migrate/setup、重复 seed | 七项迁移和缺失配置补齐，正常；种子只补齐标注示例，不清空已有数据 |
+| `python tests/campus_smoke.py --backend native --phase 11` | 阶段 1–11 全部通过；真实数据库、邮件、账号、权限、四类内容、样本、通知、搜索、举报与治理 |
+| 集中安全及个人数据回归 | CSRF、封禁/解封、危险 URL、数组筛选、重复提交、登录限流、原生编辑历史、GDPR 归属及材料清除通过 |
+| 受限分区的通知/个人中心/导出 | 列表与直接通知、回复邮件、收藏、本人记录及校园导出均过滤；实际 ZIP 检查通过 |
+| `npm run test:browser`（Chrome，串行） | 6 项全部通过，2.3 分钟；发布/预览/编辑/评论、课程/评价/资料/采纳、个人中心、搜索、移动、后台验证、举报/申诉/独立复核/公开治理；课程受限不阻断搜索 |
+| `python tests/smoke.py --backend native --resume` | 已有 smoke 实例重启、真实业务 SQL/文件/源码备份、新数据库恢复及业务统计一致；源码不匹配和重复恢复拒绝，原实例健康 |
+| `python scripts/dev_mail.py --backend native --check` | SMTP 本地收信、纯文本邮箱读取、旧设置恢复通过；未向外部投递 |
+| 静态、PHP 语法、管理脚本行为 | Python AST/JSON/YAML/Git 排除与 PHP 语法通过；14 项行为测试全部通过 |
+| Composer validate / audit、npm audit | 通过，无已报告漏洞或停止维护包；没有忽略公告 |
+| GitHub 新业务 PR CI | 待实际远程运行确认；流程已包含 Linux Docker 新安装、业务隔离恢复、阶段 1–11、Chromium 与依赖审计 |
+
+尚未上线：正式 HTTPS、外发 SMTP、只读生产卷、异地加密备份/调度/告警和稳定 2.x 升级。匿名评价按路线图允许的方案关闭，后端拒绝匿名请求；原生语言仍为已安装英文包，校园模块为中文。当前搜索验收包含 23 条匹配记录的真实分页，规模扩大后需另行压测。完整命令见 [testing.md](testing.md)，新开发者环境同步见 [development.md](development.md)。

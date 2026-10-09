@@ -24,6 +24,8 @@ services:
     logging: *logging
     restart: unless-stopped
   app:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     build:
       context: .
       dockerfile: docker/php/Dockerfile

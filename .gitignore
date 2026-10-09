@@ -29,4 +29,7 @@ __pycache__/
 *.sql.gz
 *.pem
 *.key
+node_modules/
+test-results/
+playwright-report/
 

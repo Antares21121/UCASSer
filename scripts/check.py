@@ -15,7 +15,7 @@ def main():
     for path in list((ROOT / 'scripts').glob('*.py')) + list((ROOT / 'tests').glob('*.py')):
         ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
     for path in (ROOT / 'composer.json', ROOT / 'scripts/runtime-lock.json', ROOT / 'composer.lock'):
-        json.loads(path.read_text())
+        json.loads(path.read_text(encoding='utf-8'))
     import yaml  # CI/developer check dependency only, not needed by launcher.
     for path in [ROOT / 'compose.yaml', ROOT / 'compose.production.yaml', ROOT / '.github/workflows/ci.yaml']:
         with path.open(encoding='utf-8') as file:

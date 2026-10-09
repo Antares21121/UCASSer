@@ -465,6 +465,9 @@ class Forum:
                          'config/environment.php': self.root / 'config/environment.php',
                          'config/release.php': self.root / 'config/release.php',
                          'scripts/runtime-lock.json': self.root / 'scripts/runtime-lock.json', 'extend.php': self.root / 'extend.php'}
+                for path in (self.root / 'extensions').rglob('*'):
+                    if path.is_file() and not path.is_symlink() and 'node_modules' not in path.parts:
+                        files[path.relative_to(self.root).as_posix()] = path
                 if self.args.backend == 'docker':
                     # Named volumes are not on the host; read through a temporary container.
                     for folder, path in [('assets', 'public/assets'), ('storage', 'storage')]:
@@ -526,8 +529,17 @@ class Forum:
             for name, checksum in metadata['checksums'].items():
                 if hashlib.sha256(archive.read(name)).hexdigest() != checksum:
                     raise ValueError('Backup checksum mismatch: ' + name)
-            if archive.read('composer.lock') != (self.root / 'composer.lock').read_bytes():
+            if archive.read('composer.lock').replace(b'\r\n',b'\n') != (self.root / 'composer.lock').read_bytes().replace(b'\r\n',b'\n'):
                 raise ValueError('Dependency lock mismatch; use the backed-up version in the fresh checkout first')
+            # Local path packages must match the backed-up source before importing any data.
+            for name in metadata['checksums']:
+                if name.startswith('extensions/'):
+                    path=self.root/name
+                    if not path.is_file(): raise ValueError('Extension source mismatch; use the backed-up checkout first: '+name)
+                    actual,expected=path.read_bytes(),archive.read(name)
+                    if path.suffix in ('.php','.js','.cjs','.json','.map','.less','.css','.md','.ts','.tsx'):
+                        actual,expected=actual.replace(b'\r\n',b'\n'),expected.replace(b'\r\n',b'\n')
+                    if actual!=expected: raise ValueError('Extension source mismatch; use the backed-up checkout first: '+name)
             if self.args.backend == 'docker':
                 import io
                 import tarfile

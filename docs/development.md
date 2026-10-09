@@ -14,13 +14,14 @@
 | MariaDB | 11.4.13 LTS | Compose 私有网络 / Windows 便携版 |
 | Nginx | 1.30.1 | Compose Web 服务；Windows 替代方案不使用 Nginx |
 | Flarum | 核心 2.0.0-rc.8 | `^2.0.0-rc.8` + 精确 `composer.lock`，沿用上游 beta + prefer-stable |
+| Node / npm | 22.18.0 / 10.x | `package-lock.json` 固定前端构建与浏览器验收工具 |
 
 Flarum 官方安装要求见 [2.x 安装指南](https://docs.flarum.org/install/)。项目启用 curl、dom、fileinfo、gd、json、mbstring、openssl、pdo_mysql、tokenizer、zip，并增加 intl、OPcache（容器）。官方 Composer 安装及现有骨架兼容，Web 根目录固定为 `public/`。RC 开发与正式生产边界见 [ADR 001](decisions/001-runtime.md)。
 
 ## 方案一：Docker（Windows / macOS / Linux）
 
 1. 安装 Git、Python 和 Docker；Windows 启用 Docker Desktop 的 Linux 容器后端。启动 Docker 引擎并确认当前账号有权限。无需安装宿主 PHP 或 MariaDB。
-2. 克隆仓库并进入根目录。Phase 0 尚未合并时，执行 `git switch codex/phase0-infrastructure`；合并后使用默认 `2.x` 分支。
+2. 克隆仓库并进入根目录。本轮 PR 尚未合并时，执行 `git switch codex/phases1-12`；合并后使用默认 `2.x` 分支。
 3. 检查和初始化：
 
 ```console
@@ -97,7 +98,7 @@ python scripts/forum.py healthcheck
 
 Windows 给这些命令加 `--backend native`。更换 PHP/数据库镜像前阅读变更说明；不要自动删除数据卷以修复启动问题。上游依赖新增迁移时先备份，再按部署文档手动运行 `php flarum migrate` 和清缓存。
 
-业务开发放在独立 Flarum 扩展或 `extend.php`，禁止改 `vendor/flarum/core`。自定义扩展先说明包名、支持的 Flarum 版本、存储路径与权限，再使用 Composer path repository 开发；本阶段未创建业务扩展，Node/npm 构建也未引入。
+业务扩展 `ucasser/flarum-campus` 位于 `extensions/campus`，通过 Composer path repository 加载，禁止改 vendor。Node 22.18.0 和 npm 10.x 构建自己的前端；提交源文件与 `js/dist`，不提交 node_modules。更新此包时不升级原仓库官方依赖。
 
 提交前执行：
 
@@ -121,3 +122,29 @@ python -m unittest discover -s tests -p "test_*.py" -v
 - `.runtime/last-error.log` 只记录最近一次错误，已知秘密会脱敏；转发日志前仍应审查个人信息。Windows 原始 Web 日志可能包含查询参数，`logs` 命令会隐藏它们。
 
 本次机器检查与已验证范围详见 [verification.md](verification.md)。
+
+## 业务初始化、迁移与前端
+
+首次 Flarum 安装后执行：
+
+```console
+npm ci
+npm run build
+python scripts/campus.py enable
+python scripts/campus.py migrate
+python scripts/campus.py seed
+```
+
+Windows 的 Python 命令加 `--backend native`。已有数据库在 migrate 前 backup。enable 使用官方 ExtensionManager，启用校园扩展与已安装的 audit、nicknames、GDPR；migrate 执行真实迁移、补齐缺失分区/角色/分类并清缓存。seed 仅开发使用，补齐十个普通讨论、四类结构化示例和示例课程，不清空已有内容。
+
+拉取业务更新后按顺序执行 npm ci、npm run build、forum.py setup、备份、campus.py migrate，再刷新页面。两个锁文件固定精确版本，不执行全量 composer update。升级失败保留现场，按 [部署](deployment.md) 的新数据库恢复策略回滚，不能重跑 installer 或删除卷。
+
+后台 Extensions 下的「校园公共社区」配置分区、分类、验证和授权；课程与治理管理员入口在对应论坛页面。路径见 [features.md](features.md)，验收见 [testing.md](testing.md)。
+
+## 本地邮件
+
+另一终端执行 `python scripts/dev_mail.py --backend native`；Docker 用 `--backend docker`。打开 `http://127.0.0.1:8026`，刷新查看最近 30 封纯文本邮件并复制确认/重置链接。邮件不向外部投递、不写日志或磁盘，停止后清除。
+
+工具临时同步 Flarum SMTP；Ctrl+C 恢复旧设置。异常终止后相同命令加 `--restore`，私有 `.runtime/dev-mail/saved.json` 不得提交。SMTP 端口为 8025；Docker 容器通过 host.docker.internal 连接宿主，因此 SMTP 绑定所有网卡，仅用于受控开发网络。Native SMTP 和邮箱读取页面都仅监听回环地址。
+
+正式 SMTP 在后台配置真实服务，实际发送确认与重置后验收，不能把本地捕获成功视为正式外发成功。

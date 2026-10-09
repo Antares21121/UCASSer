@@ -24,7 +24,7 @@ Windows 替代方案使用 PHP 内置开发服务器，直接读 `public/`，数
 
 - `composer.json` + `composer.lock`：直接依赖约束和精确的传递依赖版本。`vendor/` 由 Composer 生成。
 - `site.php` / `flarum` / `public/index.php`：保留官方站点与命令行入口，不修改核心。
-- `extend.php`：保留上游扩展入口，Phase 0 未添加业务扩展。
+- `extend.php`：保留上游入口；业务由独立 `extensions/campus/extend.php` 注册官方 Extenders。
 - `config/environment.php`：项目环境变量桥接，返回 Flarum 2.x 的真实配置键。
 - `config.php`：首次官方 CLI 安装成功后改为调用桥接文件，不保存数据库密码、不提交 Git。
 - `docker/`、两份 Compose：团队开发环境和独立生产部署骨架。
@@ -37,3 +37,13 @@ Windows 替代方案使用 PHP 内置开发服务器，直接读 `public/`，数
 备份通过停止应用写入后导出数据库并归档 assets、storage、扩展入口与锁定版本，随后恢复服务。数据库本身保持运行；没有默认删除或重建数据库的启动动作。新增附件扩展前必须确认其存储位置，并扩展备份清单。
 
 依赖基线与 RC 的生产边界见 [ADR 001](decisions/001-runtime.md)。生产服务器、域名、论坛正式名称、SMTP 和外部备份存储尚待决定，不预设真实值。
+
+## 校园业务模块
+
+`ucasser/flarum-campus` 为本地 Composer path 包，PHP PSR-4 在 src/，七项迁移在 migrations/，Mithril 页面与 webpack 产物在 js/。根 package-lock.json 锁定前端与 Playwright；部署使用已提交的 js/dist，无需 Node。
+
+Flarum 保存用户、讨论、帖子、标签、点赞、关注和通知。campus_records 唯一关联 discussion_id，扩展表保存分类、课程、修订、收藏、反馈、认证、分区授权、私有举报事件和公开治理。输入按类型白名单校验；通过 Flarum 2.x 内部 API 和事务保留权限、格式和事件，不修改 vendor。
+
+Sections/Visibility/Policy 约束原生查询与操作；Records/Search/Personal 使用 whereVisibleTo；NotificationGuard 过滤通知与发送；ExportGuard 校验登录和导出归属。限流和封禁中间件约束写入，NativeRevision 监听原生编辑保存历史。
+
+信息过期动态派生，历史不删除；课程通过 SQL 聚合可见有效评价。搜索参数绑定、每页 20 条，目前使用 LIKE。规模增长后按真实查询和 EXPLAIN 评估全文索引，当前验收规模见 [测试](testing.md)。

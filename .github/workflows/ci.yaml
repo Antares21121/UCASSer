@@ -1,15 +1,22 @@
-name: Phase 0 checks
+name: Infrastructure and campus acceptance
 on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
   infrastructure:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.13"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22.18.0", cache: npm}
+      - name: Locked frontend build and browser runtime
+        run: |
+          npm ci
+          npm run build
+          npx playwright install --with-deps chromium
       - name: Static checks and launcher behavior
         run: |
           python -m pip install -r tests/requirements.txt
@@ -20,20 +27,24 @@ jobs:
       - name: Validate Compose, PHP and Nginx syntax
         run: |
           docker compose config --quiet
-          docker compose run --rm --no-deps app sh -c 'find config scripts public -name "*.php" -exec php -l {} \;'
+          docker compose run --rm --no-deps app sh -c 'find config scripts public extensions tests -name "*.php" -exec php -l {} \;'
           docker compose run --rm --no-deps app composer validate --strict --no-check-all
           docker compose run --rm --no-deps app composer check-platform-reqs --no-dev
           docker compose up -d --wait
           docker compose exec -T web nginx -t
       - name: Real install, restart, backup and isolated restore
         run: python tests/smoke.py --backend docker
+      - name: Real campus acceptance phases 1 through 11
+        run: python tests/campus_smoke.py --backend docker --phase 11
+      - name: Browser workflows and mobile layout
+        run: npm run test:browser
       - name: Security audit (no ignored advisories)
         run: python scripts/audit.py --backend docker
       - name: Redacted failure diagnostics
         if: failure()
         run: |
           python - <<'PY'
-          import subprocess
+          import subprocess, re
           from pathlib import Path
           from scripts.forum import read_env
           values = read_env(Path('.env')) if Path('.env').exists() else {}
@@ -50,6 +61,8 @@ jobs:
               output = result.stdout + result.stderr
               for secret in secrets:
                   output = output.replace(secret, '[REDACTED]')
+              output = re.sub(r'/(confirm|reset|gdpr/erasure/confirm)/[^\s?"<>]+', r'/\1/[REDACTED]', output)
+              output = re.sub(r'([A-Z]+ /[^\s?]*)\?\S+', r'\1?[REDACTED]', output)
               print(output)
           PY
       - name: Preserve diagnostics without secrets or backups
@@ -57,7 +70,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: runtime-verification
-          path: .runtime/verification.json
+          path: |
+            .runtime/verification.json
+            .runtime/campus-verification.json
+          # Reports contain outcomes only, never fixtures, mail, tokens or browser traces.
           if-no-files-found: ignore
       - name: Stop services without deleting data
         if: always()

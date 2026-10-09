@@ -1,0 +1,14 @@
+{
+  "name": "ucasser-campus-development",
+  "private": true,
+  "scripts": {
+    "build": "webpack --config extensions/campus/js/webpack.config.cjs --mode production",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "flarum-webpack-config": "3.0.6",
+    "webpack": "5.104.1",
+    "webpack-cli": "4.10.0",
+    "@playwright/test": "1.64.0"
+  }
+}

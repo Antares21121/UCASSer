@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "99c9ebf153bcb76968952e1adc664c7d",
+    "content-hash": "e6773d91578e780fe1f0e58b859d7443",
     "packages": [
         {
             "name": "asispts/http-accept",
@@ -11724,6 +11724,45 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.4.0"
             },
             "time": "2025-12-02T11:56:42+00:00"
+        },
+        {
+            "name": "ucasser/flarum-campus",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "extensions/campus",
+                "reference": "67a51a9c5749ff57b8cfb8efe297fdf0d2b26468"
+            },
+            "require": {
+                "flarum/core": "^2.0.0-rc.8",
+                "flarum/subscriptions": "^2.0.0-rc.8",
+                "flarum/suspend": "^2.0.0-rc.8",
+                "flarum/tags": "^2.0.0-rc.8"
+            },
+            "type": "flarum-extension",
+            "extra": {
+                "flarum-extension": {
+                    "title": "校园公共社区",
+                    "icon": {
+                        "name": "fas fa-graduation-cap",
+                        "backgroundColor": "#176d72",
+                        "color": "#fff"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "UCASSer\\Campus\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Campus community information, knowledge and learning experience",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "voku/portable-ascii",

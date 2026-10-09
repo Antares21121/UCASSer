@@ -98,6 +98,19 @@ def main():
 
     verify(original)
     print('PASS: database and asset survive a real restart; private paths denied', flush=True)
+    original.php('scripts/campus.php','enable')
+    original.php('flarum','migrate')
+    original.php('flarum','campus:setup')
+    original.php('scripts/campus.php','seed')
+    original.php('flarum','cache:clear')
+    def campus_state(instance):
+        with urllib.request.urlopen(instance.values['APP_URL']+'/api/campus/home',timeout=15) as response:
+            home=json.load(response)['data']
+        assert len(home['sections'])==10 and home['latest'], 'Business extension missing after restore'
+        with urllib.request.urlopen(instance.values['APP_URL']+'/api/campus/governance',timeout=15) as response:
+            stats=json.load(response)['data']['statistics']
+        return {'sections':[(s['id'],s['key']) for s in home['sections']], 'statistics':stats}
+    expected_campus=campus_state(original)
     backup = original.backup()
     wait_health(original)
     # Isolated workspace, separate DB/server port or Compose project/volumes.
@@ -107,8 +120,8 @@ def main():
     target.mkdir()
     for path in ('composer.json', 'composer.lock', 'site.php', 'flarum', 'extend.php', 'compose.yaml', 'compose.production.yaml', '.env.example', '.dockerignore', '.nginx.conf'):
         shutil.copy2(ROOT / path, target / path)
-    for folder in ('config', 'scripts', 'docker'):
-        shutil.copytree(ROOT / folder, target / folder, ignore=shutil.ignore_patterns('__pycache__'))
+    for folder in ('config', 'scripts', 'docker', 'extensions'):
+        shutil.copytree(ROOT / folder, target / folder, ignore=shutil.ignore_patterns('__pycache__','node_modules'))
     shutil.copytree(ROOT / 'public', target / 'public', ignore=shutil.ignore_patterns('assets'))
     (target / 'public/assets/avatars').mkdir(parents=True)
     (target / 'storage').mkdir()
@@ -131,9 +144,22 @@ def main():
         if options.backend == 'docker':
             restored.setup()
         restored.start()
+        source=target/'extensions/campus/extend.php'
+        exact_source=source.read_bytes()
+        source.write_bytes(exact_source+b'\n// development restore mismatch probe\n')
+        try:
+            restored.restore()
+        except ValueError as error:
+            assert 'Extension source mismatch' in str(error)
+            print('PASS: mismatched local extension refused before database import',flush=True)
+        else:
+            raise AssertionError('Mismatched source unexpectedly restored')
+        finally:
+            source.write_bytes(exact_source)
         restored.restore()
         wait_health(restored)
         verify(restored)
+        assert campus_state(restored)==expected_campus, 'Restored business sections mismatch'
         # Safety check: a second restore into the installed DB must be refused.
         try:
             restored.restore()
@@ -144,7 +170,7 @@ def main():
     finally:
         restored.stop()
     verify(original)
-    report = {'backend': options.backend, 'flarum': original.core_version(), 'result': 'passed', 'checks': ['fresh install', 'administrator login API', 'HTTP API and homepage', 'restart database persistence', 'upload persistence', 'private paths denied including existing uploaded PHP', 'real SQL and file backup', 'new isolated database restore', 'restore overwrite refusal', 'original instance unchanged'], 'backup': backup.name, 'restore_workspace': target.name}
+    report = {'backend': options.backend, 'flarum': original.core_version(), 'result': 'passed', 'checks': ['resumed smoke-created instance' if options.resume else 'fresh install', 'administrator login API', 'HTTP API and homepage', 'restart database persistence', 'upload persistence', 'private paths denied including existing uploaded PHP', 'real SQL and file backup including local extension', 'new isolated database restore and business statistics', 'extension source mismatch refusal before import', 'restore overwrite refusal', 'original instance unchanged'], 'backup': backup.name, 'restore_workspace': target.name}
     module.write_private(ROOT / '.runtime/verification.json', json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print('PASS: isolated restore matches database and uploaded bytes; original still healthy')
     print('Development administrator password: .runtime/admin-initial-password.txt (never printed)')
