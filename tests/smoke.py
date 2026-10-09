@@ -22,13 +22,15 @@ def args(backend, root):
 
 
 def wait_health(instance):
+    last_error = None
     for attempt in range(30):
         try:
             instance.health()
             return
-        except (OSError, RuntimeError, ValueError, urllib.error.URLError):
+        except (OSError, RuntimeError, ValueError, urllib.error.URLError) as error:
+            last_error = error
             time.sleep(1)
-    raise RuntimeError('Health never became ready')
+    raise RuntimeError(f'Health never became ready: {last_error}')
 
 
 def main():

@@ -29,6 +29,29 @@ jobs:
         run: python tests/smoke.py --backend docker
       - name: Security audit (no ignored advisories)
         run: python scripts/audit.py --backend docker
+      - name: Redacted failure diagnostics
+        if: failure()
+        run: |
+          python - <<'PY'
+          import subprocess
+          from pathlib import Path
+          from scripts.forum import read_env
+          values = read_env(Path('.env')) if Path('.env').exists() else {}
+          secrets = [v for k, v in values.items() if 'PASSWORD' in k and v]
+          password = Path('.runtime/admin-initial-password.txt')
+          if password.exists():
+              secrets.append(password.read_text().strip())
+          commands = [
+              ['docker', 'compose', 'logs', '--no-color', '--tail', '60', 'app', 'web'],
+              ['docker', 'compose', 'exec', '-T', 'app', 'sh', '-c', 'ls -ld config.php storage storage/logs public/assets; tail -n 60 storage/logs/*.log'],
+          ]
+          for command in commands:
+              result = subprocess.run(command, capture_output=True, text=True)
+              output = result.stdout + result.stderr
+              for secret in secrets:
+                  output = output.replace(secret, '[REDACTED]')
+              print(output)
+          PY
       - name: Preserve diagnostics without secrets or backups
         if: always()
         uses: actions/upload-artifact@v4
