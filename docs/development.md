@@ -119,6 +119,7 @@ python -m unittest discover -s tests -p "test_*.py" -v
 - 下载慢：本次 GitHub zip 下载曾超时，Composer 最终完成。保留缓存和锁文件重试 `setup`，不更换未核实的镜像源、不关闭 HTTPS。
 - MariaDB 无法连接：检查 `.runtime/db.log`、端口和 PID 状态；查看 `.runtime/last-error.log`。已有数据库的密码不会因修改 `.env` 自动变化，应恢复原配置或明确执行凭据轮换。
 - HTTP 500：先查看 `storage/logs/`、PHP 日志、环境桥接、文件权限和数据库。默认关闭向浏览器显示详细错误。
+- 全新安装的资源目录：setup 和 install 会执行 `scripts/prepare-runtime.php`，补齐运行缓存及锁定 Flarum 2 RC 包中被归档省略的空前端目录。依赖内容和版本不变，运行账户无需写入 vendor；更新依赖后重新执行 setup。
 - `.runtime/last-error.log` 只记录最近一次错误，已知秘密会脱敏；转发日志前仍应审查个人信息。Windows 原始 Web 日志可能包含查询参数，`logs` 命令会隐藏它们。
 
 本次机器检查与已验证范围详见 [verification.md](verification.md)。
