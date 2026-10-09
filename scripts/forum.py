@@ -224,6 +224,7 @@ class Forum:
         if not lock_exists and self.values.get('APP_ENV') == 'production':
             raise ValueError('Production requires a reviewed composer.lock')
         self.composer('install' if lock_exists else 'update', '--prefer-dist', '--no-dev', '--no-interaction', '--no-plugins', '--no-scripts')
+        self.php('scripts/prepare-runtime.php', root=True)
         if self.args.backend == 'docker':
             # Named volumes hide the checkout's tracked placeholder directories.
             # mkdir is idempotent and retains all existing application data.
@@ -385,6 +386,7 @@ class Forum:
         self.install_with_admin(username, email, password)
 
     def install_with_admin(self, username, email, password):
+        self.php('scripts/prepare-runtime.php', root=True)
         values = self.environment()
         config = {
             'debug': False, 'baseUrl': values['APP_URL'],

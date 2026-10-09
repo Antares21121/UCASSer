@@ -13,6 +13,7 @@ COPY composer.json composer.lock ./
 COPY extensions ./extensions
 RUN composer install --no-dev --prefer-dist --no-interaction --no-plugins --no-scripts
 COPY . .
+RUN php scripts/prepare-runtime.php
 RUN php scripts/release.php
 RUN mkdir -p storage/cache storage/formatter storage/less storage/locale storage/logs storage/sessions storage/tmp storage/views public/assets/avatars \
     && printf "<?php\nreturn require __DIR__.'/config/environment.php';\n" > config.php \
