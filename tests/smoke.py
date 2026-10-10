@@ -107,7 +107,7 @@ def main():
     target.mkdir()
     for path in ('composer.json', 'composer.lock', 'site.php', 'flarum', 'extend.php', 'compose.yaml', 'compose.production.yaml', '.env.example', '.dockerignore', '.nginx.conf'):
         shutil.copy2(ROOT / path, target / path)
-    for folder in ('config', 'scripts', 'docker'):
+    for folder in ('config', 'scripts', 'docker', 'extensions'):
         shutil.copytree(ROOT / folder, target / folder, ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copytree(ROOT / 'public', target / 'public', ignore=shutil.ignore_patterns('assets'))
     (target / 'public/assets/avatars').mkdir(parents=True)
