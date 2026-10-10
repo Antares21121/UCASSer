@@ -1,0 +1,59 @@
+# Independent production definition: immutable code, HTTPS, same named volumes.
+name: ${COMPOSE_PROJECT_NAME:?Set a separate production project name}
+x-logging: &logging
+  driver: json-file
+  options: {max-size: "10m", max-file: "3"}
+services:
+  db:
+    image: mariadb:11.4.13
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:?Required}
+      MARIADB_USER: ${DB_USER:?Required}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Required}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Required}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes: ["database:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+    logging: *logging
+  app:
+    build: {context: ., dockerfile: docker/php/Dockerfile.production}
+    env_file: ${FORUM_ENV_FILE:-.env.production}
+    environment: {DB_HOST: db, DB_PORT: "3306", DB_ROOT_PASSWORD: "", APP_ENV: production, APP_DEBUG: "false"}
+    read_only: true
+    tmpfs: ["/tmp"]
+    volumes: ["assets:/var/www/forum/public/assets", "storage:/var/www/forum/storage"]
+    depends_on: {db: {condition: service_healthy}}
+    healthcheck:
+      test: ["CMD", "php", "scripts/db.php", "installed"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+    logging: *logging
+  web:
+    build: {context: ., dockerfile: docker/web/Dockerfile.production}
+    environment:
+      FORUM_HOST: ${FORUM_HOST:?Set the real domain before production deployment}
+      NGINX_ENVSUBST_FILTER: ^FORUM_HOST$
+    ports: ["80:80", "443:443"]
+    volumes:
+      - assets:/var/www/forum/public/assets:ro
+      - ${TLS_CERT_DIR:?Supply TLS certificate directory}:/certs:ro
+    depends_on: {app: {condition: service_healthy}}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+    logging: *logging
+volumes:
+  database:
+  assets:
+  storage:
