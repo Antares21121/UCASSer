@@ -27,6 +27,10 @@ jobs:
           docker compose exec -T web nginx -t
       - name: Real install, restart, backup and isolated restore
         run: python tests/smoke.py --backend docker
+      - name: Enable resource directory extension and exercise its API
+        run: |
+          python scripts/enable_resources.py --backend docker
+          python tests/resource_smoke.py --url http://127.0.0.1:8080 --admin-user phase0_admin --password-file .runtime/admin-initial-password.txt
       - name: Security audit (no ignored advisories)
         run: python scripts/audit.py --backend docker
       - name: Redacted failure diagnostics

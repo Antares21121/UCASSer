@@ -24,7 +24,12 @@
 
 ## 安装与更新
 
-在新克隆的开发工作区运行 `python scripts/forum.py setup`、`start`、`install` 后，进入 Flarum 管理后台的扩展列表，启用“UCASSer 资源汇总”。启用时会执行扩展迁移，创建分类、资料、修订记录和反馈表。已有论坛合入本 PR 后，先备份，再执行 `python scripts/forum.py setup` 安装新的锁定依赖，进入后台启用扩展；不要重复执行 `install`。Docker 与 Windows native 均可使用，native 命令在脚本名后加 `--backend native`。
+在新克隆的开发工作区运行 `python scripts/forum.py setup`、`start`、`install` 后，需要启用扩展才能让资源页与接口生效。Flarum 2.x 核心没有 `extension:enable` 命令，启用有两条等价路径：
+
+- 管理后台：进入后台扩展列表，启用“UCASSer 资源汇总”；
+- 自动化脚本：运行 `python scripts/enable_resources.py --backend docker`（CI 与无头环境使用，内部调用管理 API `PATCH /api/extensions/ucasser-resources`，扩展 id 是 composer 包名 `ucasser/resources` 把 `/` 换成 `-`）。
+
+启用时会执行扩展迁移，创建分类、资料、修订记录和反馈表。已有论坛合入本 PR 后，先备份，再执行 `python scripts/forum.py setup` 安装新的锁定依赖，再按上述方式启用扩展；不要重复执行 `install`。Docker 与 Windows native 均可使用，native 命令在脚本名后加 `--backend native`。
 
 启用之后打开 `http://127.0.0.1:8080/resources`。如果本地端口不同，以 `.env` 的 `APP_URL` 为准。若扩展代码更新后新增数据库迁移，先备份，再在运行环境执行 `php flarum migrate`；普通链接和分类的增补不需要重新部署。
 

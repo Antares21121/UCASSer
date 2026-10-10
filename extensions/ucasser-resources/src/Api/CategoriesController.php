@@ -32,9 +32,13 @@ class CategoriesController extends Support implements RequestHandlerInterface
         $parent = $parentId ? $this->db->table('ucasser_resource_categories')->where('id', $parentId)->first() : null;
         $kind = $input['kind'] ?? null;
 
-        if (! $name || ! $parent || ! (($parent->kind === 'root' && $parent->name === '校内资料' && $kind === 'college')
+        if (! $name || ! $parent || ! (($parent->kind === 'root' && $parent->parent_id === null && $kind === 'college')
             || ($parent->kind === 'course_group' && $kind === 'course'))) {
             return $this->error('请选择校内根分类添加学院，或选择必修／选修分类添加课程');
+        }
+
+        if ($kind === 'college' && $this->db->table('ucasser_resource_categories')->where('parent_id', $parentId)->where('kind', 'external_topic')->exists()) {
+            return $this->error('校外根分类下不能添加学院');
         }
 
         if ($this->db->table('ucasser_resource_categories')->where('parent_id', $parentId)->where('name', $name)->exists()) {

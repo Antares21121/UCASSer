@@ -90,6 +90,11 @@
       .catch(function (error) { page.error = error.message || '修改名称失败'; m.redraw(); });
   };
 
+  function isCampusRoot(categories, category) {
+    return category.kind === 'root' && category.parent_id === null
+      && !childCategories(categories, category.id).some(function (child) { return child.kind === 'external_topic'; });
+  }
+
   ResourcePage.prototype.categoryNode = function (category, depth) {
     var page = this;
     var children = childCategories(page.categories, category.id);
@@ -102,7 +107,7 @@
         page.canManage && (category.kind === 'college' || category.kind === 'course') ? m('button.Button', {
           type: 'button', onclick: function () { page.renameCategory(category); }, title: '修改名称'
         }, '改名') : null,
-        page.canManage && category.kind === 'root' && category.name === '校内资料' ? m('button.Button', {
+        page.canManage && isCampusRoot(page.categories, category) ? m('button.Button', {
           type: 'button', onclick: function () { page.addCategory(category, 'college'); }
         }, '+ 学院') : null,
         page.canManage && category.kind === 'course_group' ? m('button.Button', {
@@ -110,7 +115,7 @@
         }, '+ 课程') : null
       ]),
       children.length ? children.map(function (child) { return page.categoryNode(child, depth + 1); }) :
-        category.kind === 'root' && category.name === '校内资料' ? m('p.ResourceDirectory-empty', '暂无学院，管理员可以添加。') :
+        isCampusRoot(page.categories, category) ? m('p.ResourceDirectory-empty', '暂无学院，管理员可以添加。') :
         category.kind === 'course_group' ? m('p.ResourceDirectory-empty', '暂无课程。') : null
     ]);
   };
@@ -208,7 +213,7 @@
               m('p', [m('a', { href: item.url, target: '_blank', rel: 'noopener noreferrer' }, '访问资料 ↗'),
                 item.source_url ? [' · ', m('a', { href: item.source_url, target: '_blank', rel: 'noopener noreferrer' }, '查看原始来源')] : null]),
               m('small', [item.status === 'active' ? '有效' : '待核验', ' · 更新于 ', item.updated_at]),
-              m('div', [m('button.Button', { type: 'button', onclick: function () { page.report(item); } }, '反馈问题'),
+              m('div', [app.session.user ? m('button.Button', { type: 'button', onclick: function () { page.report(item); } }, '反馈问题') : null,
                 page.canManage ? m('button.Button', { type: 'button', onclick: function () { page.startEdit(item); } }, '修改') : null])
             ]);
           }) : m('p.ResourceDirectory-empty', '这里还没有资料链接。'),
@@ -217,7 +222,9 @@
             page.hasMore ? m('button.Button', { type: 'button', onclick: function () { page.page++; page.load(); } }, '下一页') : null
           ]),
           page.canManage && page.reports.length ? m('section.ResourceDirectory-reports', [m('h2', '待处理反馈'), page.reports.map(function (report) {
-            return m('p', { key: report.id }, ['资料 #', report.resource_id, '：', report.reason, ' ',
+            return m('p', { key: report.id }, [
+              m('a', { href: report.url, target: '_blank', rel: 'noopener noreferrer' }, report.title || ('资料 #' + report.resource_id)),
+              '：', report.reason, ' ',
               m('button.Button', { type: 'button', onclick: function () { page.resolveReport(report); } }, '标记已处理')]);
           })]) : null
         ])

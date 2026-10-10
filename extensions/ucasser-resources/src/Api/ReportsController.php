@@ -17,7 +17,12 @@ class ReportsController extends Support implements RequestHandlerInterface
                 return $denied;
             }
 
-            return new JsonResponse(['reports' => $this->db->table('ucasser_resource_reports')->where('status', 'pending')->orderByDesc('created_at')->limit(50)->get()]);
+            return new JsonResponse(['reports' => $this->db->table('ucasser_resource_reports as reports')
+                ->join('ucasser_resources as resources', 'resources.id', '=', 'reports.resource_id')
+                ->where('reports.status', 'pending')
+                ->orderByDesc('reports.created_at')
+                ->limit(50)
+                ->get(['reports.id', 'reports.resource_id', 'reports.reason', 'reports.created_at', 'resources.title', 'resources.url'])]);
         }
 
         if ($request->getMethod() === 'PATCH') {
