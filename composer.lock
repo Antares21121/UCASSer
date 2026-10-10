@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "99c9ebf153bcb76968952e1adc664c7d",
+    "content-hash": "8ce6c67a37d6bd7e2ff6cd003a1a4f71",
     "packages": [
         {
             "name": "asispts/http-accept",
@@ -11724,6 +11724,43 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.4.0"
             },
             "time": "2025-12-02T11:56:42+00:00"
+        },
+        {
+            "name": "ucasser/resources",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "extensions/ucasser-resources",
+                "reference": "33cc3dfdc42fe4b0de6aba34a823238562277373"
+            },
+            "require": {
+                "flarum/core": "^2.0.0-rc.8"
+            },
+            "type": "flarum-extension",
+            "extra": {
+                "flarum-extension": {
+                    "title": "UCASSer 资源汇总",
+                    "category": "feature",
+                    "icon": {
+                        "name": "fas fa-book-open",
+                        "backgroundColor": "#315c90",
+                        "color": "#fff"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "UCASSer\\Resources\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "A maintained directory of campus and external study resources.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
         },
         {
             "name": "voku/portable-ascii",

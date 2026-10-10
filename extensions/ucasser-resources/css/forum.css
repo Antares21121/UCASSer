@@ -1,0 +1,18 @@
+.ResourceDirectory { padding: 24px 16px 60px; }
+.ResourceDirectory h1 { margin-top: 0; }
+.ResourceDirectory-layout { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 24px; margin-top: 24px; }
+.ResourceDirectory-tree { border: 1px solid var(--control-bg); border-radius: 6px; padding: 12px; align-self: start; }
+.ResourceDirectory-categoryRow { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 5px 0; }
+.ResourceDirectory-categoryRow strong { padding: 8px 4px; }
+.ResourceDirectory-empty { color: var(--muted-color); padding: 8px 16px; }
+.ResourceDirectory-search, .ResourceDirectory-actions, .ResourceDirectory-pages { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.ResourceDirectory-search .FormControl { flex: 1 1 200px; }
+.ResourceDirectory-item, .ResourceDirectory-form, .ResourceDirectory-reports { border: 1px solid var(--control-bg); border-radius: 6px; padding: 16px; margin: 12px 0; }
+.ResourceDirectory-item h2 { font-size: 18px; margin: 0 0 8px; }
+.ResourceDirectory-item small { color: var(--muted-color); }
+.ResourceDirectory-item .Button { margin: 8px 8px 0 0; }
+.ResourceDirectory-form label { display: block; margin: 12px 0; }
+.ResourceDirectory-form .FormControl { width: 100%; margin-top: 4px; }
+.ResourceDirectory-notice { color: #217342; }
+.ResourceDirectory-error { color: #a92b2b; }
+@media (max-width: 700px) { .ResourceDirectory-layout { grid-template-columns: 1fr; } }
