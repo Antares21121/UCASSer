@@ -99,20 +99,36 @@
     var page = this;
     var children = childCategories(page.categories, category.id);
     var leaf = category.kind === 'course' || category.kind === 'external_topic';
+    var rowActions = [];
+    if (page.canManage && (category.kind === 'college' || category.kind === 'course')) {
+      rowActions.push(m('button.ResourceDirectory-treeBtn', {
+        type: 'button', onclick: function () { page.renameCategory(category); }, title: '修改名称'
+      }, '改名'));
+    }
+    if (page.canManage && isCampusRoot(page.categories, category)) {
+      rowActions.push(m('button.ResourceDirectory-treeBtn', {
+        type: 'button', onclick: function () { page.addCategory(category, 'college'); }
+      }, '+ 学院'));
+    }
+    if (page.canManage && category.kind === 'course_group') {
+      rowActions.push(m('button.ResourceDirectory-treeBtn', {
+        type: 'button', onclick: function () { page.addCategory(category, 'course'); }
+      }, '+ 课程'));
+    }
+    var label;
+    if (leaf) {
+      label = m('button.ResourceDirectory-navItem' + (page.selected === category.id ? '.is-active' : ''), {
+        type: 'button', onclick: function () { page.selected = category.id; page.page = 1; page.load(); }
+      }, category.name);
+    } else if (category.kind === 'root') {
+      label = m('span.ResourceDirectory-treeSection', category.name);
+    } else {
+      label = m('span.ResourceDirectory-treeGroup', category.name);
+    }
     return m('div.ResourceDirectory-category', { key: category.id }, [
-      m('div.ResourceDirectory-categoryRow', { style: { paddingLeft: (depth * 16) + 'px' } }, [
-        leaf ? m('button.Button' + (page.selected === category.id ? '.Button--primary' : ''), {
-          type: 'button', onclick: function () { page.selected = category.id; page.page = 1; page.load(); }
-        }, category.name) : m('strong', category.name),
-        page.canManage && (category.kind === 'college' || category.kind === 'course') ? m('button.Button', {
-          type: 'button', onclick: function () { page.renameCategory(category); }, title: '修改名称'
-        }, '改名') : null,
-        page.canManage && isCampusRoot(page.categories, category) ? m('button.Button', {
-          type: 'button', onclick: function () { page.addCategory(category, 'college'); }
-        }, '+ 学院') : null,
-        page.canManage && category.kind === 'course_group' ? m('button.Button', {
-          type: 'button', onclick: function () { page.addCategory(category, 'course'); }
-        }, '+ 课程') : null
+      m('div.ResourceDirectory-categoryRow', { style: { paddingLeft: (depth * 14) + 'px' } }, [
+        label,
+        rowActions.length ? m('span.ResourceDirectory-rowActions', rowActions) : null
       ]),
       children.length ? children.map(function (child) { return page.categoryNode(child, depth + 1); }) :
         isCampusRoot(page.categories, category) ? m('p.ResourceDirectory-empty', '暂无学院，管理员可以添加。') :
@@ -166,12 +182,12 @@
     var leafCategories = page.categories.filter(function (category) { return category.kind === 'course' || category.kind === 'external_topic'; });
     return m('div.ResourceDirectory.container', [
       m('h1', '资源汇总'),
-      m('p', '按学院、课程或校外考试查找资料。本站只整理来源链接，不托管原文件。'),
+      m('p.ResourceDirectory-intro', '按学院、课程或校外考试查找资料。本站只整理来源链接，不托管原文件。'),
       page.notice ? m('p.ResourceDirectory-notice', page.notice) : null,
       page.error ? m('p.ResourceDirectory-error', page.error) : null,
       m('div.ResourceDirectory-layout', [
         m('nav.ResourceDirectory-tree', { 'aria-label': '资料分类' }, [
-          m('button.Button' + (!page.selected ? '.Button--primary' : ''), {
+          m('button.ResourceDirectory-navItem' + (!page.selected ? '.is-active' : ''), {
             type: 'button', onclick: function () { page.selected = null; page.page = 1; page.load(); }
           }, '全部资料'),
           roots.map(function (root) { return page.categoryNode(root, 0); })
@@ -205,16 +221,23 @@
             m('button.Button.Button--primary', { type: 'submit' }, '保存'),
             m('button.Button', { type: 'button', onclick: function () { page.editing = null; } }, '取消')
           ]) : null,
-          page.loading ? m('p', '正在加载…') : page.resources.length ? page.resources.map(function (item) {
+          page.loading ? m('p.ResourceDirectory-empty', '正在加载…') : page.resources.length ? page.resources.map(function (item) {
+            var crumbs = categoryPath(page.categories, page.categories.find(function (category) { return category.id === item.category_id; })).split(' / ');
             return m('article.ResourceDirectory-item', { key: item.id }, [
-              m('h2', item.title),
-              m('small', categoryPath(page.categories, page.categories.find(function (category) { return category.id === item.category_id; }))),
-              item.description ? m('p', item.description) : null,
-              m('p', [m('a', { href: item.url, target: '_blank', rel: 'noopener noreferrer' }, '访问资料 ↗'),
-                item.source_url ? [' · ', m('a', { href: item.source_url, target: '_blank', rel: 'noopener noreferrer' }, '查看原始来源')] : null]),
-              m('small', [item.status === 'active' ? '有效' : '待核验', ' · 更新于 ', item.updated_at]),
-              m('div', [app.session.user ? m('button.Button', { type: 'button', onclick: function () { page.report(item); } }, '反馈问题') : null,
-                page.canManage ? m('button.Button', { type: 'button', onclick: function () { page.startEdit(item); } }, '修改') : null])
+              m('div.ResourceDirectory-itemHeader', [
+                m('h2', item.title),
+                m('span.ResourceDirectory-status.ResourceDirectory-status--' + (item.status === 'active' ? 'active' : 'needs_review'), item.status === 'active' ? '有效' : '待核验')
+              ]),
+              m('div.ResourceDirectory-crumbs', crumbs.map(function (crumb) { return m('span.ResourceDirectory-crumb', { key: crumb }, crumb); })),
+              item.description ? m('p.ResourceDirectory-itemDescription', item.description) : null,
+              m('div.ResourceDirectory-itemActions', [
+                m('a.Button.Button--primary', { href: item.url, target: '_blank', rel: 'noopener noreferrer' }, '访问资料'),
+                item.source_url ? m('a.ResourceDirectory-source', { href: item.source_url, target: '_blank', rel: 'noopener noreferrer' }, '查看原始来源') : null,
+                m('span.ResourceDirectory-itemSpacer'),
+                app.session.user ? m('button.Button', { type: 'button', onclick: function () { page.report(item); } }, '反馈问题') : null,
+                page.canManage ? m('button.Button', { type: 'button', onclick: function () { page.startEdit(item); } }, '修改') : null
+              ]),
+              m('div.ResourceDirectory-itemMeta', ['更新于 ', item.updated_at])
             ]);
           }) : m('p.ResourceDirectory-empty', '这里还没有资料链接。'),
           m('div.ResourceDirectory-pages', [
@@ -222,9 +245,9 @@
             page.hasMore ? m('button.Button', { type: 'button', onclick: function () { page.page++; page.load(); } }, '下一页') : null
           ]),
           page.canManage && page.reports.length ? m('section.ResourceDirectory-reports', [m('h2', '待处理反馈'), page.reports.map(function (report) {
-            return m('p', { key: report.id }, [
-              m('a', { href: report.url, target: '_blank', rel: 'noopener noreferrer' }, report.title || ('资料 #' + report.resource_id)),
-              '：', report.reason, ' ',
+            return m('div.ResourceDirectory-report', { key: report.id }, [
+              m('a.ResourceDirectory-reportTitle', { href: report.url, target: '_blank', rel: 'noopener noreferrer' }, report.title || ('资料 #' + report.resource_id)),
+              m('span.ResourceDirectory-reportReason', report.reason),
               m('button.Button', { type: 'button', onclick: function () { page.resolveReport(report); } }, '标记已处理')]);
           })]) : null
         ])
