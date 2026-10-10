@@ -1,0 +1,26 @@
+{
+    "name": "ucasser/resources",
+    "description": "A maintained directory of campus and external study resources.",
+    "type": "flarum-extension",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "flarum/core": "^2.0.0-rc.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "UCASSer\\Resources\\": "src/"
+        }
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "UCASSer 资源汇总",
+            "category": "feature",
+            "icon": {
+                "name": "fas fa-book-open",
+                "backgroundColor": "#315c90",
+                "color": "#fff"
+            }
+        }
+    }
+}
