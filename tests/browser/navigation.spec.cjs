@@ -5,6 +5,15 @@ test('numbered native pages remain distinct through reload and preserve filters'
   await page.goto('/?sort=newest');
   const titles=page.locator('.DiscussionListItem-title');
   await expect(titles.first()).toBeVisible();
+  const row=page.locator('.DiscussionListItem').first();
+  await expect(row.locator('.Campus-feedHeading .Campus-feedTags')).toBeVisible();
+  await expect(row.locator('.DiscussionListItem-info .item-tags')).toHaveCount(0);
+  const heading=await row.locator('.Campus-feedHeading').evaluate(node=>{
+    const title=node.querySelector('h2').getBoundingClientRect(),tags=node.querySelector('.Campus-feedTags').getBoundingClientRect();
+    return {titleTop:title.top,titleRight:title.right,tagsTop:tags.top,tagsLeft:tags.left};
+  });
+  expect(Math.abs(heading.tagsTop-heading.titleTop)).toBeLessThan(8);
+  expect(heading.tagsLeft).toBeGreaterThanOrEqual(heading.titleRight);
   const first=await titles.allTextContents();
   expect(first.length).toBeGreaterThan(0);
   await page.getByRole('navigation',{name:'信息流分页'}).getByRole('link',{name:'下一页',exact:true}).click();
@@ -82,7 +91,38 @@ test('directory and native pages keep readable theme colors and reflow at high D
       await expect(page.getByRole('button',{name:'搜索',exact:true})).toBeVisible();
     }
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
-    await expect(page.locator('.Campus-directoryCard').first()).toBeVisible();
+    await page.setViewportSize({width:1440,height:1000});
+    await page.goto('/?sort=newest');
+    await expect(page.locator('.Campus-feedTags').first()).toBeVisible();
+    await page.emulateMedia({forcedColors:'none'});
+    for (const theme of ['light','dark','light-hc','dark-hc']) {
+      await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
+      const contrast=await page.locator('.Campus-feedTags .TagLabel-text').first().evaluate(node=>{
+        const luminance=value=>{const c=value.match(/\d+(\.\d+)?/g).slice(0,3).map(Number).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
+        const a=luminance(getComputedStyle(node).color),b=luminance(getComputedStyle(node.closest('.TagLabel')).backgroundColor);
+        return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+      });
+      expect(contrast,theme+' tag contrast').toBeGreaterThanOrEqual(4.5);
+    }
+    for (const width of [992,768,390,320]) {
+      await page.setViewportSize({width,height:1000});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'feed overflow at '+width).toBeTruthy();
+      await expect(page.locator('.Navigation-back')).toHaveCount(0);
+    }
+    await page.locator('.DiscussionListItem-main').first().click();
+    await expect(page.locator('.DiscussionHero-title')).toBeVisible();
+    await page.emulateMedia({forcedColors:'none'});
+    for (const theme of ['light','dark','light-hc','dark-hc']) {
+      await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
+      const contrast=await page.locator('.DiscussionHero-title').evaluate(node=>{
+        const luminance=value=>{const c=value.match(/\d+(\.\d+)?/g).slice(0,3).map(Number).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
+        const a=luminance(getComputedStyle(node).color),b=luminance(getComputedStyle(node.closest('.DiscussionHero')).backgroundColor);
+        return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+      });
+      expect(contrast,theme+' discussion heading contrast').toBeGreaterThanOrEqual(4.5);
+    }
+    await page.emulateMedia({forcedColors:'active'});
+    await expect(page.locator('.DiscussionHero-title')).toBeVisible();
     expect(errors).toEqual([]);
   } finally {await context.close();}
 });

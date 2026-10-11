@@ -32,6 +32,19 @@
 .Header,.CampusBoardHero,.IndexPage .DiscussionList,
 .IndexPage-nav.sideNav,.Campus-nativeRecord { background:var(--campus-surface); }
 .Campus-nativeExplore { background:transparent; }
+// The tags extension sets white contrast text for its original saturated hero.
+// Our softer hero must override the paired foreground and label variables too.
+.DiscussionHero,.DiscussionHero.DiscussionHero--colored {
+  --contrast-color:var(--campus-ink);
+  color:var(--campus-ink);
+  background:var(--campus-soft);
+}
+.DiscussionHero .DiscussionHero-title { color:var(--campus-ink); }
+.DiscussionHero .TagsLabel .TagLabel.colored {
+  --tag-color:var(--campus-link);
+  color:var(--campus-link);
+  background:var(--campus-surface);
+}
 .Campus {
   --campus-ink:var(--text-color);
   --campus-muted:var(--muted-color);
@@ -60,6 +73,19 @@
 @media(min-width:992px) { .IndexPage-nav.sideNav>ul.affix { width:calc(var(--sidebar-width,190px) - 26px); } }
 .IndexPage .DiscussionListItem-info .item-excerpt { font-size:13px; }
 .IndexPage .DiscussionListItem-title { line-height:1.65; }
+.IndexPage .Campus-feedHeading { display:flex; align-items:flex-start; gap:12px; margin-bottom:8px; }
+.IndexPage .Campus-feedHeading .DiscussionListItem-title { flex:1; min-width:0; margin:0; font-size:16px; line-height:1.6; letter-spacing:0; }
+.IndexPage .Campus-feedTags { flex:none; max-width:38%; margin-top:3px; line-height:20px; }
+.IndexPage .Campus-feedTags .TagsLabel { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; white-space:normal; }
+.IndexPage .Campus-feedTags .TagLabel { font-size:11px; line-height:18px; max-width:100%; overflow:hidden; text-overflow:ellipsis; border-radius:5px; }
+.IndexPage .Campus-feedTags .TagLabel-text { overflow-wrap:anywhere; }
+.IndexPage .Campus-feedTags .TagLabel.colored { --tag-color:var(--campus-link); background:var(--campus-soft); color:var(--campus-link); }
+.IndexPage .DiscussionListItem-info { display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; }
+.IndexPage .DiscussionListItem-info>li { margin:0!important; }
+.IndexPage .DiscussionListItem-info :is(.item-campus-facts,.item-campus-ratings,.item-excerpt) { flex-basis:100%; }
+.IndexPage .DiscussionListItem-info .item-excerpt { margin-top:5px!important; }
+.IndexPage .DiscussionListItem-info .username { font-weight:500; }
+.IndexPage .DiscussionListItem-content { padding-top:20px; padding-bottom:20px; }
 .Campus .Button--primary,.Campus a.Button--primary { color:#fff; }
 .Button,.FormControl { font-family:inherit; }
 .Campus .Button,.Campus-paginationControls .Button { font-weight:600; }
@@ -115,6 +141,10 @@
   .Campus-directoryTree { max-height:260px; overflow:auto; overscroll-behavior:contain; }
 }
 @media(max-width:767px) {
+  .IndexPage .Campus-feedHeading { flex-direction:column; gap:5px; }
+  .IndexPage .Campus-feedHeading .DiscussionListItem-title { font-size:15px; }
+  .IndexPage .Campus-feedTags { max-width:100%; margin:0; }
+  .IndexPage .Campus-feedTags .TagsLabel { justify-content:flex-start; }
   .Campus-directoryCard { padding:16px; }
   .Campus-directoryCardHeader { gap:9px; }
   .Campus-directoryCardHeader h2 { font-size:16px; }

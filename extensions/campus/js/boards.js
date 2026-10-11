@@ -292,6 +292,19 @@ export function recordOverview(r, discussion) {
   }, [symbol('link'), item.title]))]) : null]);
 }
 export function registerBoards(openComposer) {
+  extend(DiscussionListItem.prototype, 'mainView', function (vnode) {
+    // Move the native tag item into a heading row, keeping native rendering,
+    // links and unread state. No floating tag or fixed title reservation.
+    const children = vnode?.children;
+    if (!Array.isArray(children)) return;
+    const title = children.find(child => child?.tag === 'h2');
+    const info = children.find(child => child?.tag === 'ul');
+    if (!title || !Array.isArray(info?.children)) return;
+    const tags = info.children.find(child => child?.attrs?.className?.split(' ').includes('item-tags'));
+    if (!tags) return;
+    info.children = info.children.filter(child => child !== tags);
+    children[children.indexOf(title)] = m('div.Campus-feedHeading', [title, m('span.Campus-feedTags', tags.children)]);
+  });
   extend(DiscussionListItem.prototype, 'oninit', function () {
     this.subtree.check(() => app.cache.campusCatalog?.data);
   });

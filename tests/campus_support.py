@@ -8,6 +8,7 @@ import urllib.error
 import secrets
 import http.cookiejar
 import re
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
@@ -27,11 +28,22 @@ class Api:
                 self.csrf = re.search(r'"csrfToken":"([^"]+)"',html)[1]
             headers['X-CSRF-Token'] = self.csrf
         req = urllib.request.Request(self.url + path, data=json.dumps(data).encode() if data is not None else None, headers=headers, method=method)
-        try:
-            with self.opener.open(req, timeout=30) as response:
-                status, body = response.status, response.read()
-        except urllib.error.HTTPError as error: status, body = error.code, error.read()
         acceptable = expected if isinstance(expected, (list, tuple)) else [expected]
+        # Real publishing keeps the core ten-second flood protection. Faster
+        # Linux runs must wait for that precise error, not disable protection or
+        # retry our separate account/login rate limit or validation failures.
+        for attempt in range(2):
+            try:
+                with self.opener.open(req, timeout=30) as response:
+                    status, body = response.status, response.read()
+            except urllib.error.HTTPError as error: status, body = error.code, error.read()
+            if status != 429 or 429 in acceptable or attempt:
+                break
+            try: codes = [e.get('code') for e in json.loads(body).get('errors', [])]
+            except (json.JSONDecodeError, UnicodeDecodeError): codes = []
+            if codes != ['too_many_requests']:
+                break
+            time.sleep(10.1)
         assert status in acceptable, f'{method} {path}: expected {acceptable}, got {status}'
         try: return json.loads(body)
         except (json.JSONDecodeError, UnicodeDecodeError): return body

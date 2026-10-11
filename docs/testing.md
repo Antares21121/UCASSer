@@ -35,6 +35,7 @@ npm run test:browser
 | 验收 | 覆盖 |
 |---|---|
 | 14 项管理脚本测试 | 配置解析、秘密排除、恶意归档、备份失败、恢复拒绝、RC 生产门禁 |
+| 3 项接口验收客户端测试 | 仅对核心发帖 `too_many_requests` 等待一次；账号/登录限流不重试，预期 429 保持可观测 |
 | 阶段 1–2 | 首页、分区原生/API/搜索权限、角色隔离、撤权、邮件确认、密码重置、GDPR 导出/清除 |
 | 阶段 3–6 | 信息、资料、问答、课程评分与真实 SQL 样本、关联、版本冲突、反馈、评价撤回恢复 |
 | 阶段 7–8 | 真实回复邮件、采纳和反馈通知、已读、个人隔离、受限通知过滤、23 条检索分页与特殊输入 |
@@ -47,5 +48,7 @@ GitHub Actions 运行相同检查，使用 Linux Docker、锁定 npm/Composer、
 实际执行日期、结果和 PR CI 链接记录在 [verification.md](verification.md)。正式 SMTP、HTTPS、只读生产卷、真实运营删除申请和稳定 2.x 升级仍需生产前演练，不由开发通过结果代替。
 
 浏览器与阶段接口测试按顺序运行；接口测试临时调整权限，不能与浏览器同时执行。`campusRecord` 的公开字段、原生检索 20+3 条分页、非法筛选拒绝、身份/举报队列和操作权限均有真实 API 验收。
+
+接口验收遇到 Flarum 核心十秒发帖防刷时等待 10.1 秒后仅重试一次，不关闭或放宽真实防刷规则。此处理仅识别错误码 `too_many_requests`，不会绕过校园 `rate_limit` 或登录限流；Linux 运行较快，不能依赖 Windows 的单次请求耗时自然跨过窗口。
 
 先启用资料目录，再运行 `python tests/resource_smoke.py --url http://127.0.0.1:8080 --admin-user phase0_admin --password-file .runtime/admin-initial-password.txt`，最后运行完整浏览器验收。目录测试写入带验收标记的分类和资料，只应在独立开发实例执行。完成后可用 `scripts/demo.py` 建立更便于视觉检查的演示帖子。

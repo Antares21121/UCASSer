@@ -6,6 +6,10 @@ from campus_records import information
 
 def phase8(f, guest, admin):
     marker=secrets.token_hex(5); sections=admin.call('/api/campus/catalog')['data']['sections']; news=next(s for s in sections if s['key']=='news')
+    # Own the ordinary-discussion fixture rather than depending on a legacy
+    # welcome/test post that development demo cleanup can legitimately hide.
+    chat=next(s for s in sections if s['key']=='chat')
+    ordinary=admin.call('/api/discussions','POST',{'data':{'type':'discussions','attributes':{'title':'【示例】普通讨论检索 '+marker,'content':'【示例】原生普通讨论的独立检索验收。'},'relationships':{'tags':{'data':[{'type':'tags','id':str(chat['tag_id'])}]}}}},expected=201)['data']
     # One bulk labelled fixture, saved via the exact publishing API used by users.
     for number in range(23):
         admin.call('/api/campus/records','POST',information(admin,news['id'],title=f'【示例】分页检索 {marker} {number:02d}',body=f'【示例】分页真实数据 {marker}，不得用前端假数据代替。'),expected=201)
@@ -26,7 +30,8 @@ def phase8(f, guest, admin):
     assert not guest.call('/api/campus/search?'+urllib.parse.urlencode({'q':'%_not_a_wildcard_'+marker}))['data']
     guest.call('/api/campus/search?from=2026-02-30',expected=422)
     assert guest.call('/api/campus/search?'+query+'&deadline_from=2020-01-01&starts_from=2020-01-01&sort=deadline')['data']
-    assert guest.call('/api/campus/search?type=discussion')['data']
+    discussions=guest.call('/api/campus/search?'+urllib.parse.urlencode({'type':'discussion','q':marker}))['data']
+    assert any(str(d['id'])==ordinary['id'] for d in discussions)
     assert guest.call('/api/campus/search?type=resource')['data']
     original={k:news[k] for k in ['name','description','position','visibility']};original['is_open']=bool(news['is_open']);original['position']=int(news['position'])
     try:

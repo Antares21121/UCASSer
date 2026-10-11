@@ -83,6 +83,8 @@ python tests/campus_smoke.py --backend native --phase 11
 
 `NativeListFields` 按整页批量读取课程、分区、赞同、采纳和可见关联内容，避免每行重复查询。列表只返回公开预览，详情、反馈与历史仍按既有权限处理；没有在客户端拼接不可见数据。
 
+信息流标题和原生分类标签放入同一个弹性标题行。桌面标签与标题顶部对齐，多标签自然换行，标题不再预留固定 155px 或使用绝对定位标签；手机改为上下排列。辅助信息按统一间距换行，字段、评分、摘要各占独立行；标签采用语义蓝色底与文字色，兼容深色和高对比度主题。
+
 `finish.less` 使用语义颜色分别定义页面背景、表面、正文、辅助文字、分隔线和蓝色链接，跟随原生浅色、深色及高对比度主题。图标沿用矢量字体，字体采用本机系统栈，无外部字体下载或图片文字。可用宽度不足时目录、工具栏与分页换行，手机按钮保留触控尺寸，减少动画设置禁用骨架呼吸效果；系统强制颜色模式使用 Canvas、CanvasText、LinkText 和 Highlight。
 
 设计依据：[Microsoft Fluent 排版](https://fluent2.microsoft.design/typography)、[颜色](https://fluent2.microsoft.design/color)、[设计变量](https://fluent2.microsoft.design/design-tokens)、[可访问性](https://fluent2.microsoft.design/accessibility)，以及 [WCAG](https://www.w3.org/TR/WCAG22/) 的文字对比度与重排原则。自动验收检查代表性正文对比度至少 4.5:1、DPR 2 和 320–1440px 布局；这些检查不能替代完整的可访问性审计。
