@@ -122,7 +122,13 @@
 .WelcomeHero { background:fade(@primary-color,9%); color:var(--text-color,#172b38); }
 .WelcomeHero .Hero-title { font-weight:750; font-size:30px; letter-spacing:-.5px; }
 .WelcomeHero .Hero-subtitle { color:var(--muted-color,#5a6c79); line-height:1.7; }
-.IndexPage .DiscussionList { background:var(--body-bg,#fff); border:1px solid fade(#687f8a,14%); border-radius:14px; overflow:hidden; }
+.IndexPage .DiscussionList { background:var(--body-bg,#fff); border:1px solid fade(#687f8a,14%); border-radius:14px; }
+.IndexPage .DiscussionList-discussions>li:first-child>.DiscussionListItem,
+.IndexPage .DiscussionList-discussions>li:first-child>.DiscussionListItem>.DiscussionListItem-content { border-radius:14px 14px 0 0; }
+.IndexPage .DiscussionList-discussions>li:last-child>.DiscussionListItem,
+.IndexPage .DiscussionList-discussions>li:last-child>.DiscussionListItem>.DiscussionListItem-content { border-radius:0 0 14px 14px; }
+.IndexPage .DiscussionList-discussions>li:only-child>.DiscussionListItem,
+.IndexPage .DiscussionList-discussions>li:only-child>.DiscussionListItem>.DiscussionListItem-content { border-radius:14px; }
 
 .DiscussionListItem-title { font-weight:650; line-height:1.5; }
 .DiscussionListItem-info { line-height:1.7; }
@@ -179,6 +185,11 @@
 .IndexPage .DiscussionListItem-stats { min-width:42px; padding-top:5px; font-size:13px; font-variant-numeric:tabular-nums; color:var(--muted-color); }
 .IndexPage .DiscussionListItem-title .TagsLabel { margin-left:8px; }
 .IndexPage .DiscussionListItem-controls { top:14px; }
+@media @tablet-up {
+  .IndexPage .DiscussionList-discussions>li>.DiscussionListItem { margin-inline:0; padding-inline:0; }
+  .IndexPage .DiscussionListItem-content { padding-right:72px; }
+  .DiscussionListPane .DiscussionListItem-content { padding-right:72px; }
+}
 .TagTile { border-radius:12px; overflow:hidden; }
 .TagTiles { gap:14px; }
 .TagTile-name { font-weight:650; letter-spacing:.2px; }
