@@ -201,6 +201,9 @@ class Forum:
         ini = (self.root / 'docker/php/php.ini').read_text().replace('error_log=/dev/stderr', 'error_log="' + (self.runtime / 'php-error.log').as_posix() + '"')
         ini += f'\nextension_dir="{php_dir}/ext"\nopenssl.cafile="{ca}"\ncurl.cainfo="{ca}"\n'
         ini += ''.join(f'extension={name}\n' for name in ('curl', 'fileinfo', 'gd', 'mbstring', 'openssl', 'pdo_mysql', 'zip', 'intl'))
+        # The built-in Windows server uses the CLI SAPI. Cache compiled PHP,
+        # but check source timestamps on every request so edits stay visible.
+        ini += 'zend_extension=php_opcache.dll\nopcache.enable=1\nopcache.enable_cli=1\nopcache.validate_timestamps=1\nopcache.revalidate_freq=0\n'
         (self.tools / 'php/php.ini').write_text(ini, encoding='utf-8')
         self.doctor()
 
@@ -225,10 +228,13 @@ class Forum:
             raise ValueError('Production requires a reviewed composer.lock')
         self.composer('install' if lock_exists else 'update', '--prefer-dist', '--no-dev', '--no-interaction', '--no-plugins', '--no-scripts')
         if self.args.backend == 'docker':
+            self.compose('run', '--rm', '--no-deps', '-u', '0', 'app', 'php', 'scripts/prepare-runtime.php')
             # Named volumes hide the checkout's tracked placeholder directories.
             # mkdir is idempotent and retains all existing application data.
             self.compose('run', '--rm', '--no-deps', '-u', '0', 'app', 'sh', '-c',
                          'mkdir -p storage/cache storage/formatter storage/less storage/locale storage/logs storage/sessions storage/tmp storage/views public/assets/avatars && chown -R www-data:www-data storage public/assets')
+        else:
+            self.php('scripts/prepare-runtime.php')
         print('Setup OK; passwords stored privately in env file; next: start, install')
 
     def db_bin(self, name):
@@ -385,6 +391,7 @@ class Forum:
         self.install_with_admin(username, email, password)
 
     def install_with_admin(self, username, email, password):
+        self.php('scripts/prepare-runtime.php', root=True)
         values = self.environment()
         config = {
             'debug': False, 'baseUrl': values['APP_URL'],
@@ -465,6 +472,9 @@ class Forum:
                          'config/environment.php': self.root / 'config/environment.php',
                          'config/release.php': self.root / 'config/release.php',
                          'scripts/runtime-lock.json': self.root / 'scripts/runtime-lock.json', 'extend.php': self.root / 'extend.php'}
+                for path in (self.root / 'extensions').rglob('*'):
+                    if path.is_file() and not path.is_symlink() and 'node_modules' not in path.parts:
+                        files[path.relative_to(self.root).as_posix()] = path
                 if self.args.backend == 'docker':
                     # Named volumes are not on the host; read through a temporary container.
                     for folder, path in [('assets', 'public/assets'), ('storage', 'storage')]:
@@ -526,8 +536,17 @@ class Forum:
             for name, checksum in metadata['checksums'].items():
                 if hashlib.sha256(archive.read(name)).hexdigest() != checksum:
                     raise ValueError('Backup checksum mismatch: ' + name)
-            if archive.read('composer.lock') != (self.root / 'composer.lock').read_bytes():
+            if archive.read('composer.lock').replace(b'\r\n',b'\n') != (self.root / 'composer.lock').read_bytes().replace(b'\r\n',b'\n'):
                 raise ValueError('Dependency lock mismatch; use the backed-up version in the fresh checkout first')
+            # Local path packages must match the backed-up source before importing any data.
+            for name in metadata['checksums']:
+                if name.startswith('extensions/'):
+                    path=self.root/name
+                    if not path.is_file(): raise ValueError('Extension source mismatch; use the backed-up checkout first: '+name)
+                    actual,expected=path.read_bytes(),archive.read(name)
+                    if path.suffix in ('.php','.js','.cjs','.json','.map','.less','.css','.md','.ts','.tsx'):
+                        actual,expected=actual.replace(b'\r\n',b'\n'),expected.replace(b'\r\n',b'\n')
+                    if actual!=expected: raise ValueError('Extension source mismatch; use the backed-up checkout first: '+name)
             if self.args.backend == 'docker':
                 import io
                 import tarfile

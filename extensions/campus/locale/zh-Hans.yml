@@ -1,0 +1,891 @@
+# Chinese native UI for pinned Flarum 2.x; keep ICU placeholders intact.
+"core.admin.appearance.color_schemes.dark_hc_mode_label": "高对比度深色"
+"core.admin.appearance.color_schemes.dark_mode_label": "深色"
+"core.admin.appearance.color_schemes.light_hc_mode_label": "高对比度浅色"
+"core.admin.appearance.color_schemes.light_mode_label": "浅色"
+"core.admin.appearance.colors_heading": "主题颜色"
+"core.admin.appearance.colors_primary_label": "主色"
+"core.admin.appearance.colors_secondary_label": "辅助色"
+"core.admin.appearance.title": "外观"
+"core.admin.basics.all_discussions_label": "全部讨论"
+"core.admin.basics.default_language_heading": "默认语言"
+"core.admin.basics.forum_description_heading": "论坛简介"
+"core.admin.basics.forum_title_heading": "论坛名称"
+"core.admin.basics.title": "基本设置"
+"core.admin.create_user.email_placeholder": "邮箱"
+"core.admin.create_user.password_placeholder": "密码"
+"core.admin.create_user.username_placeholder": "用户名"
+"core.admin.edit_css.submit_button": "保存修改"
+"core.admin.edit_footer.submit_button": "保存修改"
+"core.admin.edit_group.color_label": "颜色"
+"core.admin.edit_group.icon_label": "图标"
+"core.admin.edit_group.submit_button": "保存修改"
+"core.admin.edit_header.submit_button": "保存修改"
+"core.admin.email.mail_password_label": "密码"
+"core.admin.email.mail_username_label": "用户名"
+"core.admin.email.title": "邮箱"
+"core.admin.header.log_out_button": "退出登录"
+"core.admin.models.discussions": "讨论"
+"core.admin.models.posts": "回复"
+"core.admin.models.users": "用户"
+"core.admin.nav.advanced_button": "高级设置"
+"core.admin.nav.appearance_button": "外观"
+"core.admin.nav.basics_button": "基本设置"
+"core.admin.nav.dashboard_button": "控制台"
+"core.admin.nav.email_button": "邮件"
+"core.admin.nav.permissions_button": "权限"
+"core.admin.nav.userlist_button": "用户"
+"core.admin.permissions.search_users_label": "搜索用户"
+"core.admin.permissions.title": "权限"
+"core.admin.permissions_controls.allow_never_button": "从未"
+"core.admin.settings.submit_button": "保存修改"
+"core.admin.upload_image.remove_button": "移除"
+"core.admin.users.grid.columns.email.title": "邮箱"
+"core.admin.users.grid.columns.user_actions.edit_user.button": "编辑"
+"core.admin.users.grid.columns.username.title": "用户名"
+"core.admin.users.search_placeholder": "搜索用户"
+"core.admin.users.title": "用户"
+"core.api.invalid_username_message": "用户名只允许字母、数字和连字符，且至少包含一个字母。"
+"core.email.reset_password.subject": "重置密码"
+"core.forum.change_email.confirm_password_placeholder": "确认密码"
+"core.forum.change_email.confirmation_message": "已发送确认邮件，请检查邮箱。"
+"core.forum.change_email.dismiss_button": "确定"
+"core.forum.change_email.incorrect_password_message": "密码不正确。"
+"core.forum.change_email.submit_button": "保存修改"
+"core.forum.change_email.title": "修改邮箱"
+"core.forum.change_password.send_button": "发送重置密码邮件"
+"core.forum.change_password.text": "点击下方按钮，然后在邮箱中打开修改密码的链接。"
+"core.forum.change_password.title": "修改密码"
+"core.forum.composer.close_tooltip": "关闭编辑器"
+"core.forum.composer.exit_full_screen_tooltip": "退出全屏"
+"core.forum.composer.full_screen_tooltip": "全屏编辑"
+"core.forum.composer.minimize_tooltip": "收起编辑器"
+"core.forum.composer.preview_tooltip": "预览"
+"core.forum.composer_discussion.body_placeholder": "写下讨论内容……"
+"core.forum.composer_discussion.discard_confirmation": "讨论尚未发布，确认放弃草稿？"
+"core.forum.composer_discussion.submit_button": "发布讨论"
+"core.forum.composer_discussion.title": "发起讨论"
+"core.forum.composer_discussion.title_placeholder": "讨论标题"
+"core.forum.composer_edit.discard_confirmation": "修改尚未保存，确认放弃？"
+"core.forum.composer_edit.edited_message": "修改已保存。"
+"core.forum.composer_edit.post_link": "{discussion} 中的第 {number} 条回复"
+"core.forum.composer_edit.submit_button": "保存修改"
+"core.forum.composer_edit.view_button": "查看"
+"core.forum.composer_reply.body_placeholder": "写下你的回复……"
+"core.forum.composer_reply.discard_confirmation": "回复尚未发布，确认放弃草稿？"
+"core.forum.composer_reply.posted_message": "回复已发布。"
+"core.forum.composer_reply.submit_button": "发布回复"
+"core.forum.composer_reply.view_button": "查看"
+"core.forum.discussion_controls.cannot_reply_button": "暂时无法回复"
+"core.forum.discussion_controls.cannot_reply_text": "当前账号没有回复权限。"
+"core.forum.discussion_controls.delete_button": "删除"
+"core.forum.discussion_controls.delete_confirmation": "确认删除这篇讨论？"
+"core.forum.discussion_controls.delete_forever_button": "永久删除"
+"core.forum.discussion_controls.log_in_to_reply_button": "登录后回复"
+"core.forum.discussion_controls.rename_button": "重命名"
+"core.forum.discussion_controls.reply_button": "回复"
+"core.forum.discussion_controls.restore_button": "恢复"
+"core.forum.discussion_controls.toggle_dropdown_accessible_label": "讨论操作"
+"core.forum.discussion_list.empty_text": "暂时还没有内容，期待你的第一条分享。"
+"core.forum.discussion_list.load_more_button": "加载更多"
+"core.forum.discussion_list.replied_text": "{username} 回复于 {ago}"
+"core.forum.discussion_list.skip_discussion_list_pane": "跳过讨论列表"
+"core.forum.discussion_list.started_text": "{username} 发布于 {ago}"
+"core.forum.discussion_list.total_replies_a11y_label": "{count} 条回复"
+"core.forum.discussion_list.unread_replies_a11y_label": "{count} 条未读回复，标记为已读"
+"core.forum.forgot_password.dismiss_button": "确定"
+"core.forum.forgot_password.email_placeholder": "邮箱"
+"core.forum.forgot_password.email_sent_message": "如果该邮箱已注册，我们会发送重置密码邮件。请检查收件箱及垃圾邮件。"
+"core.forum.forgot_password.not_found_message": "该邮箱尚未注册。"
+"core.forum.forgot_password.submit_button": "发送重置链接"
+"core.forum.forgot_password.text": "输入注册邮箱，我们会发送重置密码的链接。"
+"core.forum.forgot_password.title": "找回密码"
+"core.forum.header.admin_button": "管理后台"
+"core.forum.header.back_to_index_tooltip": "返回信息流"
+"core.forum.header.locale_dropdown_accessible_label": "切换语言"
+"core.forum.header.log_in_link": "登录"
+"core.forum.header.log_out_button": "退出登录"
+"core.forum.header.profile_button": "个人主页"
+"core.forum.header.search_placeholder": "搜索校园内容"
+"core.forum.header.search_role_label": "搜索校园内容"
+"core.forum.header.session_dropdown_accessible_label": "账号菜单"
+"core.forum.header.settings_button": "设置"
+"core.forum.header.sign_up_link": "注册"
+"core.forum.header.theme_switcher_accessible_label": "切换主题"
+"core.forum.index.all_discussions_link": "全部讨论"
+"core.forum.index.cannot_start_discussion_button": "暂时无法发布"
+"core.forum.index.mark_all_as_read_confirmation": "将所有讨论标记为已读？"
+"core.forum.index.mark_all_as_read_tooltip": "全部标记已读"
+"core.forum.index.meta_title_text": "全部讨论"
+"core.forum.index.refresh_tooltip": "刷新"
+"core.forum.index.skip_to_main_content": "跳到主要内容"
+"core.forum.index.start_discussion_button": "发起讨论"
+"core.forum.index.toggle_sidenav_dropdown_accessible_label": "展开板块导航"
+"core.forum.index_sort.az_button": "标题升序"
+"core.forum.index_sort.latest_button": "最近活跃"
+"core.forum.index_sort.newest_button": "最新发布"
+"core.forum.index_sort.oldest_button": "最早发布"
+"core.forum.index_sort.relevance_button": "相关程度"
+"core.forum.index_sort.toggle_dropdown_accessible_label": "更改信息流排序"
+"core.forum.index_sort.top_button": "最多回复"
+"core.forum.index_sort.za_button": "标题降序"
+"core.forum.log_in.forgot_password_link": "忘记密码？"
+"core.forum.log_in.invalid_login_message": "账号或密码不正确。"
+"core.forum.log_in.password_placeholder": "密码"
+"core.forum.log_in.remember_me_label": "记住登录状态"
+"core.forum.log_in.sign_up_text": "还没有账号？<a>注册</a>"
+"core.forum.log_in.submit_button": "登录"
+"core.forum.log_in.title": "登录"
+"core.forum.log_in.username_or_email_placeholder": "用户名或邮箱"
+"core.forum.notifications.delete_all_confirm": "确认删除全部通知？此操作无法撤销。"
+"core.forum.notifications.delete_all_tooltip": "清空通知"
+"core.forum.notifications.discussion_renamed_text": "{username} 修改了讨论标题"
+"core.forum.notifications.empty_text": "暂时没有新通知"
+"core.forum.notifications.mark_all_as_read_tooltip": "全部标记已读"
+"core.forum.notifications.mark_as_read_tooltip": "标记已读"
+"core.forum.notifications.title": "通知"
+"core.forum.notifications.toggle_dropdown_accessible_label": "查看通知"
+"core.forum.notifications.tooltip": "通知"
+"core.forum.post.edited_text": "已编辑"
+"core.forum.post.edited_tooltip": "{username} 编辑于 {ago}"
+"core.forum.post.number_tooltip": "第 {number} 条回复"
+"core.forum.post_controls.delete_button": "删除"
+"core.forum.post_controls.delete_confirmation": "确认永久删除这条回复？此操作无法撤销。"
+"core.forum.post_controls.delete_forever_button": "永久删除"
+"core.forum.post_controls.edit_button": "编辑"
+"core.forum.post_controls.hide_confirmation": "确认隐藏这条回复？"
+"core.forum.post_controls.restore_button": "恢复"
+"core.forum.post_controls.toggle_dropdown_accessible_label": "回复操作"
+"core.forum.post_list.empty_text": "暂时没有回复。"
+"core.forum.post_list.in_discussion_text": "来自 {discussion}"
+"core.forum.post_list.load_more_button": "加载更多"
+"core.forum.post_scrubber.now_link": "最新回复"
+"core.forum.post_scrubber.original_post_link": "首帖"
+"core.forum.post_scrubber.unread_text": "{count} 条未读"
+"core.forum.post_scrubber.viewing_text": "第 {index} 条 / 共 {formattedCount} 条"
+"core.forum.post_stream.discussion_renamed_old_tooltip": "原标题：{old}"
+"core.forum.post_stream.discussion_renamed_text": "{username} 将标题改为 {new}，{time}"
+"core.forum.post_stream.load_more_button": "加载更多"
+"core.forum.post_stream.reply_placeholder": "写下你的回复……"
+"core.forum.post_stream.time_lapsed_text": "{period}后"
+"core.forum.posts.meta_title_text": "回复搜索结果"
+"core.forum.posts.refresh_tooltip": "刷新"
+"core.forum.posts_sort.newest_button": "最新发布"
+"core.forum.posts_sort.oldest_button": "最早发布"
+"core.forum.posts_sort.relevance_button": "相关程度"
+"core.forum.rename_discussion.submit_button": "重命名"
+"core.forum.rename_discussion.title": "修改讨论标题"
+"core.forum.security.browser_on_operating_system": "{os} 上的 {browser}"
+"core.forum.security.cannot_terminate_current_session": "当前会话请使用退出登录结束。"
+"core.forum.security.created": "创建时间"
+"core.forum.security.current_active_session": "当前会话"
+"core.forum.security.developer_tokens_heading": "开发者令牌"
+"core.forum.security.empty_text": "暂无记录。"
+"core.forum.security.global_logout.heading": "退出所有设备"
+"core.forum.security.global_logout.help_text": "结束全部登录会话并撤销开发者令牌，同时使邮箱确认及密码重置链接失效。"
+"core.forum.security.global_logout.log_out_button": "退出登录"
+"core.forum.security.hide_access_token": "隐藏令牌"
+"core.forum.security.last_activity": "最近活动"
+"core.forum.security.never": "从未"
+"core.forum.security.new_access_token_button": "新建令牌"
+"core.forum.security.new_access_token_modal.submit_button": "创建令牌"
+"core.forum.security.new_access_token_modal.title": "新建令牌"
+"core.forum.security.new_access_token_modal.title_placeholder": "令牌用途"
+"core.forum.security.revoke_access_token": "撤销"
+"core.forum.security.revoke_access_token_confirmation": "确认执行此操作？"
+"core.forum.security.session_terminated": "已结束 {count} 个会话。"
+"core.forum.security.session_termination_failed": "结束会话失败，请稍后重试。"
+"core.forum.security.sessions_heading": "已登录设备"
+"core.forum.security.show_access_token": "查看令牌"
+"core.forum.security.terminate_all_other_sessions": "退出其他设备"
+"core.forum.security.terminate_all_other_sessions_confirmation": "确认执行此操作？"
+"core.forum.security.terminate_session": "结束会话"
+"core.forum.security.title": "账号安全"
+"core.forum.security.token_revoked": "令牌已撤销。"
+"core.forum.settings.account_heading": "账号"
+"core.forum.settings.change_email_button": "修改邮箱"
+"core.forum.settings.change_password_button": "修改密码"
+"core.forum.settings.color_scheme_heading": "外观主题"
+"core.forum.settings.color_schemes.auto_mode_label": "跟随系统"
+"core.forum.settings.color_schemes.dark_hc_mode_label": "高对比度深色"
+"core.forum.settings.color_schemes.dark_mode_label": "深色"
+"core.forum.settings.color_schemes.light_hc_mode_label": "高对比度浅色"
+"core.forum.settings.color_schemes.light_mode_label": "浅色"
+"core.forum.settings.device_heading": "设备"
+"core.forum.settings.haptic_feedback_help": "仅在支持的移动设备上可用"
+"core.forum.settings.haptic_feedback_label": "开启触感反馈"
+"core.forum.settings.notification_checkbox_a11y_label_template": "通过 {method} 接收「{description}」通知"
+"core.forum.settings.notifications_heading": "通知"
+"core.forum.settings.notify_by_email_heading": "邮箱"
+"core.forum.settings.notify_by_web_heading": "站内"
+"core.forum.settings.notify_discussion_renamed_label": "我发起的讨论标题被修改"
+"core.forum.settings.privacy_disclose_online_label": "允许他人查看我的在线状态"
+"core.forum.settings.privacy_heading": "隐私"
+"core.forum.settings.title": "设置"
+"core.forum.sign_up.dismiss_button": "确定"
+"core.forum.sign_up.email_placeholder": "邮箱"
+"core.forum.sign_up.log_in_text": "已有账号？<a>登录</a>"
+"core.forum.sign_up.password_placeholder": "密码"
+"core.forum.sign_up.submit_button": "注册"
+"core.forum.sign_up.title": "注册"
+"core.forum.sign_up.username_placeholder": "用户名"
+"core.forum.sign_up.welcome_text": "欢迎你，{username}！"
+"core.forum.user.avatar_remove_button": "移除"
+"core.forum.user.avatar_upload_button": "上传头像"
+"core.forum.user.avatar_upload_tooltip": "上传新头像"
+"core.forum.user.discussions_link": "讨论"
+"core.forum.user.in_discussion_text": "来自 {discussion}"
+"core.forum.user.joined_date_text": "加入于 {ago}"
+"core.forum.user.online_text": "在线"
+"core.forum.user.posts_empty_text": "暂时还没有回复。"
+"core.forum.user.posts_link": "回复"
+"core.forum.user.posts_load_more_button": "加载更多"
+"core.forum.user.security_link": "账号安全"
+"core.forum.user.settings_link": "设置"
+"core.forum.user_controls.button": "用户管理"
+"core.forum.user_controls.delete_button": "删除"
+"core.forum.user_controls.delete_confirmation": "确认删除此用户？其发布的内容会保留。"
+"core.forum.user_controls.delete_error_message": "删除用户 {username} 失败。"
+"core.forum.user_controls.delete_success_message": "已删除用户 {username}。"
+"core.forum.user_controls.edit_button": "编辑"
+"core.forum.user_controls.toggle_dropdown_accessible_label": "用户操作"
+"core.forum.user_email_confirmation.alert_message": "已发送确认邮件，请检查邮箱。"
+"core.forum.user_email_confirmation.resend_button": "重新发送确认邮件"
+"core.forum.user_email_confirmation.sent_message": "已发送"
+"core.forum.welcome_hero.hide": "收起欢迎信息"
+"core.lib.alert.dismiss_a11y_label": "关闭提示"
+"core.lib.assets_updated.message": "页面有新版本可用。"
+"core.lib.assets_updated.reload_button": "刷新页面"
+"core.lib.badge.hidden_tooltip": "已隐藏"
+"core.lib.connection_restored_message": "网络连接已恢复。"
+"core.lib.data_segment.label": "{label}："
+"core.lib.datetime_formats.fullTime": "YYYY年M月D日 HH:mm"
+"core.lib.datetime_formats.humanTimeLong": "YYYY年M月D日"
+"core.lib.datetime_formats.humanTimeShort": "M月D日"
+"core.lib.datetime_formats.scrubber": "YYYY年M月"
+"core.lib.datetime_formats.userListJoinDate": "YYYY年M月D日"
+"core.lib.debug_button": "调试详情"
+"core.lib.dropdown.toggle_dropdown_accessible_label": "展开菜单"
+"core.lib.edit_user.activate_button": "激活账号"
+"core.lib.edit_user.email_heading": "邮箱"
+"core.lib.edit_user.email_label": "邮箱"
+"core.lib.edit_user.groups_heading": "用户组"
+"core.lib.edit_user.nothing_available": "当前账号无权编辑此用户。"
+"core.lib.edit_user.password_heading": "密码"
+"core.lib.edit_user.password_label": "密码"
+"core.lib.edit_user.set_password_label": "设置新密码"
+"core.lib.edit_user.submit_button": "保存修改"
+"core.lib.edit_user.title": "编辑用户"
+"core.lib.edit_user.username_heading": "用户名"
+"core.lib.edit_user.username_label": "用户名"
+"core.lib.error.db_error_message": "数据暂时无法读取，请稍后重试。"
+"core.lib.error.generic_cross_origin_message": "请求未完成，请刷新后重试。"
+"core.lib.error.generic_message": "操作未完成，请稍后重试。输入内容已保留。"
+"core.lib.error.missing_dependencies_message": "请先启用所需扩展：{extensions}。"
+"core.lib.error.network_message": "网络连接异常，请检查网络后重试。"
+"core.lib.error.not_found_message": "内容不存在或已移除。"
+"core.lib.error.offline_message": "网络已断开，请检查连接。"
+"core.lib.error.payload_too_large_message": "提交的内容过大，请适当缩减。"
+"core.lib.error.permission_denied_message": "当前账号没有此操作权限。"
+"core.lib.error.rate_limit_exceeded_message": "操作过于频繁，请稍等片刻再试。"
+"core.lib.error.render_failed_message": "内容暂时无法显示，请稍后重试。"
+"core.lib.index_sort.az_button": "标题升序"
+"core.lib.index_sort.latest_button": "最近活跃"
+"core.lib.index_sort.newest_button": "最新发布"
+"core.lib.index_sort.oldest_button": "最早发布"
+"core.lib.index_sort.relevance_button": "相关程度"
+"core.lib.index_sort.top_button": "最多回复"
+"core.lib.index_sort.za_button": "标题降序"
+"core.lib.input.clear_button": "清空输入"
+"core.lib.loading_indicator.accessible_label": "加载中"
+"core.lib.meta_titles.with_page_title": "{pageNumber, plural, =1 {{pageTitle} - {forumName}} other {{pageTitle}：第 # 页 - {forumName}}}"
+"core.lib.meta_titles.without_page_title": "{pageNumber, plural, =1 {{forumName}} other {第 # 页 - {forumName}}}"
+"core.lib.modal.close": "关闭"
+"core.lib.multi_select.placeholder": "选择多个选项"
+"core.lib.nav.drawer_button": "打开导航菜单"
+"core.lib.nav.pin_pane_button": "固定讨论列表"
+"core.lib.notices.bisecting": "正在排查导致问题的扩展。"
+"core.lib.notices.bisecting_continue": "继续排查"
+"core.lib.notices.maintenance_mode_low": "论坛维护中，目前仅管理员可访问。"
+"core.lib.notices.maintenance_mode_safe": "论坛处于安全维护模式，目前仅管理员可访问。"
+"core.lib.overflowing_list.toggle_accessible_label": "更多选项"
+"core.lib.pagination.back_button": "上一页"
+"core.lib.pagination.first_button": "第一页"
+"core.lib.pagination.go_to_page_textbox_a11y_label": "跳转到页码"
+"core.lib.pagination.last_button": "最后一页"
+"core.lib.pagination.next_button": "下一页"
+"core.lib.pagination.page_counter": "第 {current} 页 / 共 {total} 页"
+"core.lib.search.gambit_minus_button_a11y_label": "添加排除条件"
+"core.lib.search.gambit_plus_button_a11y_label": "添加筛选条件"
+"core.lib.search.no_results_text": "暂无匹配结果，试试其他关键词。"
+"core.lib.search.no_search_text": "输入关键词，查找讨论、资料和同学。"
+"core.lib.search.options_heading": "搜索选项"
+"core.lib.search.placeholder": "搜索……"
+"core.lib.search.preview_heading": "搜索结果预览"
+"core.lib.search.search_active_button_accessible_label": "修改搜索：{query}"
+"core.lib.search.search_clear_button_accessible_label": "清空搜索"
+"core.lib.search.title": "搜索"
+"core.lib.search_source.discussions.all_button": "搜索「{query}」的所有讨论"
+"core.lib.search_source.discussions.heading": "讨论"
+"core.lib.search_source.posts.all_button": "搜索「{query}」的所有回复"
+"core.lib.search_source.posts.heading": "回复"
+"core.lib.search_source.users.heading": "用户"
+"core.lib.series.glue_text": "、"
+"core.lib.series.three_text": "{first}、{second}和{third}"
+"core.lib.series.two_text": "{first}和{second}"
+"core.lib.user_selection_modal.empty_results": "未找到匹配的用户。"
+"core.lib.user_selection_modal.max_items_to_select": "最多选择 {count} 位用户"
+"core.lib.user_selection_modal.search_placeholder": "搜索用户"
+"core.lib.user_selection_modal.submit_button": "确定"
+"core.lib.user_selection_modal.title": "选择相关用户"
+"core.lib.username.deleted_text": "已删除账号"
+"core.ref.all_discussions": "全部讨论"
+"core.ref.change_email": "修改邮箱"
+"core.ref.change_password": "修改密码"
+"core.ref.color": "颜色"
+"core.ref.confirm_email": "确认邮箱"
+"core.ref.confirm_password": "确认密码"
+"core.ref.confirmation_email_sent": "已发送确认邮件，请检查邮箱。"
+"core.ref.dark_hc_mode_label": "高对比度深色"
+"core.ref.dark_mode_label": "深色"
+"core.ref.delete": "删除"
+"core.ref.delete_forever": "永久删除"
+"core.ref.discussions": "讨论"
+"core.ref.edit": "编辑"
+"core.ref.edit_user": "编辑用户"
+"core.ref.email": "邮箱"
+"core.ref.extensions": "扩展"
+"core.ref.generic_confirmation_message": "确认执行此操作？"
+"core.ref.icon": "图标"
+"core.ref.invalid_login_message": "账号或密码不正确。"
+"core.ref.latest": "最近活跃"
+"core.ref.light_hc_mode_label": "高对比度浅色"
+"core.ref.light_mode_label": "浅色"
+"core.ref.load_more": "加载更多"
+"core.ref.loading": "加载中"
+"core.ref.log_in": "登录"
+"core.ref.log_out": "退出登录"
+"core.ref.mark_all_as_read": "全部标记已读"
+"core.ref.never": "从未"
+"core.ref.new_token": "新建令牌"
+"core.ref.newest": "最新发布"
+"core.ref.next_page": "下一页"
+"core.ref.notifications": "通知"
+"core.ref.okay": "确定"
+"core.ref.oldest": "最早发布"
+"core.ref.password": "密码"
+"core.ref.posts": "回复"
+"core.ref.previous_page": "上一页"
+"core.ref.refresh": "刷新"
+"core.ref.relevance": "相关程度"
+"core.ref.remember_me_label": "记住登录状态"
+"core.ref.remove": "移除"
+"core.ref.rename": "重命名"
+"core.ref.reply": "回复"
+"core.ref.reset_your_password": "重置密码"
+"core.ref.restore": "恢复"
+"core.ref.save_changes": "保存修改"
+"core.ref.search_users": "搜索用户"
+"core.ref.security": "账号安全"
+"core.ref.settings": "设置"
+"core.ref.sign_up": "注册"
+"core.ref.some_others": "其他同学"
+"core.ref.start_a_discussion": "发起讨论"
+"core.ref.title_az": "标题升序"
+"core.ref.title_za": "标题降序"
+"core.ref.top": "最多回复"
+"core.ref.username": "用户名"
+"core.ref.username_or_email_placeholder": "用户名或邮箱"
+"core.ref.users": "用户"
+"core.ref.view": "查看"
+"core.ref.write_a_reply": "写下你的回复……"
+"core.views.admin.extensions.caption": "扩展"
+"core.views.confirm_email.submit_button": "确认邮箱"
+"core.views.confirm_email.title": "确认邮箱"
+"core.views.content.javascript_disabled_message": "请使用支持 JavaScript 的现代浏览器访问。"
+"core.views.content.load_error_message": "页面加载遇到问题，请刷新后重试。"
+"core.views.content.loading_text": "加载中"
+"core.views.discussion.next_page_button": "下一页"
+"core.views.discussion.previous_page_button": "上一页"
+"core.views.error.csrf_token_mismatch": "页面停留过久，请刷新后重试。"
+"core.views.error.csrf_token_mismatch_return_link": "返回重试"
+"core.views.error.invalid_confirmation_token": "确认链接无效或已使用。"
+"core.views.error.maintenance_mode_link": "管理员登录"
+"core.views.error.maintenance_mode_message": "论坛维护中，请稍后再来。"
+"core.views.error.maintenance_mode_title": "维护中"
+"core.views.error.method_not_allowed": "当前页面不支持此请求方式。"
+"core.views.error.not_authenticated": "请登录后访问此页面。"
+"core.views.error.not_found": "你访问的内容不存在或已移除。"
+"core.views.error.not_found_return_link": "返回 {forum}"
+"core.views.error.permission_denied": "当前账号无法访问此页面。"
+"core.views.error.unknown": "页面暂时无法加载，请稍后重试。"
+"core.views.index.all_discussions_heading": "全部讨论"
+"core.views.index.next_page_button": "下一页"
+"core.views.index.previous_page_button": "上一页"
+"core.views.layout.skip_to_content": "跳到主要内容"
+"core.views.log_in.invalid_login_message": "账号或密码不正确。"
+"core.views.log_in.password_placeholder": "密码"
+"core.views.log_in.remember_me_label": "记住登录状态"
+"core.views.log_in.submit_button": "登录"
+"core.views.log_in.title": "登录"
+"core.views.log_in.username_or_email_placeholder": "用户名或邮箱"
+"core.views.log_out.log_out_button": "退出登录"
+"core.views.log_out.title": "退出登录"
+"core.views.reset_password.submit_button": "保存修改"
+"core.views.reset_password.title": "重置密码"
+"flarum-approval.forum.badge.awaiting_approval_tooltip": "等待审核"
+"flarum-approval.forum.post.awaiting_approval_text": "等待审核"
+"flarum-approval.forum.post_controls.approve_button": "通过审核"
+"flarum-bbcode.forum.quote.wrote": "写道"
+"flarum-emoji.forum.composer.emoji_tooltip": "表情"
+"flarum-emoji.forum.composer.type_to_search_text": "搜索表情……"
+"flarum-flags.forum.flag_post.confirmation_message": "举报已提交，谢谢你共同维护社区。"
+"flarum-flags.forum.flag_post.dismiss_button": "确定"
+"flarum-flags.forum.flag_post.reason_details_placeholder": "请说明具体情况……"
+"flarum-flags.forum.flag_post.reason_inappropriate_label": "不当内容"
+"flarum-flags.forum.flag_post.reason_inappropriate_text": "含攻击、骚扰或违规内容。"
+"flarum-flags.forum.flag_post.reason_inappropriate_text_no_guidelines": "含攻击、骚扰或其他不当内容。"
+"flarum-flags.forum.flag_post.reason_missing_message": "请说明具体情况，帮助维护人员判断。"
+"flarum-flags.forum.flag_post.reason_off_topic_label": "偏离主题"
+"flarum-flags.forum.flag_post.reason_off_topic_text": "与当前讨论无关。"
+"flarum-flags.forum.flag_post.reason_other_label": "其他原因"
+"flarum-flags.forum.flag_post.reason_spam_label": "垃圾广告"
+"flarum-flags.forum.flag_post.reason_spam_text": "重复、无关或未经允许的推广。"
+"flarum-flags.forum.flag_post.submit_button": "提交举报"
+"flarum-flags.forum.flag_post.title": "举报回复"
+"flarum-flags.forum.flagged_posts.empty_text": "暂无待处理举报"
+"flarum-flags.forum.flagged_posts.item_text": "{username} 在 <em>{discussion}</em> 中举报"
+"flarum-flags.forum.flagged_posts.title": "待处理举报"
+"flarum-flags.forum.flagged_posts.tooltip": "待处理举报"
+"flarum-flags.forum.post.dismiss_flag_button": "结束处理"
+"flarum-flags.forum.post.flagged_by_text": "{username} 已举报"
+"flarum-flags.forum.post.flagged_by_with_reason_text": "{username} 因 {reason} 举报"
+"flarum-flags.forum.post_controls.flag_button": "举报"
+"flarum-gdpr.forum.badges.anonymized_user": "已匿名化的账号"
+"flarum-gdpr.forum.delete_user.delete_button": "删除账号"
+"flarum-gdpr.forum.delete_user.modal_delete_button": "按默认方式处理"
+"flarum-gdpr.forum.delete_user.text": "确认删除 {username} 的账号？此操作无法撤销。"
+"flarum-gdpr.forum.delete_user.title": "删除 {username} 的账号"
+"flarum-gdpr.forum.erasure_request_confirmed": "账号删除申请已确认，管理员将审核处理。"
+"flarum-gdpr.forum.erasure_requests.empty_text": "暂无待处理的账号删除申请"
+"flarum-gdpr.forum.erasure_requests.item_text": "{name} 申请删除账号"
+"flarum-gdpr.forum.erasure_requests.title": "账号删除申请"
+"flarum-gdpr.forum.erasure_requests.tooltip": "账号删除申请"
+"flarum-gdpr.forum.export_file": "{forumTitle}（{url}）于 {date} 为 {username}（{email}）准备的个人数据"
+"flarum-gdpr.forum.notification.export-ready": "{username} 的个人数据已准备好，可下载。"
+"flarum-gdpr.forum.process_erasure.anonymization_button": "匿名化账号"
+"flarum-gdpr.forum.process_erasure.comments_label": "处理说明（选填）"
+"flarum-gdpr.forum.process_erasure.confirm": "确认按 {mode} 方式处理 {name} 的账号？"
+"flarum-gdpr.forum.process_erasure.confirmed_at": "确认时间：{date}"
+"flarum-gdpr.forum.process_erasure.deletion_button": "删除账号"
+"flarum-gdpr.forum.process_erasure.eligible_at": "可自动处理时间：{date}"
+"flarum-gdpr.forum.process_erasure.requested_at": "申请时间：{date}"
+"flarum-gdpr.forum.process_erasure.text": "{name} 已申请删除账号。"
+"flarum-gdpr.forum.process_erasure.title": "处理账号删除申请"
+"flarum-gdpr.forum.request_erasure.cancel_button": "撤回申请"
+"flarum-gdpr.forum.request_erasure.password_label": "确认密码"
+"flarum-gdpr.forum.request_erasure.reason": "申请理由：{reason}"
+"flarum-gdpr.forum.request_erasure.reason_label": "申请理由（选填）"
+"flarum-gdpr.forum.request_erasure.request_button": "提交删除申请"
+"flarum-gdpr.forum.request_erasure.status.awaiting_user_confirmation": "请在邮箱中确认账号删除申请。"
+"flarum-gdpr.forum.request_erasure.status.user_confirmed": "申请已确认，等待管理员审核处理。"
+"flarum-gdpr.forum.request_erasure.text": "收到并确认申请后，管理员将审核处理。"
+"flarum-gdpr.forum.request_erasure.title": "申请删除账号"
+"flarum-gdpr.forum.settings.data.heading": "个人数据"
+"flarum-gdpr.forum.settings.export_data_button": "导出个人数据"
+"flarum-gdpr.forum.settings.export_data_help": "获取与你账号有关的可导出数据副本，包括发布内容和个人资料。"
+"flarum-gdpr.forum.settings.request_erasure_button": "申请删除账号"
+"flarum-gdpr.forum.settings.request_erasure_help": "管理员将审核账号删除申请。删除无法撤销，请先保存你需要保留的内容。"
+"flarum-gdpr.lib.request_data.request_button": "申请导出"
+"flarum-gdpr.lib.request_data.text": "系统将准备一个压缩包，完成后通过站内通知提供下载链接。链接有效期为一天。"
+"flarum-gdpr.lib.request_data.title": "导出 {username} 的个人数据"
+"flarum-likes.forum.notifications.others_text": "其他同学"
+"flarum-likes.forum.notifications.post_liked_text": "{username} 赞了你的回复"
+"flarum-likes.forum.post.like_link": "赞"
+"flarum-likes.forum.post.liked_by_self_text": "{users} 觉得有帮助"
+"flarum-likes.forum.post.liked_by_text": "{users} 觉得有帮助"
+"flarum-likes.forum.post.others_link": "{count} 位同学"
+"flarum-likes.forum.post.unlike_link": "取消赞"
+"flarum-likes.forum.post.you_text": "你"
+"flarum-likes.forum.post_likes.load_more_button": "加载更多"
+"flarum-likes.forum.post_likes.title": "觉得有帮助的同学"
+"flarum-likes.forum.settings.notify_post_liked_label": "我的回复收到赞"
+"flarum-likes.forum.user.likes_link": "收到的赞"
+"flarum-lock.forum.badge.locked_tooltip": "已关闭回复"
+"flarum-lock.forum.discussion_controls.lock_button": "关闭回复"
+"flarum-lock.forum.discussion_controls.unlock_button": "开放回复"
+"flarum-lock.forum.notifications.discussion_locked_text": "{username} 关闭了讨论回复"
+"flarum-lock.forum.post_stream.discussion_locked_text": "{username} 关闭了回复，{time}"
+"flarum-lock.forum.post_stream.discussion_unlocked_text": "{username} 开放了回复，{time}"
+"flarum-lock.forum.settings.notify_discussion_locked_label": "我发起的讨论被关闭回复"
+"flarum-markdown.lib.composer.bold_tooltip": "加粗"
+"flarum-markdown.lib.composer.code_tooltip": "代码"
+"flarum-markdown.lib.composer.header_tooltip": "标题格式"
+"flarum-markdown.lib.composer.image_tooltip": "图片"
+"flarum-markdown.lib.composer.italic_tooltip": "斜体"
+"flarum-markdown.lib.composer.link_tooltip": "链接"
+"flarum-markdown.lib.composer.ordered_list_tooltip": "有序列表"
+"flarum-markdown.lib.composer.quote_tooltip": "引用"
+"flarum-markdown.lib.composer.spoiler_tooltip": "折叠内容"
+"flarum-markdown.lib.composer.strikethrough_tooltip": "删除线"
+"flarum-markdown.lib.composer.unordered_list_tooltip": "无序列表"
+"flarum-mentions.forum.composer.mention_tooltip": "提及用户或回复"
+"flarum-mentions.forum.composer.reply_to_post_text": "回复第 {number} 条"
+"flarum-mentions.forum.group_mention.deleted_text": "已移除的用户组"
+"flarum-mentions.forum.mentioned_by.load_more_button": "加载更多"
+"flarum-mentions.forum.mentioned_by.title": "对此回复的回应"
+"flarum-mentions.forum.notifications.group_mentioned_text": "{username} 提到了你所在的用户组"
+"flarum-mentions.forum.notifications.others_text": "其他同学"
+"flarum-mentions.forum.notifications.post_mentioned_text": "{username} 回复了你的内容"
+"flarum-mentions.forum.notifications.user_mentioned_text": "{username} 提到了你"
+"flarum-mentions.forum.post.mentioned_by_more_text": "还有 {count} 条回复"
+"flarum-mentions.forum.post.mentioned_by_self_text": "{users} 回复了你的内容"
+"flarum-mentions.forum.post.mentioned_by_text": "{users} 回复了此内容"
+"flarum-mentions.forum.post.others_text": "其他同学"
+"flarum-mentions.forum.post.quote_button": "引用"
+"flarum-mentions.forum.post.reply_link": "回复"
+"flarum-mentions.forum.post.you_text": "你"
+"flarum-mentions.forum.post_mention.deleted_text": "已移除的回复"
+"flarum-mentions.forum.settings.notify_group_mentioned_label": "有人提到了我所在的用户组"
+"flarum-mentions.forum.settings.notify_post_mentioned_label": "有人回复我的内容"
+"flarum-mentions.forum.settings.notify_user_mentioned_label": "有人提到了我"
+"flarum-mentions.forum.user.mentions_link": "提到我的内容"
+"flarum-messages.forum.composer.discard_confirmation": "消息尚未发送，确认放弃草稿？"
+"flarum-messages.forum.composer.placeholder": "写下消息……"
+"flarum-messages.forum.composer.recipients": "收件人"
+"flarum-messages.forum.composer.submit_button": "发送消息"
+"flarum-messages.forum.composer.to": "发送给："
+"flarum-messages.forum.dialog_list.load_more_button": "加载更多"
+"flarum-messages.forum.dialog_list.mark_as_read_tooltip": "标记已读"
+"flarum-messages.forum.dialog_list.title": "私信"
+"flarum-messages.forum.dialog_list.view_all": "查看全部私信"
+"flarum-messages.forum.dialog_section.back_label": "返回"
+"flarum-messages.forum.dialog_section.cannot_reply_text": "当前用户无法回复"
+"flarum-messages.forum.dialog_section.controls.details_button": "会话详情"
+"flarum-messages.forum.dialog_section.controls_toggle_label": "会话操作"
+"flarum-messages.forum.dialog_section.details_modal.created_at": "创建时间"
+"flarum-messages.forum.dialog_section.details_modal.recipients": "参与者"
+"flarum-messages.forum.dialog_section.details_modal.title": "会话详情"
+"flarum-messages.forum.header.dropdown_tooltip": "私信"
+"flarum-messages.forum.index.messages_link": "私信"
+"flarum-messages.forum.index_sort.latest_button": "最近活跃"
+"flarum-messages.forum.index_sort.newest_button": "最新消息"
+"flarum-messages.forum.index_sort.oldest_button": "最早消息"
+"flarum-messages.forum.message_controls.delete_button": "删除"
+"flarum-messages.forum.message_controls.delete_confirmation": "确认删除这条消息？此操作无法撤销。"
+"flarum-messages.forum.messages_page.cannot_send_message_button": "暂时无法发送私信"
+"flarum-messages.forum.messages_page.empty_text": "暂无私信"
+"flarum-messages.forum.messages_page.hero.subtitle": "与其他同学的私下交流"
+"flarum-messages.forum.messages_page.hero.title": "私信"
+"flarum-messages.forum.messages_page.mark_all_as_read_tooltip": "全部标记已读"
+"flarum-messages.forum.messages_page.refresh_tooltip": "刷新"
+"flarum-messages.forum.messages_page.send_message_button": "发送私信"
+"flarum-messages.forum.messages_page.stream.load_next_button": "加载后续消息"
+"flarum-messages.forum.messages_page.stream.load_previous_button": "加载更早消息"
+"flarum-messages.forum.messages_page.stream.start_of_the_conversation": "会话开始"
+"flarum-messages.forum.messages_page.stream.time_lapsed_text": "{period}后"
+"flarum-messages.forum.messages_page.title": "私信"
+"flarum-messages.forum.notifications.message_received_text": "{user} 发来了私信"
+"flarum-messages.forum.recipient_selection_modal.title": "选择收件人"
+"flarum-messages.forum.settings.notify_message_received_label": "收到新私信"
+"flarum-messages.forum.user_controls.cannot_reply_text": "当前用户无法回复"
+"flarum-messages.forum.user_controls.send_message_button": "发送私信"
+"flarum-messages.lib.dialog.title": "与 {username} 的私信"
+"flarum-nicknames.forum.change_nickname.submit_button": "保存修改"
+"flarum-nicknames.forum.change_nickname.title": "修改昵称"
+"flarum-nicknames.forum.settings.change_nickname_button": "修改昵称"
+"flarum-nicknames.forum.sign_up.nickname_placeholder": "昵称"
+"flarum-nicknames.ref.change_nickname": "修改昵称"
+"flarum-nicknames.ref.nickname": "昵称"
+"flarum-statistics.admin.statistics.discussions_heading": "讨论"
+"flarum-statistics.admin.statistics.loading": "加载中"
+"flarum-statistics.admin.statistics.posts_heading": "回复"
+"flarum-statistics.admin.statistics.users_heading": "用户"
+"flarum-sticky.forum.badge.sticky_tooltip": "置顶"
+"flarum-sticky.forum.discussion_controls.sticky_button": "置顶"
+"flarum-sticky.forum.discussion_controls.unsticky_button": "取消置顶"
+"flarum-sticky.forum.post_stream.discussion_stickied_text": "{username} 置顶了讨论，{time}"
+"flarum-sticky.forum.post_stream.discussion_unstickied_text": "{username} 取消了置顶，{time}"
+"flarum-subscriptions.forum.badge.following_tooltip": "已关注"
+"flarum-subscriptions.forum.badge.ignoring_tooltip": "已忽略"
+"flarum-subscriptions.forum.discussion_controls.follow_button": "关注"
+"flarum-subscriptions.forum.discussion_controls.unfollow_button": "取消关注"
+"flarum-subscriptions.forum.discussion_controls.unignore_button": "取消忽略"
+"flarum-subscriptions.forum.following.meta_title_text": "我关注的讨论"
+"flarum-subscriptions.forum.index.following_link": "我关注的讨论"
+"flarum-subscriptions.forum.notifications.new_post_text": "{username} 回复了你关注的讨论"
+"flarum-subscriptions.forum.settings.follow_after_create_label": "自动关注我发起的讨论"
+"flarum-subscriptions.forum.settings.follow_after_reply_label": "自动关注我回复的讨论"
+"flarum-subscriptions.forum.settings.notify_for_all_posts_label": "每条新回复都通知我"
+"flarum-subscriptions.forum.settings.notify_new_post_label": "关注的讨论有新回复"
+"flarum-subscriptions.forum.sub_controls.follow_button": "关注"
+"flarum-subscriptions.forum.sub_controls.following_button": "正在关注"
+"flarum-subscriptions.forum.sub_controls.following_text": "有新回复时接收通知。"
+"flarum-subscriptions.forum.sub_controls.ignoring_button": "已忽略"
+"flarum-subscriptions.forum.sub_controls.ignoring_text": "不接收通知，并从信息流隐藏。"
+"flarum-subscriptions.forum.sub_controls.not_following_button": "关注讨论"
+"flarum-subscriptions.forum.sub_controls.not_following_text": "只通知与你有关的回复。"
+"flarum-subscriptions.forum.sub_controls.notify_alert_tooltip": "讨论有新回复时接收站内通知"
+"flarum-subscriptions.forum.sub_controls.notify_email_tooltip": "讨论有新回复时接收邮件"
+"flarum-subscriptions.ref.follow": "关注"
+"flarum-subscriptions.ref.following": "我关注的讨论"
+"flarum-subscriptions.ref.ignoring": "已忽略"
+"flarum-suspend.forum.notifications.user_suspended_indefinite_text": "账号被无限期暂停使用"
+"flarum-suspend.forum.notifications.user_suspended_text": "账号被暂停使用 {timeReadable}"
+"flarum-suspend.forum.notifications.user_unsuspended_text": "账号已恢复使用"
+"flarum-suspend.forum.suspend_user.display_message": "向用户展示的说明"
+"flarum-suspend.forum.suspend_user.indefinitely_label": "无限期暂停"
+"flarum-suspend.forum.suspend_user.limited_time_days_text": " 天"
+"flarum-suspend.forum.suspend_user.limited_time_label": "指定暂停时长"
+"flarum-suspend.forum.suspend_user.not_suspended_label": "正常使用"
+"flarum-suspend.forum.suspend_user.placeholder_optional": "选填"
+"flarum-suspend.forum.suspend_user.reason": "处置理由"
+"flarum-suspend.forum.suspend_user.status_heading": "账号状态"
+"flarum-suspend.forum.suspend_user.submit_button": "保存修改"
+"flarum-suspend.forum.suspend_user.title": "暂停 {username} 的账号"
+"flarum-suspend.forum.suspension_info.dismiss_button": "关闭"
+"flarum-suspend.forum.suspension_info.indefinite": "账号被无限期暂停使用"
+"flarum-suspend.forum.suspension_info.limited": "账号暂停使用至 {date}"
+"flarum-suspend.forum.suspension_info.title": "账号暂时受限"
+"flarum-suspend.forum.user_badge.suspended_tooltip": "账号受限"
+"flarum-suspend.forum.user_controls.suspend_button": "暂停账号"
+"flarum-tags.admin.basics.tags_label": "全部板块"
+"flarum-tags.admin.edit_tag.color_label": "颜色"
+"flarum-tags.admin.edit_tag.icon_label": "图标"
+"flarum-tags.admin.edit_tag.name_label": "名称"
+"flarum-tags.admin.edit_tag.name_placeholder": "名称"
+"flarum-tags.admin.edit_tag.submit_button": "保存修改"
+"flarum-tags.admin.nav.tags_button": "全部板块"
+"flarum-tags.admin.settings.button_text": "选择板块"
+"flarum-tags.forum.all_tags.meta_description_text": "校园板块一览"
+"flarum-tags.forum.all_tags.meta_title_text": "全部板块"
+"flarum-tags.forum.choose_tags.edit_title": "修改「{title}」的板块"
+"flarum-tags.forum.choose_tags.title": "为讨论选择板块"
+"flarum-tags.forum.composer_discussion.choose_tags_link": "选择板块"
+"flarum-tags.forum.discussion_controls.edit_tags_button": "修改板块"
+"flarum-tags.forum.header.back_to_tags_tooltip": "返回板块列表"
+"flarum-tags.forum.index.more_link": "更多板块"
+"flarum-tags.forum.index.tags_link": "全部板块"
+"flarum-tags.forum.index.untagged_link": "未分类"
+"flarum-tags.forum.post_stream.added_and_removed_tags_text": "{username} 添加了 {tagsAdded} 并移除了 {tagsRemoved}，{time}"
+"flarum-tags.forum.post_stream.added_tags_text": "{username} 添加了 {tagsAdded}，{time}"
+"flarum-tags.forum.post_stream.removed_tags_text": "{username} 移除了 {tagsRemoved}，{time}"
+"flarum-tags.forum.post_stream.tags_text": "{tags}"
+"flarum-tags.forum.tag.meta_description_text": "{tag} 板块的讨论"
+"flarum-tags.lib.deleted_tag_text": "已删除板块"
+"flarum-tags.lib.tag_selection_modal.bypass_requirements": "跳过板块数量要求"
+"flarum-tags.lib.tag_selection_modal.choose_primary_placeholder": "还需选择 {count} 个主板块"
+"flarum-tags.lib.tag_selection_modal.choose_secondary_placeholder": "还需选择 {count} 个板块"
+"flarum-tags.lib.tag_selection_modal.choose_tags_placeholder": "还需选择 {count} 个板块"
+"flarum-tags.lib.tag_selection_modal.submit_button": "确定"
+"flarum-tags.lib.tag_selection_modal.title": "选择板块"
+"flarum-tags.ref.choose_tags": "选择板块"
+"flarum-tags.ref.choose_tags_placeholder": "还需选择 {count} 个板块"
+"flarum-tags.ref.name": "名称"
+"flarum-tags.ref.tags": "全部板块"
+core.forum.security.token_item_title: '{title} - {token}'
+core.forum.security.token_title_placeholder: '/'
+core.lib.error.circular_dependencies_message: '扩展存在循环依赖：{extensions}。请停用其中一个扩展后重试。'
+core.lib.error.dependent_extensions_message: '请先停用依赖扩展 {extensions}，再停用 {extension}。'
+core.lib.error.extension_initialiation_failed_message: '{extension} 初始化失败，请查看浏览器控制台了解详情。'
+core.lib.error.extension_runtime_failed_message: '{extension} 运行出错，请查看浏览器控制台了解详情。'
+core.lib.gambits.group_keys.allows: 'allows'
+core.lib.gambits.group_keys.has: 'has'
+core.lib.gambits.group_keys.is: 'is'
+core.lib.gambits.discussions.author.key: 'author'
+core.lib.gambits.discussions.author.hint: '用户名，多个用户名用英文逗号分隔'
+core.lib.gambits.discussions.created.key: 'created'
+core.lib.gambits.discussions.created.hint: '日期或日期范围，例如 2026-10-01..2026-10-31'
+core.lib.gambits.discussions.hidden.key: 'hidden'
+core.lib.gambits.discussions.unread.key: 'unread'
+core.lib.gambits.posts.discussion.key: 'discussion'
+core.lib.gambits.posts.discussion.hint: '主题编号'
+core.lib.gambits.users.email.key: 'email'
+core.lib.gambits.users.email.hint: '电子邮箱地址'
+core.lib.gambits.users.group.key: 'group'
+core.lib.gambits.users.group.hint: '用户组名称'
+core.lib.number_suffix.kilo_text: '千'
+core.lib.number_suffix.mega_text: '百万'
+core.views.admin.extensions.disable: '停用'
+core.views.admin.extensions.empty: '尚未安装扩展'
+core.views.admin.extensions.enable: '启用'
+core.views.admin.extensions.name: '扩展名称'
+core.views.admin.extensions.package_name: '软件包名称'
+core.views.admin.extensions.version: '版本'
+core.views.admin.info.caption: '应用信息'
+core.views.admin.title: '管理后台'
+core.views.confirm_email.text: '点击下方按钮，确认你的电子邮箱。'
+core.views.log_out.log_out_confirmation: '确定退出 {forum} 吗？'
+core.views.reset_password.confirm_password_label: '确认新密码'
+core.views.reset_password.new_password_label: '新密码'
+core.views.unsubscribe_email.title: '确认退订'
+core.views.unsubscribe_email.return_to_forum: '返回 {forumTitle}'
+core.views.unsubscribe_email.confirm_button: '确认'
+core.views.unsubscribe_email.immediate_helptext: '确认后立即停止接收此类邮件通知。'
+core.views.unsubscribe_email.confirm_message: '你正在退订 {forumTitle} 的「{type}」邮件通知。'
+core.views.unsubscribe_email.success_message: '已退订 {forumTitle} 的「{type}」通知。若要重新接收，请[修改设置]({settingsLink})。'
+core.views.unsubscribe_email.invalid_message: '退订链接无效或已使用。若要修改 {forumTitle} 的邮件通知，请[查看设置]({settingsLink})。'
+core.ref.custom_footer_text: '在页面底部显示自定义 HTML。'
+core.ref.custom_footer_title: '编辑自定义页脚'
+core.ref.custom_header_text: '在 Flarum 顶栏上方显示自定义 HTML。'
+core.ref.custom_header_title: '编辑自定义页首'
+core.ref.icon_text: '填写 Font Awesome 图标类名及前缀，例如 fas fa-flag。'
+core.ref.you: '你'
+flarum-approval.ref.awaiting_approval: '等待审核'
+flarum-audit.lib.browser.discussion.approved: '审核通过 {discussion}'
+flarum-audit.lib.browser.post.approved: '审核通过 {postuser} 在 {discussion} 的 {post}'
+flarum-audit.forum.link.all-audit: '审计日志'
+flarum-audit.forum.link.discussion-audit: '主题审计日志'
+flarum-audit.forum.link.user-audit: '账号变更日志'
+flarum-audit.forum.link.actor-audit: '操作日志'
+flarum-audit.forum.modal.all-title: '审计日志'
+flarum-audit.forum.modal.discussion-title: '主题审计日志'
+flarum-audit.forum.modal.user-title: '账号审计日志'
+flarum-audit.forum.modal.actor-title: '操作审计日志'
+flarum-audit.lib.browser.filterPlaceholder: '筛选日志'
+flarum-audit.lib.browser.filterApply: '应用'
+flarum-audit.lib.browser.filterClear: '清除筛选'
+flarum-audit.lib.browser.refresh: '刷新'
+flarum-audit.lib.browser.filtersHint: '筛选条件：'
+flarum-audit.lib.browser.filters.actor: '执行操作的用户；actor:guest 表示系统或未登录操作。'
+flarum-audit.lib.browser.filters.user: '受影响用户的用户名。'
+flarum-audit.lib.browser.filters.action: '操作类型，例如 action:post.created。'
+flarum-audit.lib.browser.filters.client: '请求使用的客户端类型。'
+flarum-audit.lib.browser.filters.ip: '请求来源 IP 地址。'
+flarum-audit.lib.browser.filters.discussion: '受影响主题的编号。'
+flarum-audit.lib.browser.help.toggle: '搜索帮助'
+flarum-audit.lib.browser.help.multiple: '用英文逗号组合多个值，例如 action:post.created,post.deleted。'
+flarum-audit.lib.browser.help.negate: '用减号排除匹配项，例如 -client:cli。'
+flarum-audit.lib.browser.empty: '没有找到日志'
+flarum-audit.lib.browser.loadMore: '加载更多'
+flarum-audit.lib.browser.withoutActor: '访客或系统'
+flarum-audit.lib.browser.deletedResource.discussion: '主题 #{id}'
+flarum-audit.lib.browser.deletedResource.group: '用户组 #{id}'
+flarum-audit.lib.browser.deletedResource.post: '帖子 #{id}'
+flarum-audit.lib.browser.deletedResource.tag: '标签 #{id}'
+flarum-audit.lib.browser.deletedResource.user: '用户 #{id}'
+flarum-audit.lib.browser.genericResource.comment: '回复'
+flarum-audit.lib.browser.genericResource.post: '帖子'
+flarum-audit.lib.browser.permissionGroup.everyone: '所有人'
+flarum-audit.lib.browser.permissionGroup.members: '注册用户'
+flarum-audit.lib.browser.noValue: '（未填写）'
+flarum-audit.lib.browser.noReason: '（未填写原因）'
+flarum-audit.lib.browser.core: '核心'
+flarum-audit.lib.browser.client.session: '网页会话'
+flarum-audit.lib.browser.client.api_key: 'API 密钥'
+flarum-audit.lib.browser.client.access_token: '访问令牌'
+flarum-audit.lib.browser.client.cli: '命令行'
+flarum-audit.lib.browser.client.unknown: '未知客户端'
+flarum-audit.lib.browser.controls.title: '操作'
+flarum-audit.lib.browser.controls.hideRaw: '隐藏原始日志'
+flarum-audit.lib.browser.controls.showRaw: '查看原始日志'
+flarum-audit.lib.browser.controls.filterActor: '查看此用户的操作'
+flarum-audit.lib.browser.controls.filterIp: '查看此 IP 的日志'
+flarum-audit.lib.browser.controls.filterClient: '查看此类客户端的日志'
+flarum-audit.lib.browser.controls.filterAction: '查看同类操作'
+flarum-audit.lib.browser.controls.filterUser: '查看影响此用户的日志'
+flarum-audit.lib.browser.controls.filterDiscussion: '查看此主题的日志'
+flarum-audit.lib.browser.audit_log_cleared: '清除了 {deleted_count} 条审计日志'
+flarum-audit.lib.browser.cache_cleared: '手动清理了缓存'
+flarum-audit.lib.browser.developer_token_created: '为 {username} 创建了开发令牌「{title}」'
+flarum-audit.lib.browser.discussion.created: '发布了主题 {discussion}'
+flarum-audit.lib.browser.discussion.deleted: '删除了主题 {discussion}'
+flarum-audit.lib.browser.discussion.hidden: '隐藏了主题 {discussion}'
+flarum-audit.lib.browser.discussion.renamed: '将主题「{old_title}」改名为「{new_title}」'
+flarum-audit.lib.browser.discussion.restored: '恢复了主题 {discussion}'
+flarum-audit.lib.browser.extension.disabled: '停用了扩展 {package}'
+flarum-audit.lib.browser.extension.enabled: '启用了扩展 {package}'
+flarum-audit.lib.browser.extension.uninstalled: '卸载了扩展 {package}'
+flarum-audit.lib.browser.queue.paused: '暂停了 {connection} 的队列 {queue}'
+flarum-audit.lib.browser.queue.resumed: '恢复了 {connection} 的队列 {queue}'
+flarum-audit.lib.browser.group.created: '创建了用户组 {name}'
+flarum-audit.lib.browser.group.deleted: '删除了用户组 {name}'
+flarum-audit.lib.browser.group.renamed: '将用户组「{old_name}」改名为「{new_name}」'
+flarum-audit.lib.browser.permission_changed: '将权限 {permission} 从 {old_groups} 调整为 {new_groups}'
+flarum-audit.lib.browser.post.created: '在 {discussion} 发布了 {post}'
+flarum-audit.lib.browser.post.deleted: '删除了 {postuser} 在 {discussion} 的 {post}'
+flarum-audit.lib.browser.post.hidden: '隐藏了 {postuser} 在 {discussion} 的 {post}'
+flarum-audit.lib.browser.post.restored: '恢复了 {postuser} 在 {discussion} 的 {post}'
+flarum-audit.lib.browser.post.revised: '修改了 {postuser} 在 {discussion} 的 {post}'
+flarum-audit.lib.browser.setting_changed: '修改了设置 {key}'
+flarum-audit.lib.browser.setting_changed_with_values: '将设置 {key} 从 {old_value} 调整为 {new_value}'
+flarum-audit.lib.browser.settings_reset: '重置了扩展 {extension} 的设置 {keys}'
+flarum-audit.lib.browser.user.activated: '手动激活了 {username} 的账号'
+flarum-audit.lib.browser.user.activated_with_email: '{username} 通过邮件激活了账号'
+flarum-audit.lib.browser.user.avatar_changed: '修改了 {username} 的头像'
+flarum-audit.lib.browser.user.avatar_removed: '移除了 {username} 的头像'
+flarum-audit.lib.browser.user.created: '创建了 {username} 的账号'
+flarum-audit.lib.browser.user.deleted: '删除了用户 {username}'
+flarum-audit.lib.browser.user.email_changed: '将 {username} 的邮箱从 {old_email} 修改为 {new_email}'
+flarum-audit.lib.browser.user.email_change_requested: '{username} 申请将邮箱修改为 {new_email}'
+flarum-audit.lib.browser.user.groups_changed: '将 {username} 的用户组从 {old_groups} 调整为 {new_groups}'
+flarum-audit.lib.browser.user.logged_in: '{username} 登录了账号'
+flarum-audit.lib.browser.user.logged_in_with_provider: '{username} 通过 {provider} 登录了账号'
+flarum-audit.lib.browser.user.logged_out: '{username} 退出了账号'
+flarum-audit.lib.browser.user.password_changed: '{username} 修改了密码'
+flarum-audit.lib.browser.user.password_change_requested: '{username} 申请修改密码'
+flarum-audit.lib.browser.user.password_reset_attempted: '{username} 申请重置密码'
+flarum-audit.lib.browser.user.password_reset_attempted_unmatched: '邮箱 {email} 申请重置密码，但没有对应账号'
+flarum-audit.lib.browser.user.provider_connected: '{username} 关联了 {provider}'
+flarum-audit.lib.browser.user.username_changed: '将 {username} 的用户名从 {old_username} 修改为 {new_username}'
+flarum-flags.ref.flag_post: '举报帖子'
+flarum-flags.ref.flagged_posts: '已举报帖子'
+flarum-audit.lib.browser.post.dismissed_flags: '清除了 {postuser} 在 {discussion} 的 {post} 的举报'
+flarum-audit.lib.browser.post.flagged: '以「{reason}」举报了 {postuser} 在 {discussion} 的 {post}'
+flarum-likes.lib.gambits.posts.likedBy.key: 'likedBy'
+flarum-likes.lib.gambits.posts.likedBy.hint: '用户编号或用户名'
+flarum-lock.lib.gambits.discussions.locked.key: 'locked'
+flarum-audit.lib.browser.discussion.locked: '锁定了主题 {discussion}'
+flarum-audit.lib.browser.discussion.unlocked: '解锁了主题 {discussion}'
+flarum-mentions.lib.gambits.posts.mentioned.key: 'mentioned'
+flarum-mentions.lib.gambits.posts.mentioned.hint: '被提及用户的编号或用户名'
+flarum-nicknames.forum.edit_user.nicknames_heading: '修改昵称'
+flarum-nicknames.forum.edit_user.nicknames_text: '昵称'
+flarum-audit.lib.browser.user.nickname_changed: '将 {username} 的昵称从 {old_nickname} 修改为 {new_nickname}'
+flarum-sticky.lib.gambits.discussions.sticky.key: 'sticky'
+flarum-sticky.ref.sticky: '置顶'
+flarum-audit.lib.browser.discussion.stickied: '置顶了主题 {discussion}'
+flarum-audit.lib.browser.discussion.unstickied: '取消了主题 {discussion} 的置顶'
+flarum-subscriptions.lib.gambits.discussions.subscription.following_key: 'following'
+flarum-subscriptions.lib.gambits.discussions.subscription.ignoring_key: 'ignoring'
+flarum-suspend.lib.gambits.users.suspended.key: 'suspended'
+flarum-audit.lib.browser.user.suspended: '封禁了 {username}，截止 {until}'
+flarum-audit.lib.browser.user.unsuspended: '解除了 {username} 的封禁'
+flarum-tags.lib.gambits.discussions.tag.key: 'tag'
+flarum-tags.lib.gambits.discussions.tag.hint: '标签名称，多个标签用英文逗号分隔；untagged 表示无标签'
+flarum-audit.lib.browser.discussion.tagged: '将 {discussion} 的标签从 {old_tags} 调整为 {new_tags}'
+flarum-audit.lib.browser.tag.created: '创建了标签 {tag}'
+flarum-audit.lib.browser.tag.updated: '修改了标签 {tag}'
+flarum-audit.lib.browser.tag.deleted: '删除了标签 {tag}'
+flarum-gdpr.lib.data.avatar.delete_description: '删除文件系统中的用户头像。'
+flarum-gdpr.lib.data.avatar.export_description: '将用户头像文件加入导出包。'
+flarum-gdpr.lib.data.discussions.export_description: '导出用户发布的主题标题和创建时间。'
+flarum-gdpr.lib.data.forum.export_description: '导出论坛名称、网址、用户名、邮箱和当前日期。'
+flarum-gdpr.lib.data.default_user_action: '由默认用户数据处理流程执行。'
+flarum-gdpr.lib.data.no_action: '不执行操作。'
+flarum-gdpr.lib.data.posts.anonymize_description: '移除用户所有帖子的 IP 地址。'
+flarum-gdpr.lib.data.posts.delete_description: '删除用户发布的所有帖子。'
+flarum-gdpr.lib.data.posts.export_description: '导出用户帖子的内容、创建时间、IP 地址和主题编号。'
+flarum-gdpr.lib.data.tokens.delete_description: '删除用户创建的所有令牌。'
+flarum-gdpr.lib.data.tokens.export_description: '导出令牌创建时间与类型。'
+flarum-gdpr.lib.data.user.anonymize_description: '清空可空字段，将必填字段设置为默认值或占位值，重置密码与偏好并移除用户组。'
+flarum-gdpr.lib.data.user.delete_description: '从数据库删除用户。'
+flarum-gdpr.lib.data.user.export_description: '导出用户表数据，排除编号和密码。'
+flarum-audit.lib.browser.user.gdpr_erasure_requested: '{username} 申请清除个人数据'
+flarum-audit.lib.browser.user.gdpr_erasure_confirmed: '{username} 确认清除个人数据'
+flarum-audit.lib.browser.user.gdpr_erasure_cancelled: '{username} 取消清除个人数据'
+flarum-audit.lib.browser.user.gdpr_anonymized: '匿名化了 {username} 的个人数据'
+flarum-audit.lib.browser.user.gdpr_deleted: '清除了 {username} 的个人数据'
+flarum-audit.lib.browser.user.gdpr_exported: '导出了 {username} 的个人数据'
+flarum-realtime.forum.push.discussion-list-new-activity: '查看 {count} 个有更新的主题'
+flarum-realtime.forum.push.discussion-list-new-activity-with-auto-release: '{count} 个主题有更新，将在 {releaseTimeout} 秒后显示。点击立即查看。'
+flarum-realtime.forum.typing-indicator.anonymous-user: '匿名用户'
+flarum-realtime.forum.typing-indicator.hidden-user: '{username}（隐藏）'
+flarum-realtime.forum.typing-indicator.people-are-typing: '{number} 人正在输入'
+flarum-realtime.forum.typing-indicator.users-are-typing: '{users} 等用户正在输入'
+flarum-realtime.forum.typing-indicator.no-activity: '暂无用户正在输入'
+flarum-realtime.forum.index-typing.someone-typing: '有人正在回复此主题'
+flarum-realtime.forum.index-typing.someone-typing-tag: '有人正在此分区输入'
+flarum-realtime.forum.user.settings.heading: '实时更新'
+flarum-realtime.forum.user.settings.typing-indicator-type.help: '开启后显示正在输入的用户名；关闭后只显示人数。'
+flarum-realtime.forum.user.settings.typing-indicator-type.label: '显示正在输入的用户'

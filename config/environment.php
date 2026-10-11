@@ -16,7 +16,10 @@ if ($production && (parse_url($url, PHP_URL_SCHEME) !== 'https' || getenv('APP_D
 if ($production) {
     require __DIR__.'/release.php';
 }
-date_default_timezone_set(getenv('TZ') ?: 'UTC');
+// Flarum stores unzoned database timestamps in UTC. A local PHP timezone
+// makes Eloquent reinterpret those values and shifts API dates by eight hours.
+// TZ can still configure the host/container; browser display uses local time.
+date_default_timezone_set('UTC');
 return [
     'debug' => !$production && getenv('APP_DEBUG') === 'true',
     'database' => [

@@ -14,13 +14,14 @@
 | MariaDB | 11.4.13 LTS | Compose 私有网络 / Windows 便携版 |
 | Nginx | 1.30.1 | Compose Web 服务；Windows 替代方案不使用 Nginx |
 | Flarum | 核心 2.0.0-rc.8 | `^2.0.0-rc.8` + 精确 `composer.lock`，沿用上游 beta + prefer-stable |
+| Node / npm | 22.18.0 / 10.x | `package-lock.json` 固定前端构建与浏览器验收工具 |
 
 Flarum 官方安装要求见 [2.x 安装指南](https://docs.flarum.org/install/)。项目启用 curl、dom、fileinfo、gd、json、mbstring、openssl、pdo_mysql、tokenizer、zip，并增加 intl、OPcache（容器）。官方 Composer 安装及现有骨架兼容，Web 根目录固定为 `public/`。RC 开发与正式生产边界见 [ADR 001](decisions/001-runtime.md)。
 
 ## 方案一：Docker（Windows / macOS / Linux）
 
 1. 安装 Git、Python 和 Docker；Windows 启用 Docker Desktop 的 Linux 容器后端。启动 Docker 引擎并确认当前账号有权限。无需安装宿主 PHP 或 MariaDB。
-2. 克隆仓库并进入根目录。Phase 0 尚未合并时，执行 `git switch codex/phase0-infrastructure`；合并后使用默认 `2.x` 分支。
+2. 克隆仓库并进入根目录。本轮 PR 尚未合并时，执行 `git switch codex/phases1-12`；合并后使用默认 `2.x` 分支。
 3. 检查和初始化：
 
 ```console
@@ -62,6 +63,8 @@ python scripts/forum.py --backend native healthcheck
 
 `bootstrap-native` 下载并校验运行时到 `.tools/`，不修改系统 PATH、不安装服务、不创建公网数据库监听。重复运行验证缓存，版本不符时拒绝覆盖已安装工具。PHP CA 文件从操作系统信任库导出，不关闭 TLS 校验。
 
+Windows 便携 PHP 启用官方 OPcache（含 CLI 内置开发服务器），每次请求检查源码时间戳，PHP 修改无需手动重启。同步此配置时运行 `bootstrap-native` 后重启项目 Web 服务；数据库数据保持不变。这减少 PHP 编译开销，列表查询仍须独立测量优化。
+
 PHP 监听 `127.0.0.1:8080`，MariaDB 监听 `127.0.0.1:3307`。脚本将 `DB_HOST/DB_PORT` 转换为本机值，因此 `.env.example` 中 Docker 的 `db:3306` 不会误用于 Windows。修改数据库端口用 `NATIVE_DB_PORT`。停止等待 MariaDB 进程真实退出，避免重启时文件锁冲突。
 
 Windows PHP 不在 PATH 属于正常情况，所有命令由脚本选择 `.tools/php/php.exe`。不要在此方案与 Docker 之间切换同一工作区的运行数据；它们使用不同的数据库和文件存储。需要迁移时参照 [备份恢复](backup-recovery.md)。
@@ -97,7 +100,7 @@ python scripts/forum.py healthcheck
 
 Windows 给这些命令加 `--backend native`。更换 PHP/数据库镜像前阅读变更说明；不要自动删除数据卷以修复启动问题。上游依赖新增迁移时先备份，再按部署文档手动运行 `php flarum migrate` 和清缓存。
 
-业务开发放在独立 Flarum 扩展或 `extend.php`，禁止改 `vendor/flarum/core`。自定义扩展先说明包名、支持的 Flarum 版本、存储路径与权限，再使用 Composer path repository 开发；本阶段未创建业务扩展，Node/npm 构建也未引入。
+业务扩展 `ucasser/flarum-campus` 位于 `extensions/campus`，通过 Composer path repository 加载，禁止改 vendor。Node 22.18.0 和 npm 10.x 构建自己的前端；提交源文件与 `js/dist`，不提交 node_modules。更新此包时不升级原仓库官方依赖。
 
 提交前执行：
 
@@ -118,6 +121,55 @@ python -m unittest discover -s tests -p "test_*.py" -v
 - 下载慢：本次 GitHub zip 下载曾超时，Composer 最终完成。保留缓存和锁文件重试 `setup`，不更换未核实的镜像源、不关闭 HTTPS。
 - MariaDB 无法连接：检查 `.runtime/db.log`、端口和 PID 状态；查看 `.runtime/last-error.log`。已有数据库的密码不会因修改 `.env` 自动变化，应恢复原配置或明确执行凭据轮换。
 - HTTP 500：先查看 `storage/logs/`、PHP 日志、环境桥接、文件权限和数据库。默认关闭向浏览器显示详细错误。
+- 全新安装的资源目录：setup 和 install 会执行 `scripts/prepare-runtime.php`，补齐运行缓存及锁定 Flarum 2 RC 包中被归档省略的空前端目录。依赖内容和版本不变，运行账户无需写入 vendor；更新依赖后重新执行 setup。
 - `.runtime/last-error.log` 只记录最近一次错误，已知秘密会脱敏；转发日志前仍应审查个人信息。Windows 原始 Web 日志可能包含查询参数，`logs` 命令会隐藏它们。
 
 本次机器检查与已验证范围详见 [verification.md](verification.md)。
+
+## 业务初始化、迁移与前端
+
+首次 Flarum 安装后执行：
+
+```console
+npm ci
+npm run build
+python scripts/campus.py enable
+python scripts/campus.py migrate
+python scripts/campus.py seed
+```
+
+Windows 的 Python 命令加 `--backend native`。已有数据库在 migrate 前 backup。enable 使用官方 ExtensionManager，启用校园扩展与已安装的 audit、nicknames、GDPR；migrate 执行真实迁移、补齐缺失分区/角色/分类并清缓存。seed 仅开发使用，补齐十个普通讨论、四类结构化示例和示例课程，不清空已有内容。
+
+拉取业务更新后按顺序执行 npm ci、npm run build、forum.py setup、备份、campus.py migrate，再刷新页面。两个锁文件固定精确版本，不执行全量 composer update。升级失败保留现场，按 [部署](deployment.md) 的新数据库恢复策略回滚，不能重跑 installer 或删除卷。
+
+后台 Extensions 下的「校园公共社区」配置分区、分类、验证和授权；课程与治理管理员入口在对应论坛页面。路径见 [features.md](features.md)，验收见 [testing.md](testing.md)。
+
+## 本地邮件
+
+另一终端执行 `python scripts/dev_mail.py --backend native`；Docker 用 `--backend docker`。打开 `http://127.0.0.1:8026`，刷新查看最近 30 封纯文本邮件并复制确认/重置链接。邮件不向外部投递、不写日志或磁盘，停止后清除。
+
+工具临时同步 Flarum SMTP；Ctrl+C 恢复旧设置。异常终止后相同命令加 `--restore`，私有 `.runtime/dev-mail/saved.json` 不得提交。SMTP 端口为 8025；Docker 容器通过 host.docker.internal 连接宿主，因此 SMTP 绑定所有网卡，仅用于受控开发网络。Native SMTP 和邮箱读取页面都仅监听回环地址。
+
+正式 SMTP 在后台配置真实服务，实际发送确认与重置后验收，不能把本地捕获成功视为正式外发成功。
+
+## 同步深度定制界面
+
+本机与团队统一沿用 `composer.lock` 中的 Flarum 2.0.0-rc.8 和 `package-lock.json`，不升级官方包。拉取 PR #2 分支后执行构建、备份和 `campus.py migrate`（Windows 加 `--backend native`），再刷新浏览器。setup 会幂等补齐中文、蓝色及分区图标的首次默认值；已有管理员定制的语言、颜色和图标保留。
+
+首页和顶栏、各板块列表、详情及发布都建立在 Flarum 原生组件上。入口和组件说明见 [native-ui.md](native-ui.md)。修改 JS 后运行 `npm run build`，修改 LESS/语言/扩展注册后清缓存；`campus.py migrate` 包含 setup 和清缓存。提交 `js/dist` 和源码、LESS、语言文件，不能只提交本机 assets 缓存。
+
+浏览器测试与接口权限验收顺序执行。前者使用原生中文辅助标签，覆盖十个板块、320/390/768px、深色主题、硬刷新摘要、上下文发布和失败后重试；测试会写入带「【示例】」的开发内容。
+
+## 资料目录与可读的演示数据
+
+PR #3 的资料目录已整合进校园原生页面。已有实例先备份，按锁文件安装依赖后执行 `python scripts/enable_resources.py --backend native`。Docker 使用 `--backend docker`；脚本使用本地开发管理员的私有密码文件，不打印密码。目录入口在资料板块与侧栏，具体维护流程见 [resources.md](resources.md)。
+
+需要更接近真实帖子的信息流时执行：
+
+```console
+python scripts/demo.py --backend native
+```
+
+脚本通过原生 API 建立六个普通演示账号、十板块共 50 条有正文的内容、27 条回复及一个采纳，课程评分来自实际演示评价，不伪造计数。昵称、正文末尾和课程名注明演示，避免与真实公告或口碑混淆；不提供演示账号的登录密码。运行记录存入数据库设置，重复运行不会增加同一批帖子。日期以首次生成时间为基准，不自动修改既有内容。
+
+如需整理反复验收产生的混乱帖子，可加 `--tidy-tests`。该选项先生成完整私有备份，再通过原生 API 软隐藏明确匹配既有测试标题及测试作者的讨论；不删除账号、回复或修改历史，不影响其他真实帖子。管理员可在原生隐藏列表中恢复。此命令仅允许开发环境，CI 和生产初始化均不自动执行。

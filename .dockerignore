@@ -10,3 +10,6 @@ storage
 public/assets
 config.php
 __pycache__
+node_modules
+test-results
+playwright-report

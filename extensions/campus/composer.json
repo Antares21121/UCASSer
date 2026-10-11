@@ -1,0 +1,10 @@
+{
+  "name": "ucasser/flarum-campus",
+  "description": "Campus community information, knowledge and learning experience",
+  "type": "flarum-extension",
+  "version": "0.1.0",
+  "license": "MIT",
+  "require": {"flarum/core": "^2.0.0-rc.8", "flarum/tags": "^2.0.0-rc.8", "flarum/subscriptions": "^2.0.0-rc.8", "flarum/suspend": "^2.0.0-rc.8"},
+  "autoload": {"psr-4": {"UCASSer\\Campus\\": "src/"}},
+  "extra": {"flarum-extension": {"title": "校园公共社区", "icon": {"name": "fas fa-graduation-cap", "backgroundColor": "#176d72", "color": "#fff"}}}
+}
