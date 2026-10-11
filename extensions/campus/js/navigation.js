@@ -15,7 +15,8 @@ export function pagination({
   hasNext,
   href,
   busy = false,
-  label = '信息流分页'
+  label = '信息流分页',
+  unit = '条'
 }) {
   const last = total == null ? null : Math.max(1, Math.ceil(total / size));
   const current = Math.max(1, Number(page) || 1);
@@ -34,7 +35,7 @@ export function pagination({
     'aria-busy': busy
   }, [m('span.Campus-paginationCount', {
     role: 'status'
-  }, total == null ? `第 ${current} 页` : `共 ${total} 条 · 第 ${current} / ${last} 页`), m('div.Campus-paginationControls', [control(current - 1, '上一页', '上一页', current === 1), ...numbers.flatMap((n, i) => [i && n > numbers[i - 1] + 1 ? m('span.Campus-paginationEllipsis', {
+  }, total == null ? `第 ${current} 页` : `共 ${total} ${unit} · 第 ${current} / ${last} 页`), m('div.Campus-paginationControls', [control(current - 1, '上一页', '上一页', current === 1), ...numbers.flatMap((n, i) => [i && n > numbers[i - 1] + 1 ? m('span.Campus-paginationEllipsis', {
     'aria-hidden': 'true'
   }, '…') : null, control(n, String(n), `第 ${n} 页`)]), control(current + 1, '下一页', '下一页', last ? current >= last : !hasNext)])]);
 }

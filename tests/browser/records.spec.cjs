@@ -55,7 +55,7 @@ test('publish, preview, edit and comment on a real persisted information record'
   await page.getByLabel('具体说明（仅本人和获授权人员可见）').fill('【示例】请补充公开活动来源。');
   await page.getByRole('button',{name:'提交反馈',exact:true}).click();
   await expect(page.locator('.Campus-nativeRecord')).toContainText('请补充公开活动来源');
-  await page.locator('.Campus-nativeRecord summary').click();
+  await page.locator('.Campus-nativeRecord').getByText('内容反馈与处理',{exact:true}).click();
   await page.getByLabel('处理说明',{exact:true}).fill('【示例】已核验并补充公开来源。');
   await page.getByRole('button',{name:'保存反馈处理',exact:true}).click();
   await expect(page.locator('.Campus-nativeRecord')).toContainText('已核验并补充公开来源');

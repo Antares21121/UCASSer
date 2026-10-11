@@ -250,7 +250,7 @@ class CampusAdmin extends ExtensionPage {
     return [m('h2', '近期操作审计'), m('p.Campus-lead', '仅管理员可见。近期记录用于核对操作与理由，不公开个人材料。'), m('ul.Campus-list', this.audit.map(r => m('li', [m('strong', names[r.action] || r.action), m('small', time(r.created_at) + ' · 操作者 #' + (r.actor_id || '已移除') + ' · 对象 ' + r.target), m('p.Campus-text', r.reason || '无补充理由')]))), this.audit.length ? null : m('p.Campus-empty', '暂无审计记录。')];
   }
   content() {
-    return m('div.Campus.Campus-admin', [m('header.Campus-pageHeader', [m('div', [m('p.Campus-eyebrow', 'UCASSer / 社区管理'), m('h1', '校园公共社区'), m('p.Campus-lead', '清晰的分区、必要的权限和可追溯的管理操作。')])]), m('nav.Campus-adminTabs', {
+    return m('div.Campus.Campus-admin', [m('header.Campus-pageHeader', [m('div', [m('h1', '校园公共社区'), m('p.Campus-lead', '清晰的分区、必要的权限和可追溯的管理操作。')])]), m('nav.Campus-adminTabs', {
       role: 'tablist',
       'aria-label': '校园管理模块'
     }, tabs.map(([key, title], i) => m(Button, {

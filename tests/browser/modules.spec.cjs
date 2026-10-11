@@ -12,6 +12,26 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
   await require('./helpers.cjs').login(page,'phase0_admin',fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim());
   const marker = Date.now();
   await page.goto('/campus/courses');
+  await expect(page.locator('.CampusBoardHero h1')).toHaveText('课程目录');
+  await expect(page.locator('.Campus-courseCard').first()).toBeVisible();
+  await expect(page.locator('.Campus-pageHeader .Campus-eyebrow,.CampusBoardHero .Campus-boardEyebrow')).toHaveCount(0);
+  for(const width of [320,507,1440]){
+    await page.setViewportSize({width,height:651});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+    if(width<768)expect((await page.locator('.Campus-courseCard').first().boundingBox()).y).toBeLessThan(651);
+  }
+  const originalName=await page.locator('.Campus-courseCard h2').first().innerText();
+  await page.getByLabel('搜索课程名称',{exact:true}).fill(originalName);
+  await page.getByRole('button',{name:'查询课程',exact:true}).click();
+  await expect(page.locator('.Campus-courseCard h2').first()).toContainText(originalName);
+  await page.getByRole('link',{name:'清空筛选',exact:true}).click();
+  await expect(page.getByLabel('搜索课程名称',{exact:true})).toHaveValue('');
+  await page.getByLabel('课程类型',{exact:true}).fill('基础课程');
+  await page.getByRole('button',{name:'查询课程',exact:true}).click();
+  await page.locator('.IndexPage-newDiscussion').click();
+  await expect(page.locator('#composer').getByLabel('关联课程')).toBeVisible();
+  await page.locator('#composer').getByRole('button',{name:'关闭编辑器',exact:true}).click();
+  await page.goto('/campus/courses');
   await page.getByRole('button', {
     name: '添加课程',
     exact: true

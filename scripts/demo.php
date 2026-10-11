@@ -101,7 +101,8 @@ if (($argv[1] ?? '') === 'tidy-tests') {
     // preserves users, replies, revisions and audit trails; real posts stay intact.
     $patterns = ['/^【示例】.*：欢迎参与公共知识维护$/u', '/^【示例】(校园公共知识分享活动|公开笔记索引与授权说明|如何共同维护校园公共知识？|公共知识导论学习体验)$/u',
         '/^【示例】(校园分享活动|公开学习指南|如何寻找校园指南|问答整理后的指南|课程体验分享|通知与个人中心|分页检索|浏览器活动验收|原生界面重试|浏览器举报上下文|浏览器评价)( |$)/u',
-        '/^【示例】浏览器 (resource|question) \d+$/u', '/^【示例】普通讨论检索 [a-f0-9]{10}$/u'];
+        '/^【示例】浏览器 (resource|question) \d+$/u', '/^【示例】普通讨论检索 [a-f0-9]{10}$/u',
+        '/^【示例】详情布局验收 (news|careers|academic|life|market|resources|courses|questions|chat|governance)(-(activity|internship|lecture|help|market|travel|notes|experience|study|other))? \d{13}$/u'];
     $protected = array_column(array_filter($manifest, fn($row) => isset($row['discussion_id'])), 'discussion_id');
     foreach (Flarum\Discussion\Discussion::query()->whereNull('hidden_at')->with('user')->where('title','like','【示例】%')->get() as $discussion) {
         $username = $discussion->user?->username ?? '';

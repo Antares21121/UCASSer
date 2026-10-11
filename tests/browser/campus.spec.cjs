@@ -37,8 +37,8 @@ test('homepage, header, tag list and discussion use original Flarum components o
 });
 
 test('native campus search stays usable without access to the course section',async({page})=>{
-  let courseRequests=0;
-  await page.route('**/api/campus/catalog',async route=>{const response=await route.fetch(),body=await response.json();body.data.sections=body.data.sections.filter(s=>s.key!=='courses');await route.fulfill({response,json:body});});
+  let courseRequests=0,catalogRequests=0;
+  await page.route('**/api/campus/catalog',async route=>{catalogRequests++;const response=await route.fetch(),body=await response.json();body.data.sections=body.data.sections.filter(s=>s.key!=='courses');await route.fulfill({response,json:body});});
   await page.route('**/api/campus/courses*',route=>{courseRequests++;return route.fulfill({status:403,json:{errors:[]}});});
   await page.goto('/campus/search');
   await expect(page.getByRole('heading',{name:'详细检索',exact:true})).toBeVisible();
@@ -50,6 +50,38 @@ test('native campus search stays usable without access to the course section',as
   await page.locator('.IndexPage-toolbar').getByRole('button',{name:'最新发布',exact:true}).click();
   await expect(page.getByLabel('内容类型',{exact:true})).toHaveValue('resource');
   await expect(page.locator('.DiscussionListItem').first()).toHaveClass(/Campus-row--resources/);
+  expect(catalogRequests).toBe(1);
+  await page.goto('/campus/records?type=information');
+  await expect(page.locator('.CampusBoardHero')).toContainText('校园信息');
+  await expect(page.locator('.Campus-pageHeader .Campus-eyebrow,.CampusBoardHero .Campus-boardEyebrow')).toHaveCount(0);
+  await expect(page.locator('.Campus-nativeFilters .Campus-pageHeader')).toHaveCount(0);
+  await expect(page.locator('.DiscussionListItem').first()).toBeVisible();
+  for(const width of [320,475,768,1440]){
+    await page.setViewportSize({width,height:651});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),width+' reflow').toBeTruthy();
+    if(width<768){
+      const positions=await page.locator('.Campus-searchOptions .Campus-field').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().top));
+      expect(Math.abs(positions[0]-positions[1])).toBeLessThan(2);
+      const bar=await page.locator('.Campus-searchBar').boundingBox(),options=await page.locator('.Campus-searchOptions').boundingBox();
+      expect(bar.width).toBeGreaterThan(width-80);
+      expect(options.y).toBeGreaterThanOrEqual(bar.y+bar.height);
+      expect((await page.locator('.DiscussionListItem').first().boundingBox()).y).toBeLessThan(651);
+    }
+  }
+  const title=await page.locator('.DiscussionListItem-title').first().innerText();
+  await page.getByLabel('搜索标题、正文与标签',{exact:true}).fill(title);
+  await page.getByRole('button',{name:'查询',exact:true}).click();
+  await expect.poll(()=>page.locator('.DiscussionListItem-title').allTextContents()).toEqual([title]);
+  await page.getByRole('link',{name:'清空筛选',exact:true}).click();
+  await expect(page.getByLabel('搜索标题、正文与标签',{exact:true})).toHaveValue('');
+  await page.locator('.Campus-searchAdvanced summary').click();
+  await page.getByLabel('发布起始日期',{exact:true}).fill('2030-01-01');
+  await page.getByRole('button',{name:'应用更多筛选',exact:true}).click();
+  await expect(page).toHaveURL(/from=2030-01-01/);
+  await expect(page.locator('.DiscussionListItem')).toHaveCount(0);
+  await expect(page.locator('.Campus-searchAdvanced summary')).toContainText('1');
+  await page.getByRole('link',{name:'清空筛选',exact:true}).click();
+  await expect(page.locator('.DiscussionListItem').first()).toBeVisible();
   expect(courseRequests).toBe(0);
   await page.unrouteAll({behavior:'wait'});
 });

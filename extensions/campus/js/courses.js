@@ -1,7 +1,9 @@
 import app from 'flarum/forum/app';
 import Button from './button';
-import { DataPage, api, field, link, labels } from './records';
-import { pageHeading, emptyState } from './ui';
+import { DataPage, api, field, link } from './records';
+import { emptyState, symbol } from './ui';
+import { BoardHero, boards } from './boards';
+import { pagination } from './navigation';
 const fields = {
   name: '课程名称',
   type: '课程类型',
@@ -36,22 +38,50 @@ export default class CoursesPage extends DataPage {
         assessment: '',
         resources: '',
         reason: ''
-      }
+      },
+      className: 'Button Button--link',
+      icon: 'fas fa-plus'
     }, '添加课程') : null;
-    return [pageHeading('课程评价与学习经验', '使用正常账号分享体验。均值仅来自可见、未撤回的评价，少量样本不能代表课程全貌。', addCourse), m('form.Campus-panel.Campus-filterGrid', {
+    const advancedCount = ['grade', 'review_semester'].filter(key => this.filters[key]).length;
+    return [m('section.Campus-nativeFilters.Campus-courseFilters', {
+      'aria-label': '筛选课程'
+    }, m('form.Campus-searchForm', {
       onsubmit: e => {
         e.preventDefault();
-        m.route.set('/campus/courses', this.filters);
+        m.route.set('/campus/courses', {
+          ...this.filters,
+          page: 1
+        });
       }
-    }, Object.entries(this.filters).map(([k, v]) => field(k, k === 'search' ? '搜索课程名称' : k === 'review_semester' ? '统计评价学期（留空统计全部）' : fields[k], v, value => this.filters[k] = value)).concat(m(Button, {
-      type: 'submit'
-    }, '查询课程'), link('/campus/courses', '清空筛选'))), ...this.courses.map(c => m('article.Campus-panel.Campus-courseCard', [m('h2', c.name), m('p.Campus-meta', [c.type, c.grade, c.semester, c.nature].filter(Boolean).join(' · ')), c.assessment ? m('p', '考核方式：' + c.assessment) : null, c.resources ? m('p', '资源：' + c.resources) : null, m('div.Campus-badges', [m('span.Campus-badge', `有效样本 ${c.samples} 条`)]), m('div.Campus-stats', Object.entries(c.scores).map(([k, v]) => m('div.Campus-stat', [m('strong', v === null ? '—' : Number(v).toFixed(2)), m('span', {
+    }, [m('div.Campus-searchBar', [m('label.Campus-searchInput', [m('span.sr-only', '搜索课程名称'), symbol('search'), m('input.FormControl', {
+      name: 'search',
+      type: 'search',
+      placeholder: '搜索课程名称',
+      value: this.filters.search,
+      oninput: e => this.filters.search = e.target.value
+    })]), m(Button, {
+      type: 'submit',
+      className: 'Button Button--primary'
+    }, '查询课程')]), m('div.Campus-searchOptions', ['type', 'semester'].map(key => field(key, fields[key], this.filters[key], value => this.filters[key] = value, {
+      placeholder: key === 'type' ? '全部类型' : '全部学期'
+    }))), m('div.Campus-searchRefinements', [m('details.Campus-searchAdvanced', [m('summary', [symbol('sliders-h'), '更多筛选', advancedCount ? m('span.Campus-badge', advancedCount) : null]), m('div.Campus-searchAdvancedFields', [field('grade', '适用年级', this.filters.grade, value => this.filters.grade = value, {
+      placeholder: '全部年级'
+    }), field('review_semester', '统计评价学期', this.filters.review_semester, value => this.filters.review_semester = value, {
+      placeholder: '留空统计全部学期'
+    })]), m('small.Campus-hint', '统计评价学期只影响评分样本，不限制开课学期。'), m(Button, {
+      type: 'submit',
+      className: 'Button Button--primary'
+    }, '应用更多筛选')]), link('/campus/courses', '清空筛选', {
+      className: 'Button Button--link Campus-searchReset'
+    })])])), m('div.Campus-courseResults', [m('p', {
+      role: 'status'
+    }, `共 ${this.meta.total} 门课程`), addCourse]), m('p.Campus-hint.Campus-courseScope', this.definitions.sample), ...this.courses.map(c => m('article.Campus-panel.Campus-courseCard', [m('header.Campus-courseHeading', [m('h2', c.name), m('span.Campus-badge', `${c.samples} 条有效评价`)]), m('p.Campus-meta', [c.type, c.grade, c.semester, c.nature].filter(Boolean).join(' · ')), m('div.Campus-stats', Object.entries(c.scores).map(([k, v]) => m('div.Campus-stat', [m('span', {
       title: this.definitions[k]
     }, {
       overall: '总体体验',
       difficulty: '难度',
       workload: '工作量'
-    }[k]), m('small.Campus-hint', this.definitions[k])]))), m('p.Campus-hint', this.definitions.sample), m('div.Campus-actions', [link('/campus/records?type=review&course_id=' + c.id + (this.filters.review_semester ? '&semester=' + encodeURIComponent(this.filters.review_semester) : ''), '查看评价', {
+    }[k]), m('strong', v === null ? '—' : Number(v).toFixed(2)), v === null ? null : m('small', ' / 5')]))), c.assessment || c.resources ? m('details.Campus-courseDetails', [m('summary', '考核与相关资源'), c.assessment ? m('p.Campus-text', '考核方式：' + c.assessment) : null, c.resources ? m('p.Campus-text', '资源：' + c.resources) : null]) : null, m('div.Campus-actions', [link('/campus/records?type=review&course_id=' + c.id + (this.filters.review_semester ? '&semester=' + encodeURIComponent(this.filters.review_semester) : ''), '查看评价', {
       className: 'Button'
     }), app.session.user ? link('/campus/publish?type=review&course_id=' + c.id + '&semester=' + encodeURIComponent(this.filters.review_semester || c.semester), '发布评价', {
       className: 'Button Button--primary'
@@ -60,15 +90,17 @@ export default class CoursesPage extends DataPage {
         ...c,
         reason: ''
       }
-    }, '编辑课程') : null])), this.courses.length ? null : emptyState('暂无匹配课程', '请调整筛选条件，或联系课程维护人员添加记录。', link('/campus/courses', '清空筛选')), this.meta.total > 20 ? m('nav.Campus-pagination', {
-      'aria-label': '课程分页'
-    }, [Number(this.meta.page) > 1 ? link('/campus/courses?' + new URLSearchParams({
-      ...m.route.param(),
-      page: Number(this.meta.page) - 1
-    }), '上一页') : null, Number(this.meta.page) * 20 < this.meta.total ? link('/campus/courses?' + new URLSearchParams({
-      ...m.route.param(),
-      page: Number(this.meta.page) + 1
-    }), '下一页') : null]) : null, this.form ? m('form.Campus-panel', {
+    }, '编辑课程') : null])), this.courses.length ? null : emptyState('暂无匹配课程', '请调整筛选条件，或联系课程维护人员添加记录。', link('/campus/courses', '重置课程筛选')), this.meta.total > this.meta.page_size ? pagination({
+      page: this.meta.page,
+      total: this.meta.total,
+      size: this.meta.page_size,
+      unit: '门课程',
+      label: '课程分页',
+      href: page => '/campus/courses?' + new URLSearchParams({
+        ...this.params,
+        page
+      })
+    }) : null, this.form ? m('form.Campus-panel', {
       oncreate: v => {
         v.dom.scrollIntoView({
           block: 'start'
@@ -103,5 +135,19 @@ export default class CoursesPage extends DataPage {
       type: 'button',
       onclick: () => this.form = null
     }, '取消编辑')]) : null];
+  }
+  hero() {
+    return m(BoardHero, {
+      board: {
+        ...boards.courses,
+        title: '课程目录',
+        tabs: undefined,
+        secondary: undefined,
+        action: '浏览课程评价',
+        actionIcon: 'fas fa-arrow-right',
+        subtitle: '按课程查找学习经验，参考同学分享的评价与建议。'
+      },
+      publish: () => m.route.set('/t/campus-courses')
+    });
   }
 }

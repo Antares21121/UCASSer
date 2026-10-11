@@ -20,7 +20,7 @@ import Button from './button';
 import { labels } from './records';
 import { DataPage, api, field, link, pageHeading, emptyState, symbol, formatTime, errorMessage, loginPrompt, shell } from './ui';
 import { PersonalPage as Collections } from './personal';
-import { boards, routeBoard, boardParams, recordOverview, registerBoards } from './boards';
+import { boards, BoardHero, routeBoard, boardKey, boardParams, recordOverview, registerBoards } from './boards';
 const icons = {
   news: 'bullhorn',
   careers: 'briefcase',
@@ -47,7 +47,7 @@ const campusFilters = () => {
     ...m.route.param()
   };
 };
-const currentType = () => campusFilters().type || {
+const currentType = () => (m.route.get().split('?')[0] === '/campus/courses' ? 'review' : campusFilters().type) || {
   'campus-resources': 'resource',
   'campus-questions': 'question',
   'campus-courses': 'review'
@@ -279,11 +279,19 @@ export class NativeRecordsPage extends IndexPage {
     delete this.filters.filter;
     this.loadCatalog();
   }
-  async loadCatalog() {
+  async loadCatalog(retry = false) {
     this.catalogLoading = true;
     this.catalogError = '';
     try {
-      this.catalog = (await api('catalog')).data;
+      const cached = app.cache.campusCatalog;
+      const response = !retry && cached?.data ? {
+        data: cached.data
+      } : !retry && cached?.promise ? await cached.promise : await api('catalog');
+      if (!response?.data) throw new Error('Catalog unavailable');
+      this.catalog = response.data;
+      app.cache.campusCatalog = {
+        data: this.catalog
+      };
     } catch (e) {
       this.catalogError = errorMessage(e, '筛选选项加载失败，请重试。');
     } finally {
@@ -295,14 +303,45 @@ export class NativeRecordsPage extends IndexPage {
     app.setTitle(m.route.get().startsWith('/campus/search') ? '详细检索' : labels[currentType()] || '校园内容');
   }
   hero() {
-    return null;
+    const search = m.route.get().startsWith('/campus/search'),
+      type = currentType();
+    const base = {
+      resource: boards.resources,
+      question: boards.questions,
+      review: boards.courses
+    }[type];
+    const board = search ? {
+      icon: 'search',
+      title: '详细检索',
+      kind: 'search',
+      subtitle: '从校园讨论中找到答案，按内容类型与时间进一步筛选。'
+    } : {
+      ...base,
+      icon: base?.icon || 'bullhorn',
+      title: labels[type] || '校园内容',
+      kind: base?.kind || 'calendar',
+      tabs: undefined,
+      subtitle: base?.subtitle || '汇集校园资讯、活动与机会，快速找到与你有关的信息。',
+      action: type ? '发布' + labels[type] : undefined
+    };
+    return m(BoardHero, {
+      board,
+      publish: () => openCampusComposer({
+        type
+      }).catch(e => app.alerts.show({
+        type: 'error'
+      }, errorMessage(e)))
+    });
   }
   contentItems() {
     const items = super.contentItems(),
       search = m.route.get().startsWith('/campus/search'),
       type = currentType();
-    const select = (label, name, options) => m('label.Campus-field', [m('span', label), m('select.FormControl', {
+    const selectedType = this.filters.type || type;
+    const select = (label, name, options) => m('label.Campus-field', [m('span.Campus-fieldLabel', label), m('select.FormControl', {
       'aria-label': label,
+      name,
+      disabled: name !== 'type' && !this.catalog,
       value: this.filters[name] || '',
       onchange: e => {
         this.filters[name] = e.target.value;
@@ -312,21 +351,18 @@ export class NativeRecordsPage extends IndexPage {
       }
     }, [m('option', {
       value: ''
-    }, '全部'), ...options.map(([value, title]) => m('option', {
+    }, name !== 'type' && this.catalogLoading ? '正在加载…' : '全部' + label), ...options.map(([value, title]) => m('option', {
       value
     }, title))])]);
-    items.add('campus-filters', m('div.Campus.Campus-nativeFilters', [pageHeading(search ? '详细检索' : labels[type] || '校园内容', '查找所需信息，按分类、状态和时间缩小范围。', type ? m(Button, {
-      className: 'Button Button--primary',
-      onclick: () => openCampusComposer({
-        type
-      }).catch(e => app.alerts.show({
-        type: 'error'
-      }, errorMessage(e)))
-    }, '发布' + labels[type]) : null), this.catalogError ? m('p', {
+    const dates = ['from', 'to', 'deadline_from', 'deadline_to', 'starts_from', 'starts_to'];
+    const advancedCount = ['course_id', 'semester', ...dates].filter(key => this.filters[key]).length;
+    items.add('campus-filters', m('section.Campus.Campus-nativeFilters', {
+      'aria-label': '筛选校园内容'
+    }, [this.catalogError ? m('p.Campus-notice.is-error', {
       role: 'alert'
     }, [this.catalogError, m(Button, {
-      onclick: () => this.loadCatalog()
-    }, '重新加载')]) : null, m('form.Campus-filterGrid', {
+      onclick: () => this.loadCatalog(true)
+    }, '重新加载')]) : null, m('form.Campus-searchForm', {
       onsubmit: e => {
         e.preventDefault();
         m.route.set(search ? '/campus/search' : '/campus/records', {
@@ -334,21 +370,30 @@ export class NativeRecordsPage extends IndexPage {
           page: 1
         });
       }
-    }, [field('search', '搜索标题、正文与标签', this.filters.q || this.filters.search || '', v => {
-      this.filters.q = v;
-      delete this.filters.search;
-    }, {
-      type: 'search'
-    }), search ? select('内容类型', 'type', Object.entries({
+    }, [m('div.Campus-searchBar', [m('label.Campus-searchInput', [m('span.sr-only', '搜索标题、正文与标签'), symbol('search'), m('input.FormControl', {
+      type: 'search',
+      name: 'q',
+      placeholder: '搜索标题、正文与标签',
+      value: this.filters.q || this.filters.search || '',
+      oninput: e => {
+        this.filters.q = e.target.value;
+        delete this.filters.search;
+      }
+    })]), m(Button, {
+      type: 'submit',
+      className: 'Button Button--primary'
+    }, '查询')]), m('div.Campus-searchOptions', {
+      className: search ? 'Campus-searchOptions--global' : ''
+    }, [search ? select('内容类型', 'type', Object.entries({
       discussion: '普通讨论',
       information: '校园信息',
       resource: '共享资料',
       question: '校园问答',
       review: '课程评价'
-    })) : null, this.catalog ? select('分类', 'category', Object.entries(this.catalog.categories[this.filters.type || type] || {})) : null, this.catalog ? select('状态', 'status', (this.catalog.states[this.filters.type || type] || []).map(s => [s, labels[s]])) : null, m('details.Campus-filters', [m('summary', '更多筛选'), field('course_id', '关联课程编号', this.filters.course_id, v => this.filters.course_id = v, {
+    })) : null, select('分类', 'category', Object.entries(this.catalog?.categories[selectedType] || {})), select('状态', 'status', (this.catalog?.states[selectedType] || []).map(s => [s, labels[s]]))]), m('div.Campus-searchRefinements', [m('details.Campus-searchAdvanced', [m('summary', [symbol('sliders-h'), '更多筛选', advancedCount ? m('span.Campus-badge', advancedCount) : null]), m('div.Campus-searchAdvancedFields', [field('course_id', '关联课程编号', this.filters.course_id, v => this.filters.course_id = v, {
       type: 'number',
       min: 1
-    }), field('semester', '评价学期', this.filters.semester, v => this.filters.semester = v), ...['from', 'to', 'deadline_from', 'deadline_to', 'starts_from', 'starts_to'].map(k => field(k, {
+    }), field('semester', '评价学期', this.filters.semester, v => this.filters.semester = v), ...dates.map(k => field(k, {
       from: '发布起始日期',
       to: '发布结束日期',
       deadline_from: '截止起始日期',
@@ -357,9 +402,12 @@ export class NativeRecordsPage extends IndexPage {
       starts_to: '活动结束日期'
     }[k], this.filters[k], v => this.filters[k] = v, {
       type: 'date'
-    })), m('small', '日期筛选沿用接口的 UTC 自然日。')]), m('div.Campus-actions', [m(Button, {
-      type: 'submit'
-    }, '查询'), link(search ? '/campus/search' : '/campus/records?type=' + type, '清空筛选')])])]), 110);
+    }))]), m('small.Campus-hint', '日期范围按 UTC 自然日筛选。'), m(Button, {
+      type: 'submit',
+      className: 'Button Button--primary'
+    }, '应用更多筛选')]), link(search ? '/campus/search' : '/campus/records?type=' + type, '清空筛选', {
+      className: 'Button Button--link Campus-searchReset'
+    })])])]), 110);
     return items;
   }
 }
@@ -539,7 +587,12 @@ class RecordDetails extends Component {
   }
   view() {
     const d = this.data || this.attrs.record;
-    return m('section.Campus.Campus-nativeRecord', [this.error ? m('p', {
+    const key = boardKey(this.attrs.discussion, d);
+    if (key === 'chat' && !app.session.user && !this.error) return null;
+    return m('section.Campus.Campus-nativeRecord', {
+      className: 'Campus-nativeRecord--' + (boards[key]?.kind || d.type),
+      'aria-label': key === 'chat' ? '讨论收藏与反馈' : '内容详情'
+    }, [this.error ? m('p', {
       role: 'alert'
     }, [this.error, m(Button, {
       onclick: () => this.load()
@@ -692,10 +745,12 @@ export function registerNative() {
   }, '发布'), 5));
   extend(IndexSidebar.prototype, 'items', items => {
     const board = routeBoard(),
-      button = items.get('newDiscussion');
-    if (board?.type && button) {
-      button.children = [board.action];
-      button.attrs['aria-label'] = board.action;
+      button = items.get('newDiscussion'),
+      type = currentType(),
+      action = board?.type ? board.action : labels[type] ? '发布' + labels[type] : null;
+    if (action && button) {
+      button.children = [action];
+      button.attrs['aria-label'] = action;
       button.attrs.icon = 'fas fa-plus';
     }
   });
@@ -754,25 +809,27 @@ export function registerNative() {
     const board = routeBoard();
     if (board?.type) return openCampusComposer(boardParams(board));
     const type = currentType();
-    return type ? openCampusComposer({
+    return labels[type] ? openCampusComposer({
       type
     }) : original();
   });
   extend(IndexPage.prototype, 'oninit', function () {
     if (!app.cache.campusCatalog) {
-      app.cache.campusCatalog = {
+      const pending = app.cache.campusCatalog = {
         loading: true
       };
-      api('catalog').then(r => {
+      pending.promise = api('catalog').then(r => {
         app.cache.campusCatalog = {
           data: r.data
         };
         m.redraw();
+        return r;
       }).catch(() => {
         app.cache.campusCatalog = {
           error: true
         };
         m.redraw();
+        return null;
       });
     }
   });

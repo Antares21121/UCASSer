@@ -35,6 +35,101 @@
 .Header,.CampusBoardHero,.IndexPage .DiscussionList,
 .IndexPage-nav.sideNav,.Campus-nativeRecord { background:var(--campus-surface); }
 .Campus-nativeExplore { background:transparent; }
+// Detail structure follows the board's task, on top of the native PostStream.
+.Campus-detailHeading { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px; }
+.Campus-detailHeading h2 { flex:1; min-width:0; font-size:16px; line-height:1.5; margin:0; color:var(--campus-ink); overflow-wrap:anywhere; }
+.Campus-detailHeadingIcon { display:grid; place-items:center; width:32px; height:32px; border-radius:9px; background:var(--campus-soft); color:var(--campus-link); font-size:15px; }
+.Campus-detailHeading .Campus-badges { margin:0; }
+.Campus-detailGroup { border-color:var(--campus-divider); }
+.Campus-detailFacts { gap:10px 16px; line-height:1.65; }
+.Campus-detailFacts .Button,.Campus-detailMore summary { color:var(--campus-link); }
+.Campus-nativeRecord .Campus-detailFacts .Button { min-height:32px; }
+.Campus-detailMore summary { min-height:44px; display:list-item; padding:12px 0; }
+.Campus-detailSpotlight { display:flex; gap:14px; align-items:flex-start; padding:16px; border-radius:10px; background:var(--campus-soft); margin-bottom:16px; }
+.Campus-detailSpotlight>.icon { margin-top:5px; font-size:18px; color:var(--campus-link); }
+.Campus-detailSpotlight>div { min-width:0; }
+.Campus-detailSpotlight span { display:block; font-size:12px; color:var(--campus-muted); margin-bottom:5px; }
+.Campus-detailSpotlight strong { font-size:16px; font-weight:600; color:var(--campus-ink); overflow-wrap:anywhere; white-space:pre-wrap; }
+.Campus-applicationLead { display:flex; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px; }
+.Campus-applicationLead:empty { display:none; }
+.Campus-applicationLead .Campus-detailSpotlight { flex:1; margin:0; min-width:200px; }
+.Campus-calendarFacts { background:var(--campus-soft); border:0; padding:16px; border-radius:10px; margin-bottom:16px; }
+.Campus-calendarFacts .Campus-detailFacts { grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px 16px; }
+.Campus-calendarFacts dt { grid-row:1; }
+.Campus-calendarFacts dd { grid-row:2; font-weight:600; }
+.Campus-market--trade .Campus-detailSpotlight { border-left:3px solid var(--campus-link); }
+.Campus-market--travel .Campus-tripTimes { padding:16px; border-radius:10px; background:var(--campus-soft); border:0; margin-bottom:16px; }
+.Campus-market--travel .Campus-detailSpotlight { background:transparent; padding:0 0 16px; margin:0; border-bottom:1px solid var(--campus-divider); border-radius:0; }
+.Campus-market--travel .Campus-detailSpotlight+.Campus-detailGroup { border-top:0; }
+.Campus-detailSchedule { list-style:none; padding:0 0 0 14px; margin:0 0 18px 4px; border-left:2px solid var(--campus-divider); }
+.Campus-detailSchedule li { position:relative; padding:0 0 18px 10px; display:flex; flex-direction:column; gap:4px; }
+.Campus-detailSchedule li:last-child { padding-bottom:0; }
+.Campus-detailSchedule li:before { content:''; position:absolute; width:8px; height:8px; left:-19px; top:6px; border-radius:50%; background:var(--campus-link); border:2px solid var(--campus-surface); }
+.Campus-detailSchedule span { font-size:12px; color:var(--campus-muted); }
+.Campus-detailSchedule time { font-size:14px; font-weight:600; color:var(--campus-ink); }
+.Campus-nativeRecord--help,.Campus-nativeRecord--market,.Campus-nativeRecord--notice { border-left:3px solid var(--campus-link); }
+.Campus-nativeRecord--conversation { background:transparent; border:0; padding:0; margin-bottom:14px; box-shadow:none; }
+.Campus-nativeRecord--conversation>.Campus-actions { border:0; padding-top:0; }
+.Campus-nativeRecord>.Campus-actions .Button { min-height:44px; }
+.Campus-nativeRecord--document .Campus-resourceAccess { padding:14px; background:var(--campus-soft); border-radius:10px; }
+.Campus-nativeRecord--review .Campus-reviewMetrics .Campus-rating { background:var(--campus-soft); }
+.Campus-nativeRecord--review .Campus-reviewMetrics .Campus-rating>strong { color:var(--campus-link); }
+@media(max-width:767px) {
+  .Campus-detailFacts { grid-template-columns:minmax(0,104px) minmax(0,1fr); gap:10px 12px; }
+  .Campus-calendarFacts .Campus-detailFacts { grid-template-columns:minmax(0,80px) minmax(0,1fr); }
+  .Campus-calendarFacts dt,.Campus-calendarFacts dd { grid-row:auto; }
+  .Campus-detailHeading { gap:8px; }
+  .Campus-detailHeading .Campus-badges { flex-basis:100%; padding-left:40px; }
+}
+.IndexPage .Campus-nativeFilters,.Campus .Campus-nativeFilters {
+  padding:16px; margin:0 0 12px; border:1px solid var(--campus-divider);
+  border-radius:12px; background:var(--campus-surface);
+}
+.Campus-searchForm { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:10px 18px; align-items:end; }
+.Campus-searchBar { display:flex; align-items:center; gap:8px; min-width:0; }
+.Campus-searchInput { position:relative; flex:1; min-width:0; margin:0; }
+.Campus-searchInput>.fas { position:absolute; left:13px; top:15px; font-size:14px; color:var(--campus-muted); pointer-events:none; }
+.Campus-searchInput .FormControl { padding-left:36px; }
+.Campus-nativeFilters .FormControl { --transition:border-color .15s; height:44px; min-width:0; max-width:100%; padding-top:10px; padding-bottom:10px; font-size:14px; line-height:22px; border-radius:8px; }
+.Campus-searchBar>.Button { height:44px; flex:none; min-width:64px; padding:10px 14px; border-radius:8px; font-size:14px; }
+.Campus-searchOptions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.Campus-searchOptions--global { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.Campus-nativeFilters .Campus-field { margin:0; min-width:0; }
+.Campus-nativeFilters .Campus-fieldLabel { margin:0 0 5px; font-size:12px; line-height:18px; color:var(--campus-muted); font-weight:500; }
+.Campus-searchRefinements { grid-column:~"1 / -1"; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 12px; align-items:start; }
+.Campus-searchAdvanced>summary { display:flex; align-items:center; gap:8px; width:fit-content; min-height:44px; cursor:pointer; list-style:none; font-size:13px; color:var(--campus-muted); }
+.Campus-searchAdvanced>summary::-webkit-details-marker { display:none; }
+.Campus-searchAdvanced>summary::after { content:'\203a'; display:inline-block; font-size:20px; transform:rotate(90deg); }
+.Campus-searchAdvanced[open]>summary::after { transform:rotate(-90deg); }
+.Campus-searchAdvanced[open] { grid-column:~"1 / -1"; }
+.Campus-searchAdvancedFields { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px 12px; padding:12px 0; border-top:1px solid var(--campus-divider); }
+.Campus-nativeFilters .Campus-searchReset { min-height:44px; padding:11px 0; font-size:13px; background:transparent; color:var(--campus-muted); }
+.Campus-searchReset:hover,.Campus-searchAdvanced>summary:hover { color:var(--campus-link); }
+.Campus-courseResults { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:14px 0 6px; }
+.Campus-courseResults p { margin:0; font-size:13px; color:var(--campus-muted); }
+.Campus-courseResults .Button { min-height:44px; }
+.Campus-courseScope { margin:0 0 16px; font-size:12px; line-height:1.7; }
+.Campus-courseHeading { display:flex; align-items:flex-start; gap:12px; }
+.Campus-courseHeading h2 { flex:1; min-width:0; font-size:18px; line-height:1.5; margin:0; overflow-wrap:anywhere; }
+.Campus-courseHeading .Campus-badge { flex:none; font-size:11px; margin-top:3px; }
+.Campus-courseCard { border-top:1px solid var(--campus-divider); }
+.Campus-courseCard .Campus-meta { margin:8px 0 0; font-size:12px; }
+.Campus-courseCard .Campus-stat { background:var(--campus-soft); padding:12px; }
+.Campus-courseCard .Campus-stat strong { color:var(--campus-link); font-size:23px; margin-top:4px; }
+.Campus-courseCard .Campus-stat small { color:var(--campus-muted); font-size:11px; }
+.Campus-courseDetails { margin:12px 0; font-size:13px; }
+.Campus-courseDetails>summary { cursor:pointer; color:var(--campus-muted); min-height:32px; }
+.Campus-courseCard .Campus-actions .Button { min-height:44px; }
+.Campus-courseFilters .Campus-searchAdvancedFields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+@media(max-width:1199px) {
+  .Campus-searchForm { grid-template-columns:minmax(0,1fr); }
+  .Campus-searchAdvancedFields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:767px) {
+  .IndexPage .Campus-nativeFilters,.Campus .Campus-nativeFilters { padding:12px; border-radius:10px; }
+  .Campus-searchOptions--global { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .Campus-searchOptions--global>.Campus-field:first-child { grid-column:~"1 / -1"; }
+}
 // The tags extension sets white contrast text for its original saturated hero.
 // Our softer hero must override the paired foreground and label variables too.
 .DiscussionHero,.DiscussionHero.DiscussionHero--colored {

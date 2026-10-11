@@ -96,7 +96,7 @@ export const field = (name, label, value, onchange, options = {}) => {
     ...attrs
   }), hint ? m('small.Campus-hint', hint) : null]);
 };
-export const pageHeading = (title, description, actions) => m('header.Campus-pageHeader', [m('div', [m('p.Campus-eyebrow', 'UCASSer / 校园公共社区'), m('h1', title), description ? m('p.Campus-lead', description) : null]), actions ? m('div.Campus-actions', actions) : null]);
+export const pageHeading = (title, description, actions) => m('header.Campus-pageHeader', [m('div', [m('h1', title), description ? m('p.Campus-lead', description) : null]), actions ? m('div.Campus-actions', actions) : null]);
 export const emptyState = (title, description, action) => m('div.Campus-empty', [symbol('seedling'), m('strong', title), m('p', description), action]);
 export const loginPrompt = (title = '登录后继续', description = '使用你的账号发布、收藏内容，并查看属于自己的记录。') => m('section.Campus-panel.Campus-gate', [symbol('user-circle'), m('h1', title), m('p', description), m('div.Campus-actions', [m(Button, {
   className: 'Button Button--primary',
@@ -107,6 +107,7 @@ export const loginPrompt = (title = '登录后继续', description = '使用你�
 }, '创建账号') : null]), link('/campus', '返回校园首页')]);
 export const shell = (page, content) => m(PageStructure, {
   className: 'CampusPage',
+  hero: page.hero ? page.hero.bind(page) : undefined,
   sidebar: () => m(IndexSidebar)
 }, m('div.Campus', [page.notice ? m('div.Campus-notice', {
   role: page.noticeError ? 'alert' : 'status',
@@ -122,7 +123,7 @@ const routeTitles = {
   '/campus/cases': '举报、处理与申诉',
   '/campus/identity': '校园身份与权限',
   '/campus/moderation': '分区内容维护',
-  '/campus/courses': '课程评价与学习经验',
+  '/campus/courses': '课程目录',
   '/campus/search': '全站搜索与发现',
   '/campus/governance': '公开治理与志愿维护',
   '/campus/rules': '社区公约与治理'
