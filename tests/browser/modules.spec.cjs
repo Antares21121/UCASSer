@@ -9,18 +9,7 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
   test.setTimeout(120000);
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
-  await page.goto('/campus');
-  await page.getByRole('button', {
-    name: 'Log In',
-    exact: true
-  }).first().click();
-  await page.locator('input[name="identification"]').fill('phase0_admin');
-  await page.locator('input[name="password"]').fill(fs.readFileSync('.runtime/admin-initial-password.txt', 'utf8').trim());
-  await page.locator('.LogInModal').getByRole('button', {
-    name: 'Log In',
-    exact: true
-  }).click();
-  await expect(page.locator('.LogInModal')).toHaveCount(0);
+  await require('./helpers.cjs').login(page,'phase0_admin',fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim());
   const marker = Date.now();
   await page.goto('/campus/courses');
   await page.getByRole('button', {
@@ -56,7 +45,7 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
     exact: true
   }).click();
   await expect(page.getByLabel('关联课程')).toContainText('【示例】浏览器课程 ' + marker);
-  await page.getByLabel('标题', {
+  await page.locator('#composer').getByLabel('标题', {
     exact: true
   }).fill('【示例】浏览器评价 ' + marker);
   await page.getByLabel('详细内容').fill('【示例】正常账号发布的学习体验，评分不得冒充真实评价。');
@@ -64,14 +53,14 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
     name: '发布内容',
     exact: true
   }).click();
-  await expect(page).toHaveURL(/\/campus\/record\/\d+$/);
+  await expect(page).toHaveURL(/\/d\//);
   await expect(page.getByRole('heading', {
     name: '【示例】浏览器评价 ' + marker,
     exact: true
   })).toBeVisible();
   for (const type of ['resource', 'question']) {
     await page.goto('/campus/publish?type=' + type);
-    await page.getByLabel('标题', {
+    await page.locator('#composer').getByLabel('标题', {
       exact: true
     }).fill('【示例】浏览器 ' + type + ' ' + marker);
     await page.getByLabel('详细内容').fill('<script>window.campusUnsafe=true</script>【示例】纯文本显示，持久化发布验收。');
@@ -90,16 +79,10 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
       name: '发布内容',
       exact: true
     }).click();
-    await expect(page).toHaveURL(/\/campus\/record\/\d+$/);
+    await expect(page).toHaveURL(/\/d\//);
     expect(await page.evaluate(() => window.campusUnsafe)).toBeUndefined();
     if (type === 'question') {
-      await page.getByLabel('评论', {
-        exact: true
-      }).fill('【示例】浏览器答案，与正文保持关联。');
-      await page.getByRole('button', {
-        name: '发表评论',
-        exact: true
-      }).click();
+      await require('./helpers.cjs').reply(page,'【示例】浏览器答案，与正文保持关联。');
       await page.getByRole('button', {
         name: '采纳此答案',
         exact: true
@@ -107,10 +90,13 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
       await expect(page.getByText('已采纳答案', {
         exact: true
       })).toBeVisible();
+      await page.getByRole('button',{name:'查看已采纳答案',exact:true}).click();
+      await expect(page).toHaveURL(/\/d\/[^/]+\/2$/);
+      await expect(page.locator('.Post-body').filter({hasText:'【示例】浏览器答案，与正文保持关联。'})).toBeVisible();
     }
   }
   await page.goto('/campus/search?q=' + marker);
-  await expect(page.locator('article')).toHaveCount(3);
+  await expect(page.locator('.DiscussionListItem')).toHaveCount(3);
   await page.goto('/campus/me');
   await expect(page.getByRole('heading', {
     name: '我的校园空间',

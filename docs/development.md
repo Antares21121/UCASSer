@@ -149,3 +149,11 @@ Windows 的 Python 命令加 `--backend native`。已有数据库在 migrate 前
 工具临时同步 Flarum SMTP；Ctrl+C 恢复旧设置。异常终止后相同命令加 `--restore`，私有 `.runtime/dev-mail/saved.json` 不得提交。SMTP 端口为 8025；Docker 容器通过 host.docker.internal 连接宿主，因此 SMTP 绑定所有网卡，仅用于受控开发网络。Native SMTP 和邮箱读取页面都仅监听回环地址。
 
 正式 SMTP 在后台配置真实服务，实际发送确认与重置后验收，不能把本地捕获成功视为正式外发成功。
+
+## 同步深度定制界面
+
+本机与团队统一沿用 `composer.lock` 中的 Flarum 2.0.0-rc.8 和 `package-lock.json`，不升级官方包。拉取 PR #2 分支后执行构建、备份和 `campus.py migrate`（Windows 加 `--backend native`），再刷新浏览器。setup 会幂等补齐中文、蓝色及分区图标的首次默认值；已有管理员定制的语言、颜色和图标保留。
+
+首页和顶栏、各板块列表、详情及发布都建立在 Flarum 原生组件上。入口和组件说明见 [native-ui.md](native-ui.md)。修改 JS 后运行 `npm run build`，修改 LESS/语言/扩展注册后清缓存；`campus.py migrate` 包含 setup 和清缓存。提交 `js/dist` 和源码、LESS、语言文件，不能只提交本机 assets 缓存。
+
+浏览器测试与接口权限验收顺序执行。前者使用原生中文辅助标签，覆盖十个板块、320/390/768px、深色主题、硬刷新摘要、上下文发布和失败后重试；测试会写入带「【示例】」的开发内容。

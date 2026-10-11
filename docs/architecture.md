@@ -47,3 +47,11 @@ Flarum 保存用户、讨论、帖子、标签、点赞、关注和通知。camp
 Sections/Visibility/Policy 约束原生查询与操作；Records/Search/Personal 使用 whereVisibleTo；NotificationGuard 过滤通知与发送；ExportGuard 校验登录和导出归属。限流和封禁中间件约束写入，NativeRevision 监听原生编辑保存历史。
 
 信息过期动态派生，历史不删除；课程通过 SQL 聚合可见有效评价。搜索参数绑定、每页 20 条，目前使用 LIKE。规模增长后按真实查询和 EXPLAIN 评估全文索引，当前验收规模见 [测试](testing.md)。
+
+## 原生界面扩展
+
+`js/native.js` 接入核心 IndexPage、HeaderPrimary/Secondary、DiscussionListItem、DiscussionPage、UserPage 与 DiscussionComposer。`js/boards.js` 将十个板块的展示、快捷筛选、发布上下文和详情分组集中定义，样式在 `resources/boards.less`；没有复制核心 PostStream 或另建普通帖子详情页。
+
+NativeRecordFields 为原生 DiscussionResource 提供经过可见性查询的公开 campusRecord，加入分区标识、课程名称、真实评分和状态。原生 index 默认包含 firstPost，解决标签页硬刷新时缺失摘要的问题；原生与校园检索使用同一 SearchQuery。Private feedback、身份材料与修订正文不进入原生列表序列化。
+
+LocaleProvider 与官方 Locales extender 注册 `zh-Hans`，翻译文件在 `locale/zh-Hans.yml`。跨语言引用显式解析，避免中文 ref 字段仍回退为英文按钮；时间使用核心 DayJS 的中文相对时间和明确的北京时间展示。setup 首次初始化默认语言和默认蓝色，之后不覆盖管理员的定制。

@@ -4,6 +4,11 @@ use Flarum\Discussion\Discussion;
 use Flarum\Tags\Tag;
 use UCASSer\Campus;
 return [
+    (new Extend\ServiceProvider())->register(Campus\LocaleProvider::class),
+    new Extend\Locales(__DIR__.'/locale'),
+    (new Extend\ApiResource(\Flarum\Api\Resource\DiscussionResource::class))->fields(Campus\NativeRecordFields::class)
+        ->endpoint('index', fn(\Flarum\Api\Endpoint\Index $endpoint) => $endpoint->addDefaultInclude(['firstPost'])->eagerLoad(['firstPost'])),
+    (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))->addFilter(\Flarum\Discussion\Search\DiscussionSearcher::class,Campus\NativeFilter::class),
     (new Extend\Frontend('forum'))->js(__DIR__.'/js/dist/forum.js')->css(__DIR__.'/resources/campus.less')
         ->route('/campus', 'campus')->route('/campus/rules', 'campus.rules')->route('/campus/identity','campus.identity')->route('/campus/moderation','campus.moderation')
         ->route('/campus/records','campus.records')->route('/campus/record/{id}','campus.record')->route('/campus/publish','campus.publish'),
@@ -12,7 +17,7 @@ return [
     (new Extend\Frontend('forum'))->route('/campus/search','campus.search'),
     (new Extend\Frontend('forum'))->route('/campus/cases','campus.cases'),
     (new Extend\Frontend('forum'))->route('/campus/governance','campus.governance'),
-    (new Extend\Frontend('admin'))->js(__DIR__.'/js/dist/admin.js'),
+    (new Extend\Frontend('admin'))->js(__DIR__.'/js/dist/admin.js')->css(__DIR__.'/resources/campus.less'),
     (new Extend\Routes('api'))->get('/campus/home', 'campus.home', Campus\Controller::class)
         ->get('/campus/rules', 'campus.rules', Campus\Controller::class)
         ->get('/campus/sections', 'campus.sections', Campus\Controller::class)
@@ -45,6 +50,7 @@ return [
         ->post('/campus/identity', 'campus.identity.submit', Campus\IdentityController::class)
         ->get('/campus/identity/queue', 'campus.identity.queue', Campus\IdentityController::class)
         ->patch('/campus/identity/{id}', 'campus.identity.review', Campus\IdentityController::class)
+        ->get('/campus/moderators', 'campus.moderators.list', Campus\IdentityController::class)
         ->post('/campus/moderators', 'campus.moderators', Campus\IdentityController::class)
         ->post('/campus/moderate', 'campus.moderate', Campus\IdentityController::class)
         ->get('/campus/audit', 'campus.audit', Campus\IdentityController::class),

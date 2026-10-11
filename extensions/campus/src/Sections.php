@@ -7,6 +7,7 @@ use Illuminate\Database\ConnectionInterface;
 
 class Sections
 {
+    public const ICONS = ['news'=>'bullhorn','careers'=>'briefcase','academic'=>'microscope','life'=>'hands-helping','market'=>'exchange-alt','resources'=>'book-open','courses'=>'graduation-cap','questions'=>'comment-dots','chat'=>'comments','governance'=>'balance-scale'];
     public const DEFAULTS = [
         'news' => ['校园资讯与活动', '校园活动、公共通知与机会'],
         'careers' => ['实习、就业与竞赛', '实习、就业、竞赛与项目招募'],
@@ -27,7 +28,7 @@ class Sections
                 if ($this->db->table('campus_sections')->where('key', $key)->exists()) continue;
                 $tag = Tag::query()->where('slug', 'campus-'.$key)->first();
                 if (!$tag) {
-                    $tag = Tag::build($name, 'campus-'.$key, $description, '#176d72', 'fas fa-graduation-cap', false);
+                    $tag = Tag::build($name, 'campus-'.$key, $description, '#2563eb', 'fas fa-'.self::ICONS[$key], false);
                     $tag->is_primary = true;
                     $tag->save();
                 }

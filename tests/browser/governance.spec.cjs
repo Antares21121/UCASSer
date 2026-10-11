@@ -4,20 +4,8 @@ const {
 } = require('@playwright/test');
 const fs = require('fs'),
   crypto = require('crypto');
-async function login(page, name, password) {
-  await page.goto('/campus');
-  await page.getByRole('button', {
-    name: 'Log In',
-    exact: true
-  }).first().click();
-  await page.locator('input[name="identification"]').fill(name);
-  await page.locator('input[name="password"]').fill(password);
-  await page.locator('.LogInModal').getByRole('button', {
-    name: 'Log In',
-    exact: true
-  }).click();
-  await expect(page.locator('.LogInModal')).toHaveCount(0);
-}
+const {login}=require('./helpers.cjs');
+
 test('identity approval, private report, appeal and independent review persist through actual browser forms', async ({
   page,
   browser,
@@ -136,8 +124,9 @@ test('identity approval, private report, appeal and independent review persist t
       name: '提交人工验证',
       exact: true
     }).click();
-    await expect(reporterPage.locator('.Campus')).toContainText('pending');
+    await expect(reporterPage.locator('.Campus')).toContainText('申请审核中');
     await page.goto('/admin#/extension/ucasser-campus');
+    await page.getByRole('tab', {name: /身份审核/}).click();
     const approval = page.locator('form').filter({
       hasText: '【示例】浏览器自愿验证 ' + marker
     });
@@ -162,13 +151,14 @@ test('identity approval, private report, appeal and independent review persist t
     let target = page.locator('article').filter({
       hasText: note
     });
+    await target.getByRole('button', {name: '处理举报', exact:true}).click();
     await target.getByLabel('公开给当事人的处理理由').fill('【示例】浏览器核验后临时隐藏');
     await target.locator('select').nth(1).selectOption('hide');
     await target.getByRole('button', {
       name: '记录并执行处置',
       exact: true
     }).click();
-    await expect(target).toContainText('resolved');
+    await expect(target).toContainText('已处理');
     await reporterPage.reload();
     const own = reporterPage.locator('article').filter({
       hasText: note
@@ -178,7 +168,7 @@ test('identity approval, private report, appeal and independent review persist t
       name: '提交申诉',
       exact: true
     }).click();
-    await expect(own).toContainText('appealed');
+    await expect(own).toContainText('申诉中');
     await page.reload();
     target = page.locator('article').filter({
       hasText: note
@@ -192,17 +182,18 @@ test('identity approval, private report, appeal and independent review persist t
     const review = reviewerPage.locator('article').filter({
       hasText: note
     });
+    await review.getByRole('button', {name: '独立复核申诉', exact:true}).click();
     await review.getByLabel('公开给当事人的处理理由').fill('【示例】独立复核后恢复浏览器内容');
     await review.locator('select').nth(1).selectOption('restore');
     await review.getByRole('button', {
       name: '记录并执行处置',
       exact: true
     }).click();
-    await expect(review).toContainText('reviewed');
+    await expect(review).toContainText('已复核');
     await page.goto('/campus/governance');
     await page.getByLabel('公开标题').fill('【示例】浏览器维护说明 ' + marker);
     await page.getByLabel('公开正文').fill('【示例】公益运行，分区交接需撤销旧权限，不包含任何个人材料。');
-    await page.getByLabel('生效时间（UTC）').fill('2026-01-01T00:00');
+    await page.getByLabel('生效时间（北京时间）').fill('2026-01-01T00:00');
     await page.getByRole('button', {
       name: '发布并保留版本',
       exact: true

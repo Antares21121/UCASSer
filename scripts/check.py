@@ -17,7 +17,7 @@ def main():
     for path in (ROOT / 'composer.json', ROOT / 'scripts/runtime-lock.json', ROOT / 'composer.lock'):
         json.loads(path.read_text(encoding='utf-8'))
     import yaml  # CI/developer check dependency only, not needed by launcher.
-    for path in [ROOT / 'compose.yaml', ROOT / 'compose.production.yaml', ROOT / '.github/workflows/ci.yaml']:
+    for path in [ROOT / 'compose.yaml', ROOT / 'compose.production.yaml', ROOT / '.github/workflows/ci.yaml', *(ROOT / 'extensions').glob('*/locale/*.yml')]:
         with path.open(encoding='utf-8') as file:
             yaml.safe_load(file)
     values = read_env(ROOT / '.env.example')

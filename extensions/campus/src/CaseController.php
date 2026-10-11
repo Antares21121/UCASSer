@@ -19,10 +19,15 @@ class CaseController implements RequestHandlerInterface
     public function handle(Request $r): ResponseInterface {
         $a=RequestUtil::getActor($r); $a->assertRegistered(); $q=$r->getQueryParams(); $d=$r->getParsedBody() ?? []; $route=$r->getAttribute('routeName'); $records=$this->cases->records; $db=$records->db;
         if ($route==='campus.cases') {
-            $page=max(1,min(10000,(int)($q['page'] ?? 1))); $query=$db->table('campus_cases');
-            if (!$a->isAdmin()) $query->where(fn($b)=>$b->where('reporter_id',$a->id)->orWhere('subject_user_id',$a->id)->orWhereIn('section_id',$db->table('campus_moderators')->where('user_id',$a->id)->select('section_id')));
+            $page=max(1,min(10000,(int)($q['page'] ?? 1))); $query=$this->cases->query($a);
+            if (!empty($q['status'])) {
+                if (!in_array($q['status'],['pending','in_progress','needs_info','resolved','rejected','appealed','reviewed'],true)) throw new ValidationException(['status'=>'请选择有效的处理状态']);
+                $query->where('status',$q['status']);
+            }
+            if (($q['mine'] ?? '')==='1') $query->where('reporter_id',$a->id);
+            $total=(clone $query)->count();
             $rows=$query->orderByDesc('id')->offset(($page-1)*20)->limit(20)->get()->filter(fn($row)=>$this->cases->visible($a,$row))->map(fn($row)=>$this->cases->serialize($a,$row))->values()->all();
-            return new JsonResponse(['data'=>$rows,'meta'=>['page'=>$page,'page_size'=>20]]);
+            return new JsonResponse(['data'=>$rows,'meta'=>['page'=>$page,'page_size'=>20,'total'=>$total,'has_more'=>$page*20<$total]]);
         }
         if ($route==='campus.cases.create') {
             $reason=$records->text($d,'reason',5,2000); $discussion=Discussion::query()->whereVisibleTo($a)->with('tags')->findOrFail((int)($d['discussion_id'] ?? 0));

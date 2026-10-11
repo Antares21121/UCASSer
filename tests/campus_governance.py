@@ -12,10 +12,20 @@ def phase9(f, guest, admin):
     case=reporter['api'].call('/api/campus/cases','POST',body,expected=201)['data']; path='/api/campus/cases/'+str(case['id'])
     reporter['api'].call('/api/campus/cases','POST',body,expected=422)
     outsider['api'].call(path,expected=404); assert not owner['api'].call(path)['data']['reason']
+    assert reporter['api'].call('/api/campus/cases?mine=1&status=pending')['data'][0]['id']==case['id']
+    assert not any(c['id']==case['id'] for c in outsider['api'].call('/api/campus/cases')['data'])
+    assert not reporter['api'].call(path)['data']['allowed_actions']
+    guest.call('/api/campus/moderators',expected=(401,403))
+    reporter['api'].call('/api/campus/moderators',expected=(401,403))
     reporter['api'].call(path,'PATCH',{'version':case['version'],'status':'resolved','reason':'【示例】普通成员伪造处理'},expected=(401,403))
     admin.call('/api/campus/moderators','POST',{'user_id':volunteer['id'],'section_id':news['id'],'enabled':True,'reason':'【示例】错误分区授权测试'})
     volunteer['api'].call(path,expected=404)
+    assert not any(c['id']==case['id'] for c in volunteer['api'].call('/api/campus/cases')['data'])
     admin.call('/api/campus/moderators','POST',{'user_id':volunteer['id'],'section_id':life['id'],'enabled':True,'reason':'【示例】本分区举报处理授权'})
+    queue=volunteer['api'].call('/api/campus/cases?status=pending')
+    assert case['id'] in [c['id'] for c in queue['data']] and queue['meta']['total']>=1
+    assert set(volunteer['api'].call(path)['data']['allowed_actions'])=={'none','hide','restore'}
+    assert 'delete' in admin.call(path)['data']['allowed_actions']
     processed=volunteer['api'].call(path,'PATCH',{'version':case['version'],'status':'needs_info','reason':'【示例】请补充可核验来源','action':'none'})['data']
     supplemented=reporter['api'].call(path+'/supplement','POST',{'version':processed['version'],'reason':'【示例】补充公开来源和可复核线索'})['data']
     done=volunteer['api'].call(path,'PATCH',{'version':supplemented['version'],'status':'resolved','reason':'【示例】先隐藏等待修订，保留历史讨论','action':'hide'})['data']

@@ -1,0 +1,163 @@
+// One blue identity; typography and information structure distinguish boards.
+.Header { background:var(--body-bg); }
+.Header-primary .Button { font-size:13px; padding-left:11px; padding-right:11px; }
+.Header-primary .Button .icon { width:16px; font-size:13px; opacity:.8; }
+.Header-secondary .Search-input { border-radius:10px; }
+.IndexPage .WelcomeHero { text-align:left; border-bottom:1px solid fade(@primary-color,10%); }
+.IndexPage .WelcomeHero .container { padding-top:27px; padding-bottom:27px; }
+.IndexPage .WelcomeHero .Hero-title { font-size:26px; margin:0 0 8px; }
+.IndexPage .WelcomeHero .Hero-subtitle { font-size:14px; max-width:700px; }
+.Campus-nativeExplore { padding:0 0 22px; }
+.Campus-nativeExplore .Campus-sectionHeading { margin:0 0 12px; }
+.Campus-nativeExplore .Campus-sectionHeading h2 { font-size:15px; }
+.Campus-nativeExplore .Campus-sectionHeading a { font-size:12px; }
+.Campus-nativeExplore .Campus-grid { display:flex; flex-wrap:wrap; gap:8px; }
+.Campus-nativeExplore .Campus-section { flex-direction:row; border:0; min-height:36px; padding:7px 10px; gap:7px; border-radius:8px; background:var(--control-bg); }
+.Campus-nativeExplore .Campus-section:hover { box-shadow:none; background:fade(@primary-color,10%); }
+.Campus-nativeExplore .Campus-sectionIcon { width:16px; font-size:13px; text-align:center; }
+.Campus-nativeExplore .Campus-section strong { font-size:12px; font-weight:500; }
+.CampusBoardHero { background:var(--body-bg); text-align:left; border-bottom:1px solid fade(@primary-color,14%); }
+.CampusBoardHero .container { padding-top:34px; padding-bottom:0; }
+.Campus-boardIntro { display:flex; align-items:center; gap:20px; padding-bottom:26px; }
+.Campus-boardIntro>div:nth-child(2) { min-width:0; flex:1; }
+.Campus-boardIcon { display:grid; place-items:center; flex:none; width:62px; height:62px; border-radius:18px; background:fade(@primary-color,9%); color:@primary-color; font-size:24px; }
+.Campus-boardEyebrow { font-size:10px; letter-spacing:1.5px; font-weight:600; color:var(--muted-color); margin:0 0 8px; }
+.CampusBoardHero .Hero-title { font-size:27px; line-height:1.4; letter-spacing:-.4px; font-weight:700; margin:0 0 8px; color:var(--text-color); }
+.CampusBoardHero .Hero-subtitle { color:var(--muted-color); font-size:13px; line-height:1.7; margin:0; }
+.Campus-boardActions { display:flex; flex-direction:column; gap:10px; flex:none; align-items:flex-end; }
+.Campus-boardActions .Button { border-radius:9px; padding:11px 17px; font-size:13px; }
+.Campus-boardSecondary { font-size:12px; color:@primary-color; display:inline-flex; gap:8px; align-items:center; }
+.Campus-boardTabs { display:flex; flex-wrap:wrap; gap:5px 18px; padding:0; }
+.Campus-boardTabs a { color:var(--muted-color); font-size:13px; padding:12px 0; border-bottom:2px solid transparent; text-decoration:none; }
+.Campus-boardTabs a:hover,.Campus-boardTabs a.is-active { color:@primary-color; }
+.Campus-boardTabs a.is-active { border-color:@primary-color; font-weight:600; }
+.Campus-rowMarker { flex:none; width:46px; min-height:46px; display:grid; place-items:center; border-radius:12px; background:fade(@primary-color,7%); color:@primary-color; font-size:19px; }
+.Campus-row .DiscussionListItem-content { gap:15px; }
+.Campus-row .DiscussionListItem-author { flex:none; }
+.Campus-rowMarker~.DiscussionListItem-author .Avatar { width:24px; height:24px; line-height:24px; font-size:12px; }
+.Campus-dateMarker { text-align:center; display:flex; flex-direction:column; line-height:1.1; padding:6px; }
+.Campus-dateMarker small { font-size:10px; margin-bottom:5px; }
+.Campus-dateMarker strong { font-size:22px; font-weight:650; }
+.Campus-questionMarker { text-align:center; line-height:1.1; }
+.Campus-questionMarker strong { font-size:21px; display:block; font-weight:600; }
+.Campus-questionMarker small { font-size:10px; display:block; margin-top:5px; }
+.Campus-questionMarker.is-resolved { color:@primary-color; }
+.Campus-row .Campus-listMetadata { background:none; padding:0; font-weight:500; color:@primary-color; }
+.Campus-rowStatus { margin-left:9px; padding:2px 6px; border-radius:4px; background:var(--control-bg); color:var(--muted-color); font-size:10px; }
+.Campus-rowStatus.is-resolved { background:fade(@primary-color,10%); color:@primary-color; }
+.Campus-rowStatus.is-expired,.Campus-rowStatus.is-ended,.Campus-rowStatus.is-invalid,.Campus-rowStatus.is-sold { opacity:.7; }
+.DiscussionListItem-info .item-campus-facts { display:block; margin:7px 0 0; }
+.Campus-rowFacts { display:flex; gap:4px 18px; flex-wrap:wrap; color:var(--text-color); font-size:12px; }
+.Campus-rowFacts>span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px; }
+.Campus-rowFacts small { color:var(--muted-color); margin-right:7px; font-size:11px; }
+.Campus-row--document .DiscussionListItem-title { font-size:16px; }
+.Campus-row--document .Campus-rowMarker { border-radius:5px 12px 12px 5px; border-left:3px solid fade(@primary-color,40%); }
+.Campus-row--agenda .Campus-rowMarker { border-top:3px solid @primary-color; border-radius:7px; }
+.Campus-row--opportunity .Campus-rowFacts>span:last-child { max-width:330px; }
+.Campus-row--market .DiscussionListItem-content { border-left:3px solid fade(@primary-color,28%); }
+.Campus-row--help .DiscussionListItem-info .item-excerpt { -webkit-line-clamp:3; }
+.Campus-row--conversation .DiscussionListItem-content { padding-top:19px; padding-bottom:19px; }
+.Campus-row--conversation .DiscussionListItem-title { font-size:16px; font-weight:500; }
+.Campus-row--notice .DiscussionListItem-title { font-weight:650; }
+.Campus-row--notice .DiscussionListItem-content { background:fade(@primary-color,2%); }
+.DiscussionListItem-info .item-campus-ratings { display:block; margin:9px 0 0; }
+.Campus-rowRatings { display:flex; flex-wrap:wrap; gap:7px; }
+.Campus-rowRatings .Campus-rating { display:flex; align-items:center; gap:8px; border:1px solid fade(@primary-color,12%); border-radius:6px; padding:3px 8px; background:fade(@primary-color,3%); font-size:11px; }
+.Campus-rowRatings strong { color:@primary-color; font-size:12px; font-variant-numeric:tabular-nums; }
+.Campus-rating strong small { font-size:10px; font-weight:400; color:var(--muted-color); }
+.Campus-recordHeading { display:flex; gap:14px; align-items:center; margin-bottom:20px; }
+.Campus-detailIcon { display:grid; place-items:center; flex:none; width:44px; height:44px; border-radius:12px; background:fade(@primary-color,9%); color:@primary-color; font-size:19px; }
+.Campus-recordHeading .Campus-boardEyebrow { margin:0; }
+.Campus-recordHeading .Campus-badges { margin:7px 0 0; }
+.Campus-detailGroup { border-top:1px solid fade(#687f8a,14%); padding:16px 0 4px; }
+.Campus-detailGroup h3,.Campus-related h3 { font-size:12px; color:var(--muted-color); font-weight:500; margin:0 0 12px; }
+.Campus-detailFacts { display:grid; grid-template-columns:130px minmax(0,1fr); margin:0; font-size:13px; gap:8px 12px; }
+.Campus-detailFacts dt { font-weight:500; color:var(--muted-color); }
+.Campus-detailFacts dd { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+.Campus-detailFacts .Button { font-size:12px; min-height:0; padding:3px 0; background:none; color:@primary-color; }
+.Campus-resourceAccess { display:flex; flex-wrap:wrap; gap:9px; margin:14px 0 20px; }
+.Campus-resourceAccess .Button { display:inline-flex; align-items:center; gap:12px; }
+.Campus-detailMore { margin-top:14px; }
+.Campus-detailMore summary { color:@primary-color; font-size:12px; cursor:pointer; padding:8px 0; }
+.Campus-related { border-top:1px solid fade(#687f8a,14%); padding-top:15px; margin-top:16px; }
+.Campus-related>a { display:flex; align-items:center; gap:8px; margin:6px 0; font-size:13px; }
+.Campus-reviewMetrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:16px 0; }
+.Campus-reviewMetrics .Campus-rating { background:fade(@primary-color,5%); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:8px; }
+.Campus-reviewMetrics .Campus-rating>span:first-child { font-size:12px; color:var(--muted-color); }
+.Campus-reviewMetrics .Campus-rating>strong { font-size:25px; line-height:1; color:@primary-color; font-variant-numeric:tabular-nums; }
+.Campus-reviewMetrics .Campus-rating>small { color:var(--muted-color); font-size:10px; }
+.Campus-ratingTrack { display:block; height:3px; border-radius:2px; background:fade(@primary-color,12%); overflow:hidden; }
+.Campus-ratingTrack i { height:100%; display:block; background:@primary-color; }
+.Campus-courseName { font-size:19px; font-weight:650; }
+.Campus-questionProgress { display:flex; padding:0; margin:0 0 18px; list-style:none; gap:10px; }
+.Campus-questionProgress li { flex:1; font-size:12px; color:var(--muted-color); border-top:2px solid var(--control-bg); padding-top:10px; display:flex; align-items:center; gap:7px; }
+.Campus-questionProgress li>span { display:grid; place-items:center; width:19px; height:19px; font-size:10px; border-radius:50%; background:var(--control-bg); }
+.Campus-questionProgress li.is-current { color:@primary-color; border-color:@primary-color; font-weight:600; }
+.Campus-questionProgress li.is-current>span { background:fade(@primary-color,10%); }
+.Campus-nativeRecord>.Campus-actions { border-top:1px solid fade(#687f8a,14%); padding-top:16px; margin-bottom:0; }
+.Campus-nativeRecord>.Campus-actions .Button { min-height:34px; font-size:12px; padding:7px 10px; }
+.Campus-nativeRecord { background:var(--body-bg); }
+.DiscussionHero { text-align:left; background:fade(@primary-color,5%); }
+.DiscussionHero .DiscussionHero-title { font-size:27px; line-height:1.5; font-weight:650; }
+.DiscussionPage .Post { border-bottom:1px solid fade(#687f8a,12%); }
+.DiscussionPage .Post-body { font-size:15px; line-height:1.9; }
+.DiscussionPage .Post-body a { text-underline-offset:3px; }
+.DiscussionPage .Post-body blockquote { border-left:3px solid fade(@primary-color,35%); background:fade(@primary-color,4%); padding:12px 18px; border-radius:0 8px 8px 0; }
+.DiscussionPage .Post-body pre { border-radius:9px; }
+.DiscussionPage .Post-actions .Button { border-radius:6px; font-size:12px; }
+.Modal-content { border-radius:14px; }
+.Button .icon { text-align:center; }
+.Campus-composerFields>.Campus-hint { padding:10px 14px; border-left:2px solid @primary-color; background:fade(@primary-color,4%); border-radius:0 7px 7px 0; }
+.Campus :is(input,textarea,select):disabled { cursor:not-allowed; }
+.Campus-courseCard { border-top:3px solid fade(@primary-color,25%); }
+.Campus-courseCard .Campus-stats { margin:14px 0; }
+.Campus-courseCard h2 { letter-spacing:-.2px; }
+@media(min-width:1100px) { .IndexPage .container,.CampusBoardHero .container { max-width:1260px; } }
+@media(max-width:767px) {
+  .CampusBoardHero .container { padding-top:22px; }
+  .Campus-boardIntro { gap:12px; flex-wrap:wrap; padding-bottom:15px; }
+  .Campus-boardIcon { width:43px; height:43px; border-radius:12px; font-size:18px; }
+  .CampusBoardHero .Hero-title { font-size:20px; margin-bottom:6px; }
+  .CampusBoardHero .Hero-subtitle { font-size:12px; }
+  .Campus-boardEyebrow { font-size:9px; letter-spacing:1px; margin-bottom:5px; }
+  .Campus-boardActions { width:100%; flex-direction:row; align-items:center; flex-wrap:wrap; gap:12px; }
+  .Campus-boardActions .Button { font-size:12px; padding:9px 12px; }
+  .Campus-boardTabs { gap:3px 14px; }
+  .Campus-boardTabs a { font-size:12px; padding:9px 0; }
+  .Campus-row .DiscussionListItem-content { gap:9px; }
+  .Campus-rowMarker { width:35px; min-height:40px; border-radius:9px; font-size:16px; }
+  .Campus-dateMarker strong { font-size:19px; }
+  .Campus-rowMarker~.DiscussionListItem-author { display:none; }
+  .Campus-rowFacts { gap:4px 12px; font-size:11px; }
+  .Campus-rowFacts>span { max-width:190px; }
+  .Campus-rowFacts small { font-size:10px; }
+  .Campus-rowRatings .Campus-rating { padding:2px 5px; gap:5px; font-size:10px; }
+  .Campus-rowRatings { gap:5px; }
+  .Campus-row--document .DiscussionListItem-title { font-size:15px; }
+  .Campus-detailFacts { grid-template-columns:1fr; gap:4px; }
+  .Campus-detailFacts dd { margin-bottom:9px; }
+  .Campus-reviewMetrics { gap:7px; }
+  .Campus-reviewMetrics .Campus-rating { padding:12px 9px; }
+  .Campus-reviewMetrics .Campus-rating>strong { font-size:23px; }
+  .Campus-questionProgress { gap:6px; }
+  .Campus-questionProgress li { font-size:11px; gap:4px; }
+  .DiscussionHero .DiscussionHero-title { font-size:22px; }
+  .DiscussionPage .Post-body { font-size:14px; }
+  .Campus-nativeExplore { padding-top:14px; }
+  .Campus-nativeExplore .Campus-section { padding:6px 8px; min-height:33px; }
+  .Campus-nativeExplore .Campus-section strong { font-size:11px; }
+  .IndexPage .WelcomeHero .container { padding-top:20px; padding-bottom:20px; }
+}
+@media(prefers-reduced-motion:reduce) { .Campus-boardTabs a { transition:none; } }
+
+.IndexPage .DiscussionList-discussions>li:not(:last-child)>.DiscussionListItem { border-bottom:1px solid fade(#687f8a,12%); }
+.Campus-headerPublish { border-radius:8px; }
+.TagTile-icon { display:grid; place-items:center; width:36px; height:36px; border-radius:10px; background:fade(@primary-color,8%); }
+.IndexPage .DiscussionListItem-info .item-excerpt { word-break:break-word; }
+
+// Core bottom alerts overlap the native composer submit button. Keep its
+// dismiss controls, but place messages above the content instead.
+.AlertManager { top:64px; bottom:auto; right:20px; left:auto; max-width:400px; }
+body:has(.App.drawerOpen) .AlertManager { z-index:(@zindex-modal-background - 1); }
+.AlertManager .Alert { border-radius:10px; box-shadow:0 8px 28px fade(#102344,12%); text-align:left; }
+@media(max-width:767px) { .AlertManager { top:60px; right:12px; left:12px; max-width:none; } }

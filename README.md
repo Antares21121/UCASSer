@@ -68,6 +68,7 @@ Windows 替代方案在脚本名之后加 `--backend native`，例如 `python sc
 ## 协作与验证
 
 - [开发环境同步手册](docs/development.md)：新开发者按文档安装相同工具、依赖和配置，不复制队友密码或数据库。
+- [原生页面与蓝色主题](docs/native-ui.md)：十板块信息结构、中文与图标、详情主操作及发布动线。
 - [架构](docs/architecture.md)、[部署](docs/deployment.md)、[安全](docs/security.md)、[权限](docs/permissions.md)。
 - [本次环境与验证报告](docs/verification.md)：Windows 实际安装、重启持久化、备份及隔离恢复已经验证；Docker/HTTPS 未在本机运行。
 - 自动检查：`python -m pip install -r tests/requirements.txt`，然后 `python scripts/check.py` 和 `python -m unittest discover -s tests -p "test_*.py" -v`。

@@ -11,21 +11,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 class SearchController implements RequestHandlerInterface
 {
     public function handle(Request $r): ResponseInterface {
-        $a=RequestUtil::getActor($r); $p=$r->getQueryParams(); $q=Discussion::query()->whereVisibleTo($a)->with(['user','tags'])->leftJoin('campus_records as c','c.discussion_id','=','discussions.id');
-        $type=(string)($p['type'] ?? ''); if ($type && !isset(Records::CATEGORIES[$type]) && $type!=='discussion') throw new ValidationException(['type'=>'检索类型无效']);
-        if ($type==='discussion') $q->whereNull('c.id'); elseif ($type) $q->where('c.type',$type);
-        foreach (['category','course_id','semester','section_id'] as $key) if (!empty($p[$key])) $q->where('c.'.$key,$p[$key]);
-        if (!empty($p['tag'])) $q->whereHas('tags',fn($b)=>$b->where('slug',mb_substr((string)$p['tag'],0,100)));
-        if (!empty($p['status'])) {
-            Records::statusFilter($q,mb_substr((string)$p['status'],0,30),'c.');
-        }
-        foreach (['from','to','deadline_from','deadline_to','starts_from','starts_to'] as $key) if (!empty($p[$key])) {
-            $v=(string)$p[$key]; $date=\DateTimeImmutable::createFromFormat('!Y-m-d',$v); if (!$date || $date->format('Y-m-d')!==$v) throw new ValidationException([$key=>'请填写有效日期']);
-            $column=str_starts_with($key,'deadline')?'c.deadline':(str_starts_with($key,'starts')?'c.starts_at':'discussions.created_at');
-            $q->where($column,str_ends_with($key,'to')?'<=':'>=',$v.(str_ends_with($key,'to')?' 23:59:59':' 00:00:00'));
-        }
+        $a=RequestUtil::getActor($r); $p=$r->getQueryParams(); $q=SearchQuery::build($a,$p);
         $term=mb_substr(trim((string)($p['q'] ?? '')),0,100); $pattern='%'.addcslashes($term,'\\%_').'%';
-        if ($term) $q->where(fn($b)=>$b->where('discussions.title','like',$pattern)->orWhere('c.data','like',$pattern)->orWhereIn('discussions.id',Post::query()->whereVisibleTo($a)->where('type','comment')->where('content','like',$pattern)->select('discussion_id')));
         $sort=$p['sort'] ?? 'latest';
         if ($sort==='relevance' && $term) $q->orderByRaw('CASE WHEN discussions.title LIKE ? THEN 0 ELSE 1 END',[$pattern]);
         elseif ($sort==='deadline') $q->whereNotNull('c.deadline')->orderBy('c.deadline');

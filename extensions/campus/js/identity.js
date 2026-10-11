@@ -1,58 +1,37 @@
-import app from 'flarum/forum/app';
-import Page from 'flarum/common/components/Page';
-import Button from 'flarum/common/components/Button';
-export default class IdentityPage extends Page {
-  oninit(v) {
-    super.oninit(v);
-    this.notice = '';
-    this.evidence = '';
-    this.consent = false;
-    this.load();
+import Button from './button';
+import { DataPage, api, field, link, pageHeading, emptyState, stateLabels, formatTime } from './ui';
+export default class IdentityPage extends DataPage {
+  requiresLogin = true;
+  async fetch() {
+    this.data = (await api('identity')).data;
+    this.sections = (await api('catalog')).data.sections;
   }
-  async load() {
-    this.loading = true;
-    try {
-      this.data = (await app.request({
-        method: 'GET',
-        url: app.forum.attribute('apiUrl') + '/campus/identity'
-      })).data;
-    } catch (_) {
-      this.notice = '请登录后查看身份与权限。';
-    } finally {
-      this.loading = false;
-      m.redraw();
-    }
-  }
-  view() {
-    return m('div.Campus.container', [m('h1', '校园身份与权限'), m('p', {
-      role: 'status'
-    }, this.notice), this.loading ? m('p', '正在加载…') : this.data ? [m('p', this.data.verified ? '身份状态：已通过人工审核' : '身份状态：尚未通过校园审核'), m('p', '只用于决定校内分区访问权限。请提交最少必要说明，不要填写身份证号、学号、密码或上传证件。材料仅管理员可见，审核后删除原始说明。'), !this.data.verified ? m('form.Campus-panel', {
-      onsubmit: async e => {
+  content() {
+    const pending = this.data.requests.some(r => r.status === 'pending');
+    return [pageHeading('校园身份与权限', '验证只用于决定校内分区的访问范围。提交最少必要说明，审核后删除原始材料。', link('/settings', '账号与隐私设置', {
+      className: 'Button'
+    })), m('section.Campus-panel', [m('div.Campus-badges', [m('span.Campus-badge', {
+      className: this.data.verified ? 'is-approved' : ''
+    }, this.data.verified ? '已通过人工审核' : pending ? '申请审核中' : '尚未通过校园审核')]), m('p', '请勿填写身份证号、学号、密码或上传证件。验证材料仅管理员可见；审核理由不应包含个人材料。'), pending ? m('p.Campus-hint', '申请已提交，请等待人工审核。无需重复申请，可在下方查看结果。') : !this.data.verified ? m('form', {
+      onsubmit: e => {
         e.preventDefault();
-        try {
-          await app.request({
-            method: 'POST',
-            url: app.forum.attribute('apiUrl') + '/campus/identity',
-            body: {
-              evidence: this.evidence,
-              consent: this.consent
-            }
-          });
-          this.notice = '申请已提交，等待人工审核。';
-          this.evidence = '';
-          await this.load();
-        } catch (_) {
-          this.notice = '提交失败，请检查同意选项、说明长度及是否已有待审申请。';
-        }
-        m.redraw();
+        this.perform(() => api('identity', 'POST', {
+          evidence: this.evidence || '',
+          consent: this.consent === true
+        }), {
+          message: '申请已提交，等待人工审核。',
+          after: () => {
+            this.evidence = '';
+            this.consent = false;
+          }
+        });
       }
-    }, [m('label', ['验证说明', m('textarea.FormControl', {
-      value: this.evidence,
+    }, [field('evidence', '验证说明', this.evidence, v => this.evidence = v, {
+      textarea: true,
       minlength: 5,
       maxlength: 1000,
-      required: true,
-      oninput: e => this.evidence = e.target.value
-    })]), m('label', [m('input', {
+      required: true
+    }), m('label', [m('input', {
       type: 'checkbox',
       checked: this.consent,
       required: true,
@@ -60,10 +39,8 @@ export default class IdentityPage extends Page {
     }), ' 我同意上述用途与材料处理方式']), m(Button, {
       type: 'submit',
       className: 'Button Button--primary'
-    }, '提交人工验证')]) : null, m('h2', '我的申请'), this.data.requests.length ? m('ul', this.data.requests.map(r => m('li', `${r.status} · ${r.created_at} · ${r.reason || '等待处理'}`))) : m('p', '暂无申请。'), m('p', '授权分区编号：' + (this.data.moderationSections.join('、') || '无')), m('p', m('a', {
-      href: app.forum.attribute('baseUrl') + '/settings'
-    }, '前往账号设置：密码、通知与个人数据申请')), this.data.moderationSections.length ? m('a', {
-      href: app.forum.attribute('baseUrl') + '/campus/moderation'
-    }, '前往分区内容维护') : null] : null]);
+    }, '提交人工验证')]) : null]), m('section.Campus-panel', [m('h2', '我的申请'), this.data.requests.length ? m('ul.Campus-timeline', this.data.requests.map(r => m('li', [m('strong', stateLabels[r.status] || r.status), m('small', formatTime(r.created_at)), m('p', r.reason || '等待处理')]))) : emptyState('暂无申请', '公开分区可以直接浏览，需要访问校内分区时再提交申请。')]), m('section.Campus-panel', [m('h2', '分区维护授权'), this.data.moderationSections.length ? [m('p', this.data.moderationSections.map(id => this.sections.find(s => s.id === id)?.name || '分区 #' + id).join('、')), link('/campus/moderation', '前往分区内容维护', {
+      className: 'Button'
+    }), link('/campus/cases', '查看举报与处理记录')] : m('p.Campus-hint', '当前没有分区维护授权。校园身份验证不等于获得管理权限。')])];
   }
 }

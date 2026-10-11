@@ -51,9 +51,18 @@ class IdentityController implements RequestHandlerInterface
             return new JsonResponse(['data'=>['id'=>$id,'status'=>$data['status']]]);
         }
         if ($route === 'campus.identity.queue') {
-            $a->assertAdmin(); return new JsonResponse(['data'=>$db->table('campus_verifications')->where('status','pending')->orderBy('id')->limit(50)->get()->all()]);
+            $a->assertAdmin(); $rows=$db->table('campus_verifications')->where('status','pending')->orderBy('id')->limit(50)->get();
+            $users=User::query()->whereIn('id',$rows->pluck('user_id'))->get()->keyBy('id');
+            foreach ($rows as $row) $row->display_name=$users->get($row->user_id)?->display_name ?? '已删除账号';
+            return new JsonResponse(['data'=>$rows->all()]);
         }
-        if ($route === 'campus.moderators') {
+        if (in_array($route,['campus.moderators','campus.moderators.list'],true)) {
+            if ($r->getMethod()==='GET') {
+                $a->assertAdmin(); $rows=$db->table('campus_moderators')->orderBy('section_id')->orderBy('user_id')->get();
+                $users=User::query()->whereIn('id',$rows->pluck('user_id'))->get()->keyBy('id');
+                foreach ($rows as $row) $row->display_name=$users->get($row->user_id)?->display_name ?? '已删除账号';
+                return new JsonResponse(['data'=>$rows->all()]);
+            }
             $a->assertAdmin(); $reason=$this->reason($data); $user=User::query()->findOrFail((int)($data['user_id'] ?? 0)); $s=$this->sections->byId((int)($data['section_id'] ?? 0));
             if (!is_bool($data['enabled'] ?? null)) throw new ValidationException(['enabled'=>'请选择授权或撤销']);
             $db->transaction(function () use ($db,$data,$a,$user,$s,$reason) {
