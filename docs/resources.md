@@ -64,3 +64,17 @@
 | 5. 搜索、筛选与移动端 | 通过 | 搜索、分类筛选、空结果正常；iPhone 14 宽度下布局单列、按钮不挤压。 |
 
 自动化：`scripts/check.py` 全绿，`tests/resource_smoke.py` 14 项断言通过，`tests/test_resource_api.py` 12/12 通过，CI run 38087761 全绿。
+
+界面实况：
+
+访客桌面视图（分类树无管理按钮，资料卡片带状态徽章与路径面包屑）：
+
+![访客桌面视图](images/acceptance/resource-guest-desktop.png)
+
+管理员桌面视图（悬停分类行浮出“+ 学院 / + 课程 / 改名”，卡片右侧为“反馈问题 / 修改”）：
+
+![管理员桌面视图](images/acceptance/resource-admin-desktop.png)
+
+移动端视图（390px 宽度，单列布局）：
+
+![移动端视图](images/acceptance/resource-guest-mobile.png)
