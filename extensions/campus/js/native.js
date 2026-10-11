@@ -668,6 +668,9 @@ export class NativeCollectionsPage extends UserPage {
     this.user = app.session.user;
     this.load();
   }
+  hero() {
+    return this.user ? super.hero() : null;
+  }
   async load() {
     if (!app.session.user) {
       this.loading = false;

@@ -4,6 +4,7 @@ const {login}=require('./helpers.cjs');
 const adminLogin=page=>login(page,'phase0_admin',fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim());
 
 test('guest access offers working native login, and the original mobile drawer stays within the viewport',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const rejectedRequests=[];
   page.on('response',response=>{if(response.url().includes('/api/campus/') && [401,403].includes(response.status())) rejectedRequests.push(new URL(response.url()).pathname);});
   for(const path of ['me','identity','moderation','cases']){await page.goto('/campus/'+path);await expect(page.getByRole('button',{name:'登录账号',exact:true})).toBeVisible();await expect(page.locator('.Header-secondary')).toHaveCount(1);}
@@ -13,6 +14,7 @@ test('guest access offers working native login, and the original mobile drawer s
   await expect(page.locator('.LogInModal')).toHaveCount(0);
   expect(rejectedRequests).toEqual([]);
   for(const width of [320,390]){await page.setViewportSize({width,height:844});await page.getByRole('button',{name:'打开导航菜单'}).click();await expect(page.locator('.App-drawer').getByRole('link',{name:'首页',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.locator('.App-drawer').getByRole('link',{name:'首页',exact:true}).click();await expect(page.locator('.IndexPage')).toHaveCount(1);}
+  expect(errors).toEqual([]);
 });
 
 test('native composer preserves input when course lookup fails and only retries on request',async({page})=>{
