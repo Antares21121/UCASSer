@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e6773d91578e780fe1f0e58b859d7443",
+    "content-hash": "3332fe08d8e82ed65f6b0acb7521f5fa",
     "packages": [
         {
             "name": "asispts/http-accept",
@@ -11759,6 +11759,43 @@
                 "MIT"
             ],
             "description": "Campus community information, knowledge and learning experience",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "ucasser/resources",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "extensions/ucasser-resources",
+                "reference": "761555aa341c0ed4e9aadd7b3c44a06747513092"
+            },
+            "require": {
+                "flarum/core": "^2.0.0-rc.8"
+            },
+            "type": "flarum-extension",
+            "extra": {
+                "flarum-extension": {
+                    "title": "UCASSer 资源汇总",
+                    "category": "feature",
+                    "icon": {
+                        "name": "fas fa-book-open",
+                        "backgroundColor": "#315c90",
+                        "color": "#fff"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "UCASSer\\Resources\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "A maintained directory of campus and external study resources.",
             "transport-options": {
                 "symlink": true,
                 "relative": true

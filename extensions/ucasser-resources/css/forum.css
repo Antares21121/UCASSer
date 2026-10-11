@@ -1,0 +1,73 @@
+/* 资源汇总页 · 清爽目录式 */
+.ResourceDirectory { padding: 28px 16px 64px; }
+.ResourceDirectory h1 { margin: 0 0 6px; font-size: 24px; }
+.ResourceDirectory-intro { margin: 0; color: var(--muted-color); max-width: 60ch; }
+
+.ResourceDirectory-layout { display: grid; grid-template-columns: minmax(220px, 260px) minmax(0, 1fr); gap: 28px; margin-top: 24px; align-items: start; }
+
+/* ---------- 左侧分类树 ---------- */
+.ResourceDirectory-tree { border: 1px solid var(--control-bg); border-radius: 10px; padding: 12px; align-self: start; position: sticky; top: 68px; }
+.ResourceDirectory-treeSection { display: block; font-size: 13px; font-weight: 600; color: var(--muted-color); padding: 10px 10px 4px; }
+.ResourceDirectory-category:first-child .ResourceDirectory-treeSection { padding-top: 2px; }
+.ResourceDirectory-treeGroup { display: block; font-weight: 600; padding: 4px 10px; }
+.ResourceDirectory-categoryRow { display: flex; align-items: center; gap: 4px; margin: 1px 0; }
+.ResourceDirectory-navItem { flex: 1; min-width: 0; text-align: left; background: none; border: none; color: var(--text-color); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+.ResourceDirectory-navItem:hover { background: var(--control-bg); }
+.ResourceDirectory-navItem.is-active { background: var(--control-bg); color: var(--primary-color); font-weight: 600; }
+.ResourceDirectory-rowActions { margin-left: auto; display: flex; gap: 2px; opacity: 0; transition: opacity .15s; }
+.ResourceDirectory-categoryRow:hover .ResourceDirectory-rowActions,
+.ResourceDirectory-categoryRow:focus-within .ResourceDirectory-rowActions { opacity: 1; }
+@media (hover: none) { .ResourceDirectory-rowActions { opacity: 1; } }
+.ResourceDirectory-treeBtn { background: none; border: none; color: var(--muted-color); font-size: 12px; padding: 2px 6px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.ResourceDirectory-treeBtn:hover { background: var(--control-bg); color: var(--text-color); }
+.ResourceDirectory-empty { color: var(--muted-color); font-size: 13px; padding: 4px 10px 10px; margin: 0; }
+
+/* ---------- 搜索与管理操作 ---------- */
+.ResourceDirectory-search { display: flex; gap: 8px; margin-bottom: 16px; }
+.ResourceDirectory-search .FormControl { flex: 1 1 200px; }
+.ResourceDirectory-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* ---------- 资料卡片 ---------- */
+.ResourceDirectory-item { border: 1px solid var(--control-bg); border-radius: 10px; padding: 20px; margin: 0 0 16px; }
+.ResourceDirectory-itemHeader { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.ResourceDirectory-item h2 { font-size: 18px; margin: 0; line-height: 1.35; }
+.ResourceDirectory-status { flex-shrink: 0; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
+.ResourceDirectory-status--active { color: #1a7f37; background: rgba(26, 127, 55, .12); }
+.ResourceDirectory-status--needs_review { color: #9a6700; background: rgba(154, 103, 0, .12); }
+[data-theme^=dark] .ResourceDirectory-status--active { color: #56d364; background: rgba(86, 211, 100, .14); }
+[data-theme^=dark] .ResourceDirectory-status--needs_review { color: #e3b341; background: rgba(227, 179, 65, .14); }
+.ResourceDirectory-crumbs { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.ResourceDirectory-crumb { font-size: 12px; color: var(--muted-color); background: var(--control-bg); border-radius: 999px; padding: 2px 10px; }
+.ResourceDirectory-itemDescription { margin: 12px 0 0; }
+.ResourceDirectory-itemActions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.ResourceDirectory-itemActions .Button { margin: 0; }
+.ResourceDirectory-itemSpacer { flex: 1; }
+.ResourceDirectory-source { font-size: 13px; color: var(--muted-color); }
+.ResourceDirectory-itemMeta { margin-top: 12px; font-size: 12.5px; color: var(--muted-color); }
+
+/* ---------- 编辑表单 ---------- */
+.ResourceDirectory-form { border: 1px solid var(--control-bg); border-radius: 10px; padding: 20px; margin: 0 0 16px; }
+.ResourceDirectory-form h2 { margin-top: 0; font-size: 16px; }
+.ResourceDirectory-form label { display: block; margin: 12px 0; }
+.ResourceDirectory-form .FormControl { width: 100%; margin-top: 4px; }
+
+/* ---------- 反馈与状态条 ---------- */
+.ResourceDirectory-reports { border: 1px solid var(--control-bg); border-radius: 10px; padding: 20px; margin-top: 24px; }
+.ResourceDirectory-reports h2 { margin-top: 0; font-size: 16px; }
+.ResourceDirectory-report { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--control-bg); }
+.ResourceDirectory-report:last-child { border-bottom: none; }
+.ResourceDirectory-reportTitle { font-weight: 600; }
+.ResourceDirectory-reportReason { color: var(--muted-color); flex: 1; min-width: 200px; }
+
+.ResourceDirectory-notice { color: #1a7f37; }
+.ResourceDirectory-error { color: #a92b2b; }
+[data-theme^=dark] .ResourceDirectory-notice { color: #56d364; }
+[data-theme^=dark] .ResourceDirectory-error { color: #f47067; }
+
+.ResourceDirectory-pages { display: flex; gap: 8px; margin-top: 4px; }
+
+@media (max-width: 700px) {
+  .ResourceDirectory-layout { grid-template-columns: 1fr; }
+  .ResourceDirectory-tree { position: static; }
+  .ResourceDirectory-item { padding: 16px; }
+}

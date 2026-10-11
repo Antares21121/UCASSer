@@ -6,6 +6,7 @@ test('homepage, header, tag list and discussion use original Flarum components o
   await expect(page.locator('.IndexPage')).toHaveCount(1);
   await expect(page.locator('.WelcomeHero')).toContainText('校园公共论坛');
   await expect(page.locator('.DiscussionListItem').first()).toBeVisible();
+  await expect(page.locator('.Navigation-back')).toHaveCount(0);
   await expect(page.locator('.Campus-section')).toHaveCount(10);
   await expect(page.locator('.Campus-topbar')).toHaveCount(0);
   await expect(page.locator('.Header-primary').getByRole('link',{name:'首页',exact:true})).toBeVisible();
@@ -15,12 +16,17 @@ test('homepage, header, tag list and discussion use original Flarum components o
   await page.locator('.DiscussionListItem-main').first().click();
   await expect(page.locator('.DiscussionPage')).toHaveCount(1);
   await expect(page.locator('.PostStream')).toHaveCount(1);
+  await expect(page.locator('.Navigation-back').first()).toHaveAttribute('href',/\/t\/campus-resources/);
   await expect(page.locator('.Campus-nativeRecord')).toContainText('版权或使用说明');
   for(const width of [320,390,768]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();}
   await page.setViewportSize({width:390,height:844});
   await page.getByRole('button',{name:'打开导航菜单'}).click();
   await page.locator('.App-drawer').getByRole('link',{name:'首页',exact:true}).click();
   await expect(page.locator('.IndexPage .DiscussionListItem').first()).toBeVisible();
+  await expect(page.locator('.Navigation-back')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'打开导航菜单'})).toBeVisible();
+  await page.goto('/campus');
+  await expect(page.locator('.Navigation-back')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 

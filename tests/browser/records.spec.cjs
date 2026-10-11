@@ -29,6 +29,8 @@ test('publish, preview, edit and comment on a real persisted information record'
     name: title,
     exact: true
   })).toBeVisible();
+  const createdAt = await page.locator('.PostStream .Post-header time').first().getAttribute('datetime');
+  expect(Math.abs(Date.now() - Date.parse(createdAt))).toBeLessThan(60000);
   await page.getByRole('button', {
     name: '收藏内容',
     exact: true

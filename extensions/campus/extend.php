@@ -7,7 +7,7 @@ return [
     (new Extend\ServiceProvider())->register(Campus\LocaleProvider::class),
     new Extend\Locales(__DIR__.'/locale'),
     (new Extend\ApiResource(\Flarum\Api\Resource\DiscussionResource::class))->fields(Campus\NativeRecordFields::class)
-        ->endpoint('index', fn(\Flarum\Api\Endpoint\Index $endpoint) => $endpoint->addDefaultInclude(['firstPost'])->eagerLoad(['firstPost'])),
+        ->endpoint('index', fn(\Flarum\Api\Endpoint\Index $endpoint) => $endpoint->addDefaultInclude(['firstPost'])->eagerLoad(['firstPost'])->after(Campus\NativeListFields::hydrate(...))),
     (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))->addFilter(\Flarum\Discussion\Search\DiscussionSearcher::class,Campus\NativeFilter::class),
     (new Extend\Frontend('forum'))->js(__DIR__.'/js/dist/forum.js')->css(__DIR__.'/resources/campus.less')
         ->route('/campus', 'campus')->route('/campus/rules', 'campus.rules')->route('/campus/identity','campus.identity')->route('/campus/moderation','campus.moderation')
@@ -55,6 +55,7 @@ return [
         ->post('/campus/moderate', 'campus.moderate', Campus\IdentityController::class)
         ->get('/campus/audit', 'campus.audit', Campus\IdentityController::class),
     (new Extend\Middleware('api'))->add(Campus\RateLimit::class),
+    (new Extend\Middleware('api'))->add(Campus\NativePagination::class),
     (new Extend\Notification())->type(Campus\Notice::class,['alert'])->type(Campus\AccountNotice::class,['alert'])->beforeSending(Campus\NotificationGuard::class),
     (new Extend\Middleware('api'))->add(Campus\NotificationGuard::class),
     (new Extend\Middleware('forum'))->add(Campus\RateLimit::class),

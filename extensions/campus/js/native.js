@@ -737,7 +737,7 @@ export function registerNative() {
     href,
     icon: 'fas fa-' + icon,
     active: (m.route.get() || '').split('?')[0] === href
-  }, title), -20 - i)));
+  }, title), i < 2 ? -20 - i : -21 - i)));
   extend(SessionDropdown.prototype, 'items', items => {
     if (app.session.user) items.add('campus-collections', m(LinkButton, {
       href: '/campus/me',

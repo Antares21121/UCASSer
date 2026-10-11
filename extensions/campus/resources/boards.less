@@ -161,3 +161,37 @@
 body:has(.App.drawerOpen) .AlertManager { z-index:(@zindex-modal-background - 1); }
 .AlertManager .Alert { border-radius:10px; box-shadow:0 8px 28px fade(#102344,12%); text-align:left; }
 @media(max-width:767px) { .AlertManager { top:60px; right:12px; left:12px; max-width:none; } }
+
+.Campus-sidebarHeading { display:block; color:var(--muted-color); font-size:10px; font-weight:650; letter-spacing:.6px; padding:17px 12px 7px; }
+@media(min-width:992px) {
+  .IndexPage-nav.sideNav { background:var(--body-bg); border:1px solid fade(#687f8a,12%); border-radius:14px; padding:12px; }
+  .IndexPage-nav.sideNav>ul { width:100%; }
+  .IndexPage-nav .App-primaryControl { margin-bottom:5px; }
+  .IndexPage-nav.sideNav .Dropdown--select .Dropdown-menu>li>a { display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:8px; font-size:13px; line-height:1.5; color:var(--text-color); }
+  .IndexPage-nav.sideNav .Dropdown--select .Dropdown-menu>li>a:hover { background:fade(@primary-color,5%); }
+  .IndexPage-nav.sideNav .Dropdown--select .Dropdown-menu>li.active>a { background:fade(@primary-color,9%); color:@primary-color; font-weight:600; box-shadow:inset 2px 0 @primary-color; }
+  .IndexPage-nav .Button-icon,.IndexPage-nav .TagIcon { width:19px; flex:0 0 19px; text-align:center; font-size:14px; }
+  .IndexPage-nav .Dropdown-separator { display:none; }
+  .IndexPage-nav .item-campustoolheading { margin-top:6px; }
+}
+.Campus-feedPagination { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:20px 22px; border-top:1px solid fade(#687f8a,12%); background:fade(@primary-color,2%); }
+.Campus-paginationCount { font-size:12px; color:var(--muted-color); }
+.Campus-paginationControls { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.Campus-paginationControls .Button { min-width:34px; min-height:34px; border-radius:8px; padding:7px 10px; font-size:12px; }
+.Campus-paginationControls .is-current { background:@primary-color; color:white; font-weight:650; }
+.Campus-paginationEllipsis { padding:0 3px; color:var(--muted-color); }
+@media(max-width:767px) { .Campus-feedPagination { padding:16px 12px; gap:9px; } .Campus-paginationControls { gap:4px; } .Campus-paginationControls .Button { padding:7px 8px; } }
+@media(min-width:768px) and (max-width:991px) { .Campus-sidebarHeading { display:none; } }
+
+.Campus-feedLoading { min-height:450px; }
+.Campus-skeletonRow { display:flex; align-items:flex-start; gap:18px; padding:25px 22px; border-bottom:1px solid var(--campus-divider); }
+.Campus-skeletonMarker { display:block; width:45px; height:45px; flex:0 0 45px; border-radius:12px; background:var(--campus-skeleton); }
+.Campus-skeletonContent { flex:1; min-width:0; }
+.Campus-skeletonContent>span { display:block; height:10px; margin-bottom:13px; background:var(--campus-skeleton); border-radius:5px; }
+.Campus-skeletonTitle { max-width:65%; height:15px!important; }
+.Campus-skeletonMeta { max-width:35%; }
+.Campus-skeletonExcerpt { max-width:85%; margin-bottom:0!important; }
+.Campus-feedSkeleton--review .Campus-skeletonMeta { max-width:53%; height:18px; }
+.Campus-feedSkeleton--calendar .Campus-skeletonMarker,.Campus-feedSkeleton--agenda .Campus-skeletonMarker { height:56px; border-radius:9px; }
+@media(prefers-reduced-motion:no-preference) { .Campus-feedSkeleton { animation:campus-skeleton-breathe 1.4s ease-in-out infinite alternate; } }
+@keyframes campus-skeleton-breathe { from { opacity:1; } to { opacity:.6; } }

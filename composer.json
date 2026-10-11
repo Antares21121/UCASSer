@@ -42,13 +42,25 @@
         "flarum/suspend": "*",
         "flarum/tags": "*",
         "php": "^8.3",
-        "ucasser/flarum-campus": "0.1.0"
+        "ucasser/flarum-campus": "0.1.0",
+        "ucasser/resources": "1.0.0"
     },
     "config": {
         "preferred-install": "dist",
         "sort-packages": true
     },
-    "repositories": [{"type": "path", "url": "extensions/campus", "options": {"symlink": true}}],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "extensions/campus",
+            "options": {"symlink": true}
+        },
+        {
+            "type": "path",
+            "url": "extensions/ucasser-resources",
+            "options": {"symlink": true}
+        }
+    ],
     "minimum-stability": "beta",
     "prefer-stable": true
 }

@@ -1,0 +1,134 @@
+// Semantic colors follow Flarum's theme, including its high contrast variants.
+@campus-font-system:"Segoe UI",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+:root {
+  --campus-canvas:#f5f7fb;
+  --campus-surface:#fff;
+  --campus-ink:#182238;
+  --campus-muted:#55637a;
+  --campus-divider:#d9e1ed;
+  --campus-skeleton:#e2e8f1;
+  --campus-soft:#edf3ff;
+  --campus-link:@primary-color;
+}
+:root[data-theme^="dark"] {
+  --campus-canvas:#101827;
+  --campus-surface:#172235;
+  --campus-ink:#e4ebf5;
+  --campus-muted:#aab8cd;
+  --campus-divider:#3a4b65;
+  --campus-skeleton:#2b3c55;
+  --campus-soft:#203554;
+  --campus-link:lighten(@primary-color,22%);
+}
+:root[data-theme$="-hc"] { --campus-divider:var(--campus-muted); }
+.App {
+  --text-color:var(--campus-ink);
+  --muted-color:var(--campus-muted);
+  --link-color:var(--campus-link);
+  font-family:@campus-font-system;
+}
+.Modal { font-family:@campus-font-system; }
+.App-content,.CampusApp .App-content { background:var(--campus-canvas); }
+.Header,.CampusBoardHero,.IndexPage .DiscussionList,
+.IndexPage-nav.sideNav,.Campus-nativeRecord { background:var(--campus-surface); }
+.Campus-nativeExplore { background:transparent; }
+.Campus {
+  --campus-ink:var(--text-color);
+  --campus-muted:var(--muted-color);
+  --campus-border:var(--campus-divider);
+  font-size:1rem;
+  line-height:1.75;
+}
+.Campus h1,.TagTile-name { font-weight:600; letter-spacing:0; }
+.Campus-panel,.Campus-section,.Campus-pagination a,.Campus .FormControl {
+  background:var(--campus-surface); color:var(--campus-ink);
+  border-color:var(--campus-divider);
+}
+.Campus .FormControl::placeholder { color:var(--campus-muted); opacity:1; }
+.Campus a:not(.Button--primary),.Campus .Button--link,
+.Campus-boardIcon,.Campus-detailIcon,.Campus-rowMarker,.Campus-listMetadata,
+.Campus-rating strong,.Campus-questionProgress li.is-current,
+.Header-primary .Button.active,.Campus-rowStatus.is-resolved,
+.IndexPage-nav.sideNav .Dropdown--select .Dropdown-menu>li.active>a {
+  color:var(--campus-link);
+}
+.Campus-boardIcon,.Campus-detailIcon,.Campus-rowMarker,.Campus-rowStatus.is-resolved,
+.IndexPage-nav.sideNav .Dropdown--select .Dropdown-menu>li.active>a { background:var(--campus-soft); }
+.Campus-rowStatus { color:var(--campus-muted); font-size:12px; }
+.DiscussionListItem-info,.Campus-sidebarHeading,.Campus-paginationCount { color:var(--campus-muted); }
+.Campus-sidebarHeading { font-size:12px; font-weight:600; letter-spacing:0; }
+@media(min-width:992px) { .IndexPage-nav.sideNav>ul.affix { width:calc(var(--sidebar-width,190px) - 26px); } }
+.IndexPage .DiscussionListItem-info .item-excerpt { font-size:13px; }
+.IndexPage .DiscussionListItem-title { line-height:1.65; }
+.Campus .Button--primary,.Campus a.Button--primary { color:#fff; }
+.Button,.FormControl { font-family:inherit; }
+.Campus .Button,.Campus-paginationControls .Button { font-weight:600; }
+.Campus-paginationControls .Button { min-height:36px; min-width:36px; }
+.Campus-paginationControls .Button:disabled { cursor:default; }
+.IndexPage .DiscussionList,.IndexPage-nav.sideNav,.Campus-nativeRecord { border-color:var(--campus-divider); }
+.Campus .Button:not(.Button--primary),.Campus-empty { background:var(--campus-soft); color:var(--campus-ink); }
+.Campus .Campus-badge { color:var(--campus-muted); background:var(--campus-soft); }
+.Campus .Campus-badge.is-approved,.Campus .Campus-badge.is-resolved { color:var(--campus-link); }
+.Campus-skeleton { background:var(--campus-skeleton); }
+.Campus :focus-visible,.App .Button:focus-visible,.App a:focus-visible {
+  outline:2px solid var(--campus-link); outline-offset:3px;
+}
+.Campus-directoryLayout { display:grid; grid-template-columns:minmax(180px,230px) minmax(0,1fr); gap:24px; align-items:start; }
+.Campus-directoryTree { padding:18px 14px; border:1px solid var(--campus-divider); border-radius:12px; background:var(--campus-surface); }
+.Campus-directoryTree h2 { font-size:15px; margin-bottom:12px; }
+.Campus-directoryTree ul { list-style:none; padding:0; margin:0; }
+.Campus-directoryTree ul ul { margin:2px 0 6px 12px; padding-left:8px; border-left:1px solid var(--campus-divider); }
+.Campus-directoryNode { display:flex; align-items:center; gap:4px; border-radius:6px; }
+.Campus-directoryCategory,.Campus-directoryAll { display:flex; flex:1; gap:8px; min-width:0; padding:8px; font-size:13px; color:var(--campus-ink)!important; overflow-wrap:anywhere; }
+.Campus-directoryCategory .icon { margin-top:5px; width:14px; flex:none; color:var(--campus-muted); }
+.Campus-directoryNode.is-active,.Campus-directoryAll.is-active { background:var(--campus-soft); font-weight:600; }
+.Campus-directoryNodeActions { display:flex; }
+.Campus .Campus-directoryNodeActions .Button { min-height:32px; min-width:30px; padding:5px; background:transparent; }
+.Campus-directoryTreeEmpty { font-size:12px; color:var(--campus-muted); padding:8px; }
+.Campus-directoryMain { min-width:0; }
+.Campus-directoryBreadcrumbs { display:flex; flex-wrap:wrap; gap:8px; font-size:13px; padding-bottom:16px; }
+.Campus-directorySearch { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:20px; }
+.Campus-directorySearch .FormControl { flex:1 1 180px; width:auto; }
+.Campus-directoryCard { padding:22px; border:1px solid var(--campus-divider); border-radius:12px; background:var(--campus-surface); margin-bottom:14px; }
+.Campus-directoryCardHeader { display:flex; align-items:flex-start; gap:12px; }
+.Campus-directoryCardHeader>div { flex:1; min-width:0; }
+.Campus-directoryCardHeader h2 { font-size:17px; margin:0 0 4px; overflow-wrap:anywhere; }
+.Campus-directoryCardHeader .Campus-hint { margin:0; }
+.Campus-directoryDocIcon { display:grid; place-items:center; width:38px; height:42px; border-radius:8px; background:var(--campus-soft); color:var(--campus-link); flex:none; }
+.Campus-directoryDescription { line-height:1.8; margin:16px 0 12px; }
+.Campus-directorySource { display:flex; align-items:center; gap:8px; color:var(--campus-muted); font-size:13px; overflow-wrap:anywhere; }
+.Campus-directoryCardFooter { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-top:18px; }
+.Campus-directoryCardFooter .Campus-actions { margin:0; gap:14px; }
+.Campus-directoryCardFooter .Button--primary .icon { margin-left:8px; }
+.Campus-directorySecondary { display:flex; flex-wrap:wrap; gap:4px; }
+.Campus .Campus-directorySecondary .Button { background:transparent; padding:6px; min-height:36px; font-size:12px; }
+.Campus-directoryUpdated,.Campus-directoryFootnote { font-size:12px; color:var(--campus-muted); margin:16px 0 0; }
+.Campus-directoryFootnote { text-align:center; margin:20px 0; }
+.Campus-directoryRevision { border-bottom:1px solid var(--campus-divider); padding:16px 0; }
+.Campus-revisionChange { display:grid; grid-template-columns:90px minmax(0,1fr) 20px minmax(0,1fr); gap:10px; font-size:13px; margin:12px 0; }
+.Campus-revisionChange del,.Campus-revisionChange ins { overflow-wrap:anywhere; text-decoration:none; }
+.Campus-revisionChange del { color:var(--campus-muted); }
+.Campus-revisionChange ins { font-weight:600; }
+.Campus-directoryReport { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:16px 0; border-bottom:1px solid var(--campus-divider); }
+@media(max-width:991px) {
+  .Campus-directoryLayout { grid-template-columns:minmax(0,1fr); }
+  .Campus-directoryTree { max-height:260px; overflow:auto; overscroll-behavior:contain; }
+}
+@media(max-width:767px) {
+  .Campus-directoryCard { padding:16px; }
+  .Campus-directoryCardHeader { gap:9px; }
+  .Campus-directoryCardHeader h2 { font-size:16px; }
+  .Campus-directoryCardHeader .Campus-badge { flex:none; padding:2px 6px; }
+  .Campus-revisionChange { grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr); }
+  .Campus-revisionChange strong { grid-column:1 / -1; }
+  .Campus-paginationControls .Button { min-height:42px; min-width:42px; }
+}
+@media(prefers-contrast:more) {
+  .App { --campus-divider:var(--campus-muted); }
+  .Campus-rowStatus,.Campus-badge { border:1px solid currentColor; }
+}
+@media(forced-colors:active) {
+  .App { --campus-canvas:Canvas; --campus-surface:Canvas; --campus-ink:CanvasText; --campus-muted:CanvasText; --campus-divider:CanvasText; --campus-link:LinkText; --campus-soft:Canvas; --campus-skeleton:GrayText; }
+  .Campus :focus-visible,.App .Button:focus-visible,.App a:focus-visible { outline-color:Highlight; }
+  .Campus-paginationControls .is-current,.Campus-directoryNode.is-active { outline:2px solid Highlight; outline-offset:-2px; }
+}

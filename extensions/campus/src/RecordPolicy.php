@@ -10,6 +10,7 @@ class RecordPolicy extends AbstractPolicy
     public function __construct(private ConnectionInterface $db) {}
     public function can(User $a,string $ability,Discussion|Post $model): ?string {
         $d=$model instanceof Post?$model->discussion:$model;
+        if (!$d) return null;
         if ($d->hidden_at && $d->hidden_user_id!==$a->id && !$a->isAdmin()) return null;
         $own=$d->user_id===$a->id && !$a->isGuest();
         $relevant=$model instanceof Post?($ability==='edit' && $model->number===1 && !$model->hidden_at):in_array($ability,['rename','tag'],true);

@@ -59,7 +59,7 @@ python scripts/campus.py migrate --backend native
 python scripts/forum.py start --backend native
 ```
 
-已有数据库先执行 `python scripts/forum.py backup --backend native`。迁移命令执行 setup 并清缓存；本轮没有新增数据库迁移。Docker 使用对应命令的 `--backend docker`。本地环境完整说明见 [development.md](development.md)。
+已有数据库先执行 `python scripts/forum.py backup --backend native`。迁移命令执行 setup 并清缓存；资料目录扩展另有自己的分类、链接、修订与反馈迁移，按 [resources.md](resources.md) 启用。Docker 使用对应命令的 `--backend docker`。本地环境完整说明见 [development.md](development.md)。
 
 Flarum 2.x 的登录弹窗、编辑器和评论组件采用异步模块加载。源码在 `js/` 根目录，因此 webpack 的 `autoChunkNameLoader` 必须覆盖该目录；否则静态构建可成功，首次打开弹窗或编辑器却会失败。扩展不得覆盖原生 Composer 的 `onTextEditorBuilt` 回调，等 `editorReady()` 后再设置校园辅助属性。
 
@@ -74,3 +74,15 @@ python tests/campus_smoke.py --backend native --phase 11
 浏览器测试和权限接口测试顺序执行，避免测试临时调整分区权限影响浏览器流程。当前结果与远程 CI 证据见 [verification.md](verification.md)。生产仍等待稳定 Flarum 2.x，并单独验证 HTTPS、外发邮件、备份恢复和运维配置。
 
 课程维护按钮位于目录页顶部，保存后自动定位该课程；原生错误提示移到内容上方，避免遮挡编辑器的提交和重试按钮。访客进入个人空间、身份、维护与举报页面先显示原生登录入口，不发送注定失败的受限请求；手机菜单打开时，提示层位于菜单下方，导航仍可操作。
+
+## 列表、导航与主题细节
+
+原生侧栏保留标签权限与手机下拉导航，桌面按内容、资料课程、个人社区分组。首页 `/`、`/campus` 和 `/all` 隐藏返回与列表固定按钮，保留手机菜单；讨论页沿用原生历史返回。
+
+信息流使用原生讨论列表的页状态，底部显示真实可见总数、页码和前后页，筛选与排序写入 URL，刷新后保持当前页。无服务器预载的校园入口先设置原生每页大小，避免首次打开第二页时 offset 为零。RC.8 首页的内部预载请求使用 `page[number]`，而讨论接口使用 offset；`NativePagination` 仅适配此内部请求，不修改 vendor 或公共接口。切换分区立即清除上一分区的列表，显示当前类型的骨架；请求序号隔离过时结果和分页总数。后台实时刷新保留当前页与已显示内容，失败不会清空列表。
+
+`NativeListFields` 按整页批量读取课程、分区、赞同、采纳和可见关联内容，避免每行重复查询。列表只返回公开预览，详情、反馈与历史仍按既有权限处理；没有在客户端拼接不可见数据。
+
+`finish.less` 使用语义颜色分别定义页面背景、表面、正文、辅助文字、分隔线和蓝色链接，跟随原生浅色、深色及高对比度主题。图标沿用矢量字体，字体采用本机系统栈，无外部字体下载或图片文字。可用宽度不足时目录、工具栏与分页换行，手机按钮保留触控尺寸，减少动画设置禁用骨架呼吸效果；系统强制颜色模式使用 Canvas、CanvasText、LinkText 和 Highlight。
+
+设计依据：[Microsoft Fluent 排版](https://fluent2.microsoft.design/typography)、[颜色](https://fluent2.microsoft.design/color)、[设计变量](https://fluent2.microsoft.design/design-tokens)、[可访问性](https://fluent2.microsoft.design/accessibility)，以及 [WCAG](https://www.w3.org/TR/WCAG22/) 的文字对比度与重排原则。自动验收检查代表性正文对比度至少 4.5:1、DPR 2 和 320–1440px 布局；这些检查不能替代完整的可访问性审计。

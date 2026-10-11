@@ -8,6 +8,7 @@ class NativeRecordFields
     public function __construct(private Records $records) {}
     public function __invoke(): array {
         return [Schema\Arr::make('campusRecord')->get(function (Discussion $discussion,Context $context) {
+            if ($discussion->relationLoaded('campusPreview')) return $discussion->getRelation('campusPreview');
             $actor=$context->getActor();
             $row=$this->records->query($actor)->where('discussion_id',$discussion->id)->first();
             if (!$row) return [];

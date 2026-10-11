@@ -70,6 +70,7 @@ export const boards = {
     category: 'notes',
     action: '分享合法资料',
     kind: 'document',
+    secondary: ['/resources', '按学院与课程查找资料'],
     tabs: [['notes', '学习笔记'], ['lecture', '公开讲义'], ['revision', '复习指南'], ['guide', '校园指南'], ['faq', '常见问题']]
   },
   courses: {

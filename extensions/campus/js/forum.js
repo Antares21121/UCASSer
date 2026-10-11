@@ -1,5 +1,7 @@
 import app from 'flarum/forum/app';
 import IndexPage from 'flarum/forum/components/IndexPage';
+import { registerNavigation } from './navigation';
+import { registerDirectory } from './directory';
 import IdentityPage from './identity';
 import ModerationPage from './moderation';
 import CoursesPage from './courses';
@@ -19,6 +21,7 @@ class RulesPage extends DataPage {
 }
 app.initializers.add('ucasser-campus', () => {
   registerNative();
+  registerNavigation();
   registerNotifications();
   registerBookmarks();
   registerReports();
@@ -42,3 +45,4 @@ app.initializers.add('ucasser-campus', () => {
     component
   };
 });
+app.initializers.add('ucasser-campus-directory', registerDirectory, -10);

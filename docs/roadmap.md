@@ -2,9 +2,11 @@
 
 本轮按维护者提供的 ROADMAP.md 实施阶段 1–12，工作分支 `codex/phases1-12`，依赖 Phase 0 的 Flarum 2.x 工程基线。原始 ROADMAP 保留在维护者的附件目录，本文件记录实际实施状态。所有示例明确标注，不替换真实校园数据。
 
+已接入 [PR #3](https://github.com/Antares21121/UCASSer/pull/3) 的资源分类目录、两个官方校外入口、链接维护、修订和反馈能力。学院与课程由维护者按实际情况填写；资料板块保留原生讨论信息流，提供目录入口。两套 CI 和本地扩展配置同时保留，目录权限见 [permissions.md](permissions.md)，安装与边界见 [resources.md](resources.md)。
+
 | 阶段 | 状态 | 实际验收范围 |
 |---|---|---|
-| 0 基础工程 | 已完成开发验收，PR #1 待合并 | 锁定 2.x、环境、持久化、备份恢复、基础 CI 与文档 |
+| 0 基础工程 | PR #1 已合并 | 锁定 2.x、环境、持久化、备份恢复、基础 CI 与文档 |
 | 1 信息架构 | 已完成开发验收 | 十分区、真实首页、活动截止、移动导航、空/错误状态、原生 URL/搜索访问控制 |
 | 2 身份权限 | 接口/浏览器通过 | 注册确认与重置邮件、角色隔离、人工材料清除、撤权、GDPR |
 | 3 校园信息 | 接口/浏览器通过 | 来源字段、期限、状态、预览、评论、修订与冲突、私有反馈 |
@@ -20,7 +22,7 @@
 
 实现清单见 [features.md](features.md)，权限、隐私与处理流程分别见 [permissions.md](permissions.md)、[privacy.md](privacy.md)、[moderation.md](moderation.md)。新开发者按 [development.md](development.md) 初始化相同锁文件与本地邮箱；验收命令见 [testing.md](testing.md)，实际证据见 [verification.md](verification.md)。
 
-阶段 1–12 已完成本轮开发及验收，提交至 [PR #2](https://github.com/Antares21121/UCASSer/pull/2)。Linux 全流程成功记录见 [GitHub Actions](https://github.com/Antares21121/UCASSer/actions/runs/37979625114)，对应业务修复提交 `a40bec6`。该 PR 依赖仍待合并的 [Phase 0 PR #1](https://github.com/Antares21121/UCASSer/pull/1)，先合并 #1，再合并 #2；没有自动合并。
+阶段 1–12 的业务开发已提交至 [PR #2](https://github.com/Antares21121/UCASSer/pull/2)。旧业务 Linux 全流程成功记录见 [GitHub Actions](https://github.com/Antares21121/UCASSer/actions/runs/37979625114)，对应提交 `a40bec6`。Phase 0 PR #1 已合并；当前原生界面与资源目录整合以新提交验收和 PR #2 checks 为准，目标分支为 `2.x`。
 
 当前生产边界：锁文件为 Flarum 2.0.0-rc.8，生产等待稳定 2.x，并重新跑兼容/升级/恢复。正式域名、服务器、证书、SMTP、运营人员、投诉联系人、保留期限、异地加密备份、调度与告警仍由部署者提供真实值后实测。未在生产数据库执行迁移、删除或部署。
 
