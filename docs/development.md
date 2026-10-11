@@ -63,6 +63,8 @@ python scripts/forum.py --backend native healthcheck
 
 `bootstrap-native` 下载并校验运行时到 `.tools/`，不修改系统 PATH、不安装服务、不创建公网数据库监听。重复运行验证缓存，版本不符时拒绝覆盖已安装工具。PHP CA 文件从操作系统信任库导出，不关闭 TLS 校验。
 
+Windows 便携 PHP 启用官方 OPcache（含 CLI 内置开发服务器），每次请求检查源码时间戳，PHP 修改无需手动重启。同步此配置时运行 `bootstrap-native` 后重启项目 Web 服务；数据库数据保持不变。这减少 PHP 编译开销，列表查询仍须独立测量优化。
+
 PHP 监听 `127.0.0.1:8080`，MariaDB 监听 `127.0.0.1:3307`。脚本将 `DB_HOST/DB_PORT` 转换为本机值，因此 `.env.example` 中 Docker 的 `db:3306` 不会误用于 Windows。修改数据库端口用 `NATIVE_DB_PORT`。停止等待 MariaDB 进程真实退出，避免重启时文件锁冲突。
 
 Windows PHP 不在 PATH 属于正常情况，所有命令由脚本选择 `.tools/php/php.exe`。不要在此方案与 Docker 之间切换同一工作区的运行数据；它们使用不同的数据库和文件存储。需要迁移时参照 [备份恢复](backup-recovery.md)。

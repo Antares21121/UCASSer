@@ -2,7 +2,10 @@ const {test,expect}=require('@playwright/test');
 
 test('homepage, header, tag list and discussion use original Flarum components on desktop and mobile',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',e=>{if(e.type()==='error'&&/TypeError|ReferenceError|NotFoundError/.test(e.text()))errors.push(e.text());});
+  await page.context().addCookies([{name:'locale',value:'en',url:test.info().project.use.baseURL}]);
   await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang','zh-Hans');
+  await expect(page.locator('.LocaleDropdown')).toHaveCount(0);
   await expect(page.locator('.IndexPage')).toHaveCount(1);
   await expect(page.locator('.WelcomeHero')).toContainText('校园公共论坛');
   await expect(page.locator('.DiscussionListItem').first()).toBeVisible();
@@ -21,6 +24,7 @@ test('homepage, header, tag list and discussion use original Flarum components o
   for(const width of [320,390,768]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();}
   await page.setViewportSize({width:390,height:844});
   await page.getByRole('button',{name:'打开导航菜单'}).click();
+  await expect(page.locator('.App-drawer .LocaleDropdown')).toHaveCount(0);
   const controls=await page.locator('.App-header .Header-controls .Button').evaluateAll(nodes=>nodes.filter(n=>n.offsetWidth).map(n=>({font:getComputedStyle(n).fontSize,height:n.getBoundingClientRect().height,icon:!!n.querySelector('.Button-icon')})));
   expect(controls.every(control=>control.font==='14px'&&control.height>=44&&control.icon)).toBeTruthy();
   await page.locator('.App-drawer').getByRole('link',{name:'首页',exact:true}).click();

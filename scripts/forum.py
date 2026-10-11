@@ -201,6 +201,9 @@ class Forum:
         ini = (self.root / 'docker/php/php.ini').read_text().replace('error_log=/dev/stderr', 'error_log="' + (self.runtime / 'php-error.log').as_posix() + '"')
         ini += f'\nextension_dir="{php_dir}/ext"\nopenssl.cafile="{ca}"\ncurl.cainfo="{ca}"\n'
         ini += ''.join(f'extension={name}\n' for name in ('curl', 'fileinfo', 'gd', 'mbstring', 'openssl', 'pdo_mysql', 'zip', 'intl'))
+        # The built-in Windows server uses the CLI SAPI. Cache compiled PHP,
+        # but check source timestamps on every request so edits stay visible.
+        ini += 'zend_extension=php_opcache.dll\nopcache.enable=1\nopcache.enable_cli=1\nopcache.validate_timestamps=1\nopcache.revalidate_freq=0\n'
         (self.tools / 'php/php.ini').write_text(ini, encoding='utf-8')
         self.doctor()
 

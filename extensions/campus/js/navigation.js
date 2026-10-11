@@ -40,6 +40,7 @@ export function pagination({
 }
 export function registerNavigation() {
   extend(HeaderSecondary.prototype, 'items', items => {
+    items.remove('locale');
     for (const item of items.toArray()) {
       if (item.itemName === 'signUp') item.attrs.icon = 'fas fa-user-plus';
       if (item.itemName === 'logIn') item.attrs.icon = 'fas fa-sign-in-alt';

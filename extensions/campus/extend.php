@@ -6,6 +6,8 @@ use UCASSer\Campus;
 return [
     (new Extend\ServiceProvider())->register(Campus\LocaleProvider::class),
     new Extend\Locales(__DIR__.'/locale'),
+    (new Extend\Middleware('forum'))->replace(\Flarum\Http\Middleware\SetLocale::class, Campus\ForumLocale::class),
+    (new Extend\Middleware('api'))->replace(\Flarum\Http\Middleware\SetLocale::class, Campus\ForumLocale::class),
     (new Extend\ApiResource(\Flarum\Api\Resource\DiscussionResource::class))->fields(Campus\NativeRecordFields::class)
         ->endpoint('index', fn(\Flarum\Api\Endpoint\Index $endpoint) => $endpoint->addDefaultInclude(['firstPost'])->eagerLoad(['firstPost'])->after(Campus\NativeListFields::hydrate(...))),
     (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))->addFilter(\Flarum\Discussion\Search\DiscussionSearcher::class,Campus\NativeFilter::class),
