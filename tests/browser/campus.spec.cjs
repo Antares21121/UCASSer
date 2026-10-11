@@ -21,6 +21,8 @@ test('homepage, header, tag list and discussion use original Flarum components o
   for(const width of [320,390,768]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();}
   await page.setViewportSize({width:390,height:844});
   await page.getByRole('button',{name:'打开导航菜单'}).click();
+  const controls=await page.locator('.App-header .Header-controls .Button').evaluateAll(nodes=>nodes.filter(n=>n.offsetWidth).map(n=>({font:getComputedStyle(n).fontSize,height:n.getBoundingClientRect().height,icon:!!n.querySelector('.Button-icon')})));
+  expect(controls.every(control=>control.font==='14px'&&control.height>=44&&control.icon)).toBeTruthy();
   await page.locator('.App-drawer').getByRole('link',{name:'首页',exact:true}).click();
   await expect(page.locator('.IndexPage .DiscussionListItem').first()).toBeVisible();
   await expect(page.locator('.Navigation-back')).toHaveCount(0);

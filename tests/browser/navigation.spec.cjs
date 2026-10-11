@@ -19,16 +19,19 @@ test('numbered native pages remain distinct through reload and preserve filters'
   await page.getByRole('navigation',{name:'信息流分页'}).getByRole('link',{name:'下一页',exact:true}).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page).toHaveURL(/sort=newest/);
-  await expect(titles.first()).toBeVisible();
+  await expect.poll(async()=>{
+    const values=await titles.allTextContents();
+    return values.length>0 && !values.some(title=>first.includes(title));
+  }).toBeTruthy();
   const second=await titles.allTextContents();
   expect(second.some(title=>first.includes(title))).toBeFalsy();
   await page.reload();
   await expect(titles.first()).toBeVisible();
-  expect(await titles.allTextContents()).toEqual(second);
+  await expect.poll(()=>titles.allTextContents()).toEqual(second);
   await expect(page.getByRole('navigation',{name:'信息流分页'}).locator('[aria-current="page"]')).toHaveText('2');
   await page.getByRole('navigation',{name:'信息流分页'}).getByRole('link',{name:'上一页',exact:true}).click();
   await expect(titles.first()).toBeVisible();
-  expect(await titles.allTextContents()).toEqual(first);
+  await expect.poll(()=>titles.allTextContents()).toEqual(first);
   await expect(page.locator('.Navigation-back')).toHaveCount(0);
   expect(await page.locator('.Campus-nativeExplore').evaluate(node=>getComputedStyle(node).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
   expect(errors).toEqual([]);
@@ -103,6 +106,14 @@ test('directory and native pages keep readable theme colors and reflow at high D
         return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
       });
       expect(contrast,theme+' tag contrast').toBeGreaterThanOrEqual(4.5);
+      for (const selector of ['.Header-primary .Button-label','.Header-secondary .Button-label','.Campus-listMetadata']) {
+        const ratio=await page.locator(selector).first().evaluate(node=>{
+          const parse=value=>value.match(/[\d.]+/g).map(Number),lum=rgb=>{const c=rgb.slice(0,3).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
+          const bg=node=>{if(!node)return[255,255,255];const c=parse(getComputedStyle(node).backgroundColor),base=bg(node.parentElement),a=c.length>3?c[3]:1;return c.slice(0,3).map((v,i)=>v*a+base[i]*(1-a));};
+          const a=lum(parse(getComputedStyle(node).color)),b=lum(bg(node));return(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+        });
+        expect(ratio,theme+' '+selector+' contrast').toBeGreaterThanOrEqual(4.5);
+      }
     }
     for (const width of [992,768,390,320]) {
       await page.setViewportSize({width,height:1000});

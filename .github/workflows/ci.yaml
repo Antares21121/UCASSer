@@ -1,5 +1,12 @@
 name: Infrastructure and campus acceptance
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: ["2.x"]
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: campus-acceptance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:

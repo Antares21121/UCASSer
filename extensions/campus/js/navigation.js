@@ -2,6 +2,7 @@ import app from 'flarum/forum/app';
 import DiscussionList from 'flarum/forum/components/DiscussionList';
 import DiscussionListState from 'flarum/forum/states/DiscussionListState';
 import IndexSidebar from 'flarum/forum/components/IndexSidebar';
+import HeaderSecondary from 'flarum/forum/components/HeaderSecondary';
 import Navigation from 'flarum/common/components/Navigation';
 import LinkButton from 'flarum/common/components/LinkButton';
 import Button from './button';
@@ -38,6 +39,13 @@ export function pagination({
   }, '…') : null, control(n, String(n), `第 ${n} 页`)]), control(current + 1, '下一页', '下一页', last ? current >= last : !hasNext)])]);
 }
 export function registerNavigation() {
+  extend(HeaderSecondary.prototype, 'items', items => {
+    for (const item of items.toArray()) {
+      if (item.itemName === 'signUp') item.attrs.icon = 'fas fa-user-plus';
+      if (item.itemName === 'logIn') item.attrs.icon = 'fas fa-sign-in-alt';
+    }
+    if (items.has('campus-publish')) items.setPriority('campus-publish', 11);
+  });
   // Home is the navigation root, even when reached from a discussion or tag.
   // Leave the history stack and the mobile drawer intact for subsequent pages.
   extend(Navigation.prototype, 'items', items => {

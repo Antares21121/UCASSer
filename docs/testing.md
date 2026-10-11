@@ -45,6 +45,8 @@ npm run test:browser
 
 GitHub Actions 运行相同检查，使用 Linux Docker、锁定 npm/Composer、真实安装、恢复与业务接口及 Chromium。远程结果以 PR 的实际 checks 为准。失败诊断脱敏；只上传不含个人数据的验收结果文件。
 
+PR 更新触发一次完整验收，`2.x` 推送另行验收目标分支；普通功能分支不同时触发重复的 push 与 PR 任务。同一 PR 有新提交时自动取消旧验收，手动运行仍可使用 workflow_dispatch。
+
 实际执行日期、结果和 PR CI 链接记录在 [verification.md](verification.md)。正式 SMTP、HTTPS、只读生产卷、真实运营删除申请和稳定 2.x 升级仍需生产前演练，不由开发通过结果代替。
 
 浏览器与阶段接口测试按顺序运行；接口测试临时调整权限，不能与浏览器同时执行。`campusRecord` 的公开字段、原生检索 20+3 条分页、非法筛选拒绝、身份/举报队列和操作权限均有真实 API 验收。
