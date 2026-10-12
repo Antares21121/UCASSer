@@ -113,7 +113,7 @@ export class AggregationReviewPage extends DataPage {
     return m('div.Aggregation', [
       pageHeading('信息汇集审核', '核对原始来源、合并重复线索，再决定是否公开。网页发生变化时只更新待审候选。'),
       tabs('review'),
-      m('section.Aggregation-sourcePanel', [m('h2', '已登记网页来源'), ...this.sources.map(source => m('p', { key: source.id }, [m('strong', source.name), ' · ', source.trust === 'official' ? '官方' : '非官方', ' · ', source.last_checked_at ? '上次检查 ' + formatTime(source.last_checked_at) : '尚未检查', source.last_error ? m('span.Aggregation-caution', ' · ' + source.last_error) : null]))]),
+      m('section.Aggregation-sourcePanel', [m('h2', '已登记网页来源'), ...this.sources.map(source => m('p', [m('strong', source.name), ' · ', source.trust === 'official' ? '官方' : '非官方', ' · ', source.last_checked_at ? '上次检查 ' + formatTime(source.last_checked_at) : '尚未检查', source.last_error ? m('span.Aggregation-caution', ' · ' + source.last_error) : null]))]),
       this.data.length ? m('div.Aggregation-reviewList', this.data.map(candidate => m('article.Aggregation-review.Campus-panel', { key: candidate.id }, [
         m('div.Aggregation-entryTop', [m('span.Aggregation-type', categories[candidate.category] || '其他'), m('span.Aggregation-status.is-pending', candidate.origin === 'web' ? '网页抓取' : '用户投稿'), m('span', candidate.visibility === 'members' ? '成员可见线索' : '公开网页')]),
         m('h2', candidate.title), m('p', candidate.summary),
