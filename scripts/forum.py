@@ -17,6 +17,7 @@ import sys
 import tempfile
 import time
 import urllib.request
+import urllib.parse
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -421,11 +422,13 @@ class Forum:
         self.validate()
         self.php('scripts/db.php', 'installed')
         url = self.values['APP_URL'].rstrip('/')
-        with urllib.request.urlopen(url + '/api', timeout=15) as response:
+        host = urllib.parse.urlsplit(url).hostname
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({})) if host in ('localhost', '127.0.0.1', '::1') else urllib.request.build_opener()
+        with opener.open(url + '/api', timeout=30) as response:
             data = json.load(response)
             if response.status != 200 or data.get('data', {}).get('type') != 'forums':
                 raise ValueError('Invalid Flarum API health response')
-        with urllib.request.urlopen(url + '/', timeout=15) as response:
+        with opener.open(url + '/', timeout=30) as response:
             if response.status != 200 or b'<html' not in response.read().lower():
                 raise ValueError('Forum homepage health check failed')
         print('Health OK: initialized database, forum API and homepage')
