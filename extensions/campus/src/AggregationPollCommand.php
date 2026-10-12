@@ -44,7 +44,7 @@ class AggregationPollCommand extends AbstractCommand
         $sources = $db->table('campus_aggregation_sources')->where('enabled', true);
         if ($this->input->getOption('source')) $sources->where('id', (int) $this->input->getOption('source'));
         $sources = $sources->get();
-        if ($sources->isEmpty()) { $this->warn('没有启用的来源'); return 0; }
+        if ($sources->isEmpty()) { $this->comment('没有启用的来源'); return 0; }
         $client = new Client(['allow_redirects' => false, 'http_errors' => false, 'timeout' => 15, 'connect_timeout' => 5,
             'headers' => ['User-Agent' => 'UCASSer-aggregation/0.1 (+reviewed campus information index)', 'Accept' => 'text/html']]);
         $failed = false;
@@ -63,7 +63,7 @@ class AggregationPollCommand extends AbstractCommand
                         if ($this->aggregation->ingestWeb($source, $entry)) $added++;
                     } catch (\Throwable $error) {
                         $unavailable++;
-                        $this->warn('跳过不可用公告：'.$entry['url'].'（'.$error->getMessage().'）');
+                        $this->comment('跳过不可用公告：'.$entry['url'].'（'.$error->getMessage().'）');
                     }
                 }
                 $db->table('campus_aggregation_sources')->where('id', $source->id)->update(['last_checked_at' => gmdate('Y-m-d H:i:s'), 'last_error' => $unavailable ? "$unavailable 条公告暂不可用" : null]);
