@@ -9,6 +9,7 @@ import registerNotifications from './notifications';
 import { registerBookmarks } from './personal';
 import { CasesPage, registerReports } from './cases';
 import GovernancePage from './governance';
+import { AggregationPage, AggregationSubmitPage, AggregationReviewPage } from './aggregation';
 import { DataPage, api, pageHeading, link } from './ui';
 import { registerNative, NativeRecordsPage, RecordRedirect, ComposerEntry, NativeCollectionsPage } from './native';
 class RulesPage extends DataPage {
@@ -38,7 +39,10 @@ app.initializers.add('ucasser-campus', () => {
     'campus.me': ['/campus/me', NativeCollectionsPage],
     'campus.search': ['/campus/search', NativeRecordsPage],
     'campus.cases': ['/campus/cases', CasesPage],
-    'campus.governance': ['/campus/governance', GovernancePage]
+    'campus.governance': ['/campus/governance', GovernancePage],
+    'campus.aggregation': ['/campus/aggregation', AggregationPage],
+    'campus.aggregation.submit': ['/campus/aggregation/submit', AggregationSubmitPage],
+    'campus.aggregation.review': ['/campus/aggregation/review', AggregationReviewPage]
   };
   for (const [name, [path, component]] of Object.entries(routes)) app.routes[name] = {
     path,
