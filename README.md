@@ -4,7 +4,7 @@
 
 资源汇总基础演示见 [使用与交接说明](docs/resources.md)：启用扩展后从论坛顶部进入 `/resources`，先按校内／校外分类维护来源链接。
 
-信息汇集试点见 [设计与运行说明](docs/aggregation-design.md)：独立信息流、用户投稿和管理员审核已接入；公开网页采集先从一个学校栏目开始。
+信息汇集试点见 [设计与运行说明](docs/aggregation-design.md) 和 [交接与自动抓取](docs/aggregation-handoff.md)：独立信息流、用户投稿和管理员审核已接入；公开网页采集先从一个学校栏目开始。
 
 技术栈：Flarum 2.0.0-rc.8、PHP 8.3.35、Composer 2.10.3、MariaDB 11.4.13、Nginx 1.30.1；管理脚本使用 Python 3.11+ 标准库。依赖版本由 `composer.lock` 固定。
 
