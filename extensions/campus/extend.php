@@ -31,6 +31,7 @@ return [
     (new Extend\Policy())->modelPolicy(Discussion::class,Campus\RecordPolicy::class)->modelPolicy(\Flarum\Post\Post::class,Campus\RecordPolicy::class),
     (new Extend\Console())->command(Campus\SetupCommand::class),
     (new Extend\Console())->command(Campus\AggregationPollCommand::class),
+    (new Extend\Console())->command(Campus\AggregationImportTrialCommand::class),
     (new Extend\Event())->listen(\Flarum\Post\Event\Saving::class,Campus\NativeRevision::class)->listen(\Flarum\Discussion\Event\Saving::class,Campus\NativeRevision::class),
     (new Extend\Routes('api'))->get('/campus/catalog','campus.catalog',Campus\RecordController::class)
         ->get('/campus/records','campus.records',Campus\RecordController::class)->post('/campus/records','campus.records.create',Campus\RecordController::class)

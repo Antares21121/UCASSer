@@ -4,7 +4,8 @@
 
 - 信息流：`/campus/aggregation`；登录成员投稿：`/campus/aggregation/submit`；管理员审核：`/campus/aggregation/review`。
 - 已接入一个公开网页来源：中国社会科学院大学教务处通知公告。抓取结果只进入待审队列，管理员确认后才公开；相同网页重复运行不会反复入队，已发布网页的变化重新进入审核。
-- 未接入公众号、微信群或任意网站的通用抓取。新增网站需要先核对其公开访问方式、页面结构，再登记来源并编写对应适配器。完整边界见 [设计说明](aggregation-design.md)。
+- 试验性导入了 8 篇经文章页核对发布账号为“社科大社会与民族学院”、且由[学院官网](https://shymzxy.ucass.edu.cn/)收录链接的微信文章；它们只进入管理员待审队列，尚未公开。这是官网可见链接的抽样，不等于公众号最近 8 篇，更不能证明已取得最近 20 篇。
+- 未接入公众号文章列表的自动抓取，也未接入微信群或任意网站的通用抓取。新增网站需要先核对其公开访问方式、页面结构，再登记来源并编写对应适配器。完整边界见 [设计说明](aggregation-design.md)。
 
 ## 本地交接步骤（Docker）
 
@@ -41,3 +42,5 @@ Register-ScheduledTask -TaskName 'UCASSer-Aggregation-Poll' -Action $action -Tri
 在 Windows 项目根目录运行 `powershell -File scripts/wechat-login.ps1`；也可用 `-ArticleUrl 'https://mp.weixin.qq.com/s/...'` 指定文章。脚本会打开独立的 Chrome 窗口，让维护者亲自完成微信要求的验证或登录。再次遇到验证时，重新运行同一命令；浏览器状态只留在未纳入 Git 的 `.runtime/wechat-chrome-profile`，不要复制或提交它。若 Chrome 安装在非标准位置且脚本无法找到，可用 `-ChromePath 'D:\Chrome\Application\chrome.exe'` 指定位置。
 
 这个窗口仅用于验证微信文章是否能人工打开。当前定时抓取器仍只处理已登记的教务处公开网页，不会读取 Chrome 的登录状态，也不会自动采集公众号。若后续接入公众号，应在抓取失败时标记“需人工验证”，由维护者打开此窗口处理；不能保证微信验证后能长期自动读取文章列表。
+
+本地试验通过 `php flarum campus:aggregation:import-college-trial .runtime/college-wechat-trial.json` 将已核对发布账号、标题、发布时间和学院官网出处的 JSON 证据导入待审队列。该证据文件留在本机 `.runtime`，不随 Git 提交；重复导入不会重复入队。试验来源默认禁用定时抓取。公众号账号主页在普通浏览器中提示“请在微信客户端打开”，故当前无法证明这 8 篇是该账号最新发布的文章，也没有凑足 20 篇。
