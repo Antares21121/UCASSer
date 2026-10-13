@@ -35,3 +35,9 @@ Register-ScheduledTask -TaskName 'UCASSer-Aggregation-Poll' -Action $action -Tri
 这只负责按时运行抓取命令，不会自动审核或发布。电脑关机、未登录或 Docker Desktop 未运行时，任务可能无法完成；到“任务计划程序”查看上次运行结果，再到审核页检查待审候选和来源错误。需要暂停时，在任务计划程序禁用 `UCASSer-Aggregation-Poll`；需要手动触发时运行 `Start-ScheduledTask -TaskName 'UCASSer-Aggregation-Poll'`。不要在多个设备上同时安排同一数据库的抓取。
 
 部署到服务器后，改用服务器的定时器调用同一个 `python scripts/aggregation.py --limit 5` 命令，不依赖个人电脑开机。首次上线先确认来源抓取许可、频率和运营审核人。
+
+## 微信文章的人工验证窗口（试验）
+
+在 Windows 项目根目录运行 `powershell -File scripts/wechat-login.ps1`；也可用 `-ArticleUrl 'https://mp.weixin.qq.com/s/...'` 指定文章。脚本会打开独立的 Chrome 窗口，让维护者亲自完成微信要求的验证或登录。再次遇到验证时，重新运行同一命令；浏览器状态只留在未纳入 Git 的 `.runtime/wechat-chrome-profile`，不要复制或提交它。若 Chrome 安装在非标准位置且脚本无法找到，可用 `-ChromePath 'D:\Chrome\Application\chrome.exe'` 指定位置。
+
+这个窗口仅用于验证微信文章是否能人工打开。当前定时抓取器仍只处理已登记的教务处公开网页，不会读取 Chrome 的登录状态，也不会自动采集公众号。若后续接入公众号，应在抓取失败时标记“需人工验证”，由维护者打开此窗口处理；不能保证微信验证后能长期自动读取文章列表。
