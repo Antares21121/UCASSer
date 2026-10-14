@@ -31,7 +31,7 @@ python scripts/forum.py setup
 
 `setup` 生成本机 `.env` 和随机密码，构建固定版本镜像，运行 `composer install --no-dev --no-plugins --no-scripts`。已有 `.env` 不重置字段或密码；已有 `composer.lock` 不做依赖升级。生成密码只保存在私有文件中，终端不打印。
 
-Docker 的 storage/assets 命名卷会遮住源代码中的占位目录；镜像与 setup 会创建 formatter、sessions 等必需子目录，并设置 www-data 所有权。重复 setup 只补齐目录，不清空现有数据。
+Docker 的 vendor、storage、assets 命名卷把依赖与运行文件保存在 Linux 文件系统中，避免 Windows 工作区中的大量小文件拖慢每次请求。首次使用或更新 `composer.lock` 后先执行 setup，确保 vendor 卷安装了锁定依赖；现有数据库和用户数据不会因此清空。镜像与 setup 会创建 formatter、sessions 等必需子目录，并设置 www-data 所有权。
 
 核心和官方扩展约束沿用仓库原始清单，扩展 `*` 的实际版本由 composer.lock 固定。Composer 清单检查使用 `validate --strict --no-check-all`，仅跳过上游通配符/精确约束的风格警告，仍验证配置和锁文件一致性。
 

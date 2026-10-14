@@ -11,7 +11,7 @@ return [
     (new Extend\ApiResource(\Flarum\Api\Resource\DiscussionResource::class))->fields(Campus\NativeRecordFields::class)
         ->endpoint('index', fn(\Flarum\Api\Endpoint\Index $endpoint) => $endpoint->addDefaultInclude(['firstPost'])->eagerLoad(['firstPost'])->after(Campus\NativeListFields::hydrate(...))),
     (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))->addFilter(\Flarum\Discussion\Search\DiscussionSearcher::class,Campus\NativeFilter::class),
-    (new Extend\Frontend('forum'))->js(__DIR__.'/js/dist/forum.js')->css(__DIR__.'/resources/campus.less')
+    (new Extend\Frontend('forum'))->js(__DIR__.'/js/dist/forum.js')->css(__DIR__.'/resources/campus.less')->css(__DIR__.'/resources/aggregation.less')
         ->route('/campus', 'campus')->route('/campus/rules', 'campus.rules')->route('/campus/identity','campus.identity')->route('/campus/moderation','campus.moderation')
         ->route('/campus/records','campus.records')->route('/campus/record/{id}','campus.record')->route('/campus/publish','campus.publish'),
     (new Extend\Frontend('forum'))->route('/campus/courses','campus.courses'),
@@ -19,6 +19,7 @@ return [
     (new Extend\Frontend('forum'))->route('/campus/search','campus.search'),
     (new Extend\Frontend('forum'))->route('/campus/cases','campus.cases'),
     (new Extend\Frontend('forum'))->route('/campus/governance','campus.governance'),
+    (new Extend\Frontend('forum'))->route('/campus/aggregation','campus.aggregation')->route('/campus/aggregation/submit','campus.aggregation.submit')->route('/campus/aggregation/review','campus.aggregation.review')->route('/campus/aggregation/sources','campus.aggregation.source.manage'),
     (new Extend\Frontend('admin'))->js(__DIR__.'/js/dist/admin.js')->css(__DIR__.'/resources/campus.less'),
     (new Extend\Routes('api'))->get('/campus/home', 'campus.home', Campus\Controller::class)
         ->get('/campus/rules', 'campus.rules', Campus\Controller::class)
@@ -29,6 +30,9 @@ return [
     (new Extend\Policy())->modelPolicy(Discussion::class, Campus\SectionPolicy::class)->modelPolicy(Tag::class, Campus\SectionPolicy::class),
     (new Extend\Policy())->modelPolicy(Discussion::class,Campus\RecordPolicy::class)->modelPolicy(\Flarum\Post\Post::class,Campus\RecordPolicy::class),
     (new Extend\Console())->command(Campus\SetupCommand::class),
+    (new Extend\Console())->command(Campus\AggregationPollCommand::class),
+    (new Extend\Console())->command(Campus\AggregationImportTrialCommand::class),
+    (new Extend\Console())->command(Campus\AggregationImportFeedCommand::class),
     (new Extend\Event())->listen(\Flarum\Post\Event\Saving::class,Campus\NativeRevision::class)->listen(\Flarum\Discussion\Event\Saving::class,Campus\NativeRevision::class),
     (new Extend\Routes('api'))->get('/campus/catalog','campus.catalog',Campus\RecordController::class)
         ->get('/campus/records','campus.records',Campus\RecordController::class)->post('/campus/records','campus.records.create',Campus\RecordController::class)
@@ -44,6 +48,14 @@ return [
     (new Extend\Routes('api'))->get('/campus/me','campus.me',Campus\PersonalController::class)
         ->get('/campus/discussions/{id}/bookmark','campus.discussion.bookmark',Campus\PersonalController::class)->post('/campus/discussions/{id}/bookmark','campus.discussion.bookmark.update',Campus\PersonalController::class),
     (new Extend\Routes('api'))->get('/campus/search','campus.search',Campus\SearchController::class),
+    (new Extend\Routes('api'))->get('/campus/aggregation/items','campus.aggregation.items',Campus\AggregationController::class)
+        ->get('/campus/aggregation/items/{id}','campus.aggregation.item',Campus\AggregationController::class)
+        ->post('/campus/aggregation/submissions','campus.aggregation.submit',Campus\AggregationController::class)
+        ->get('/campus/aggregation/mine','campus.aggregation.mine',Campus\AggregationController::class)
+        ->get('/campus/aggregation/queue','campus.aggregation.queue',Campus\AggregationController::class)
+        ->post('/campus/aggregation/candidates/{id}/review','campus.aggregation.review',Campus\AggregationController::class)
+        ->get('/campus/aggregation/sources','campus.aggregation.sources',Campus\AggregationController::class)
+        ->post('/campus/aggregation/sources','campus.aggregation.source.create',Campus\AggregationController::class),
     (new Extend\Routes('api'))->get('/campus/governance','campus.governance',Campus\GovernanceController::class)->post('/campus/governance','campus.governance.publish',Campus\GovernanceController::class),
     (new Extend\Routes('api'))->get('/campus/cases','campus.cases',Campus\CaseController::class)->post('/campus/cases','campus.cases.create',Campus\CaseController::class)
         ->get('/campus/cases/{id}','campus.case',Campus\CaseController::class)->patch('/campus/cases/{id}','campus.case.update',Campus\CaseController::class)
