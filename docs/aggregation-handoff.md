@@ -21,6 +21,14 @@ python scripts/aggregation_feed.py --feed-url 'http://127.0.0.1:8001/rss/实际�
 
 实际 RSS 路径以服务界面显示的为准。Docker 后端与 Windows 原生后端都支持；原生后端在命令后加 `--backend native`。导入结果在 `/campus/aggregation/review`，来源默认不参与现有网页抓取任务。授权失效时在订阅服务里重新扫码，UCASSer 不读取 Chrome Cookie。确认手动导入有效后，可用系统计划任务定时运行同一命令；机器、Docker 和订阅服务都必须运行。订阅服务能否补齐最近 20 篇取决于其采集方式，导入命令不会虚构缺失文章。微信读书采集模式的[上游说明](https://github.com/rachelos/we-mp-rss/blob/main/docs/weread-mp.md)指出该模式每次只能取最新一篇。
 
+本机试点已在独立容器 `ucasser-we-mp-rss` 中登记“社科大社会与民族学院”，RSS 地址为 `http://127.0.0.1:8001/rss/MP_WXS_3876517368`。账号密码保存在忽略 Git 的 `.runtime/we-mp-rss.env`；订阅服务数据库使用 Docker 命名卷 `ucasser-we-mp-rss-data`，避免 Windows 目录挂载下 SQLite 打不开的问题。执行导入时使用：
+
+```powershell
+python scripts/aggregation_feed.py --feed-url 'http://127.0.0.1:8001/rss/MP_WXS_3876517368' --name '社科大社会与民族学院' --limit 20
+```
+
+运行前先确认订阅服务的“公众号状态”显示**已授权**，且该 RSS 地址已有文章。试点容器只绑定本机 `127.0.0.1:8001`；不要将管理端口直接暴露到公网。
+
 ## 本地交接步骤（Docker）
 
 在项目根目录运行，使用自己的 `.env` 和数据库，不复制别人的账号或数据：
