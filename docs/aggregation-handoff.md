@@ -29,6 +29,23 @@ python scripts/aggregation_feed.py --feed-url 'http://127.0.0.1:8001/rss/MP_WXS_
 
 本次试点通过**微信读书**扫码授权，测试接口确认该账号可读，手动采集到 1 篇文章，运行上述命令后新增 1 条待审候选。订阅服务界面的“公众号平台授权”与“微信读书授权”是不同状态；前者显示未授权不影响这条已验证的微信读书采集路径。该模式目前只能确认取得最新一篇，不能把 `--limit 20` 理解为已取得最近 20 篇。后续采集需要在订阅服务的微信读书采集功能中触发，再运行导入命令；授权失效则由维护者重新扫码。试点容器只绑定本机 `127.0.0.1:8001`；不要将管理端口直接暴露到公网。
 
+### 添加更多公众号并每天采集
+
+1. 打开本机订阅服务 `http://127.0.0.1:8001/`，进入“添加订阅”。点“通过公众号码文章获取”，粘贴**目标公众号自己发布的**一篇 `https://mp.weixin.qq.com/s/...` 原文链接，点“获取”。核对自动带出的公众号名称后点“添加订阅”。每个公众号添加一次即可。请勿仅凭转载文章的标题判断发布账号。
+2. 在 UCASSer 项目根目录执行 `python scripts/aggregation_weread.py`。它逐个处理订阅服务里已启用的 `MP_WXS_*` 公众号：先用当前微信读书授权采集，再将本机 RSS 中最多 20 条原文链接导入待审队列。旧链接去重，不自动发布。运行记录在 `.runtime/aggregation-weread.log`。如果提示微信读书未授权，回订阅服务重新扫码。
+3. Windows 开发机可用以下 PowerShell 命令将同一脚本设为每天上午 9 点运行（当前用户登录且 Docker Desktop 和订阅服务可用时）：
+
+```powershell
+$repo = "$env:USERPROFILE\Desktop\UCASSer"
+$python = (Get-Command python -ErrorAction Stop).Source
+$action = New-ScheduledTaskAction -Execute $python -Argument 'scripts/aggregation_weread.py' -WorkingDirectory $repo
+$trigger = New-ScheduledTaskTrigger -Daily -At '09:00'
+$principal = New-ScheduledTaskPrincipal -UserId ([Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited
+Register-ScheduledTask -TaskName 'UCASSer-WeRead-Collect' -Action $action -Trigger $trigger -Principal $principal -Description '每日采集公众号并送信息汇集待审队列' -Force
+```
+
+在“任务计划程序”可查看或禁用 `UCASSer-WeRead-Collect`。每天执行一次只能取得当天运行时的**最新一篇**及已入 RSS 的历史文章；同一账号两次运行之间连续发布多篇时，当前微信读书接口可能漏掉较早的文章，不能保证完整归档。电脑关机、Docker 未启动或授权失效时也不会成功采集，应检查日志并补做人工核对。
+
 ## 本地交接步骤（Docker）
 
 在项目根目录运行，使用自己的 `.env` 和数据库，不复制别人的账号或数据：
