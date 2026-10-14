@@ -41,7 +41,7 @@ class AggregationController implements RequestHandlerInterface
             $page = max(1, min(10000, (int) ($query['page'] ?? 1)));
             $pending = $db->table('campus_aggregation_candidates')->where('status', 'pending');
             $total = (clone $pending)->count();
-            $rows = $pending->orderBy('id')->offset(($page - 1) * 20)->limit(20)->get();
+            $rows = $pending->orderByDesc('id')->offset(($page - 1) * 20)->limit(20)->get();
             return new JsonResponse(['data' => $rows->all(), 'meta' => ['total' => $total, 'page' => $page, 'page_size' => 20]]);
         }
         if ($route === 'campus.aggregation.review') {
