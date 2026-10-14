@@ -252,9 +252,11 @@ export class DirectoryPage extends DataPage {
     const d = this.data,
       selected = d.categories.find(c => c.id === Number(this.params.category_id));
     const crumbs = pathOf(d.categories, selected);
-    return [pageHeading('资料分类目录', '按学院、课程与校外考试查找来源链接。', link('/t/campus-resources', '返回资料讨论', {
+    return [pageHeading('资料分类目录', '按学院、课程与校外考试查找来源链接。', [link('/resources/assist', '用问题找链接', {
+      className: 'Button Button--primary'
+    }), link('/t/campus-resources', '返回资料讨论', {
       className: 'Campus-directoryBack'
-    })), m('div.Campus-directoryLayout', [m('aside.Campus-directoryTree', [m('h2', [symbol('folder-open'), ' 分类导航']), m(Link, {
+    })]), m('div.Campus-directoryLayout', [m('aside.Campus-directoryTree', [m('h2', [symbol('folder-open'), ' 分类导航']), m(Link, {
       href: this.filter(null),
       className: 'Campus-directoryAll' + (!selected ? ' is-active' : '')
     }, '全部资料'), m('ul', d.categories.filter(c => c.parent_id === null).map(c => this.categoryNode(c)))]), m('section.Campus-directoryMain', [m('nav.Campus-directoryBreadcrumbs', {
@@ -341,9 +343,94 @@ export class DirectoryPage extends DataPage {
     }, '标记已处理')])) : emptyState('反馈已处理完', '新的失效或内容反馈会出现在这里。')]) : null, m('p.Campus-directoryFootnote', '本站整理合法来源链接，原文件由来源网站提供。')])])];
   }
 }
+export class ResourceAssistPage extends DataPage {
+  oninit(vnode) {
+    this.query = '';
+    this.provider = 'gemini';
+    this.model = '';
+    this.apiKey = '';
+    this.answer = '';
+    super.oninit(vnode);
+  }
+  onremove(vnode) {
+    this.apiKey = '';
+    super.onremove(vnode);
+  }
+  async fetch() {
+    this.query = this.params.q || '';
+    this.answer = '';
+    this.data = this.query.trim() ? (await request('resources/assist?q=' + encodeURIComponent(this.query.trim()))).resources : [];
+  }
+  pageTitle() {
+    return '按问题查找资料链接';
+  }
+  async ask() {
+    if (this.busy || !this.apiKey || !this.model || !this.data.length) return;
+    if (this.query.trim() !== (this.params.q || '').trim()) {
+      this.notice = '问题已修改，请先点击“查找链接”查看将用于总结的结果。';
+      this.noticeError = true;
+      return;
+    }
+    this.busy = true;
+    this.notice = '';
+    this.answer = '';
+    m.redraw();
+    try {
+      const result = await request('resources/assist', 'POST', {
+        q: this.query.trim(), provider: this.provider, model: this.model.trim(), api_key: this.apiKey
+      });
+      this.answer = result.answer;
+      this.data = result.resources;
+    } catch (error) {
+      this.notice = error.response?.error || errorMessage(error, '生成失败，目录搜索仍可使用。');
+      this.noticeError = true;
+    } finally {
+      this.apiKey = '';
+      this.busy = false;
+      m.redraw();
+    }
+  }
+  content() {
+    return [pageHeading('按问题查找资料链接', '先搜索人工维护的目录，再选择是否使用自己的 API Key 生成辅助说明。', link('/resources', '返回资料目录')),
+      m('section.Campus-panel.Campus-resourceAssist', [
+        m('form.Campus-resourceAssistSearch', { onsubmit: e => {
+          e.preventDefault();
+          m.route.set('/resources/assist?q=' + encodeURIComponent(this.query.trim()));
+        } }, [
+          field('q', '想找什么资料？', this.query, value => this.query = value, { required: true, maxlength: 100, placeholder: '例如：社会学概论复习资料' }),
+          m(Button, { type: 'submit', className: 'Button Button--primary', icon: 'fas fa-search' }, '查找链接')
+        ]),
+        m('p.Campus-hint', '这里只查找资料标题、学院／课程分类和维护者填写的说明，不读取网盘文件。'),
+        this.data.length ? m('ol.Campus-resourceAssistResults', this.data.map((item, index) => m('li', { key: item.id }, [
+          m('span.Campus-resourceAssistNumber', '[' + (index + 1) + ']'),
+          m('div', [m('h2', item.title), m('p.Campus-hint', item.category_path), item.description ? m('p', item.description) : m('p.Campus-hint', '维护者尚未填写简介。'),
+            m('div.Campus-actions', [m('a', { href: item.url, target: '_blank', rel: 'noopener noreferrer nofollow' }, '访问链接 ↗'), item.source_url ? m('a', { href: item.source_url, target: '_blank', rel: 'noopener noreferrer nofollow' }, '核对原始来源 ↗') : null])])
+        ]))) : this.params.q ? emptyState('没有找到相关链接', '换个课程名称或更短的关键词试试。') : null
+      ]),
+      this.data.length ? m('section.Campus-panel.Campus-resourceAssistAI', [
+        m('h2', '用自己的 API Key 整理结果'),
+        m('p.Campus-hint', '可选功能。请求经本站服务器转发给所选服务商，只发送上方链接的标题、分类和简短说明；密钥用后清空，不存入数据库。服务商可能收费，请自行查看额度。'),
+        app.session.user ? m('form', { onsubmit: e => { e.preventDefault(); this.ask(); } }, [
+          m('label.Campus-field', [m('span.Campus-fieldLabel', '服务商'), m('select.FormControl', { value: this.provider, onchange: e => this.provider = e.target.value }, [
+            m('option', { value: 'gemini' }, 'Google Gemini'), m('option', { value: 'siliconflow' }, '硅基流动'),
+            m('option', { value: 'deepseek' }, 'DeepSeek'), m('option', { value: 'openai' }, 'OpenAI')
+          ])]),
+          field('model', '模型名称', this.model, value => this.model = value, { required: true, maxlength: 120, placeholder: '从服务商控制台复制模型名称', hint: '各服务商可用模型及额度会变化，请以其控制台显示为准。' }),
+          field('api_key', '你的 API Key', this.apiKey, value => this.apiKey = value, { type: 'password', required: true, autocomplete: 'off', maxlength: 512 }),
+          m(Button, { type: 'submit', className: 'Button Button--primary', loading: this.busy }, '生成目录说明')
+        ]) : m('p.Campus-hint', '登录后可使用自己的 API Key；不登录也能查看上面的搜索结果。'),
+        this.answer ? m('div.Campus-resourceAssistAnswer', [m('h3', '辅助说明'), m('p', this.answer), m('small', '编号对应上方链接；AI 没有读取网盘内的文件，请打开原链接核对。')]) : null
+      ]) : null
+    ];
+  }
+}
 export function registerDirectory() {
   if (app.routes['ucasser.resources']) app.routes['ucasser.resources'] = {
     path: '/resources',
     component: DirectoryPage
+  };
+  if (app.routes['ucasser.resources.assist']) app.routes['ucasser.resources.assist'] = {
+    path: '/resources/assist',
+    component: ResourceAssistPage
   };
 }

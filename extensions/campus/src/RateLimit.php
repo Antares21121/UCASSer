@@ -22,9 +22,10 @@ class RateLimit implements MiddlewareInterface
         if (str_contains($path, '/campus/') && !$actor->isAdmin() && $actor->suspended_until && $actor->suspended_until->isFuture()
             && !preg_match('~/cases/\d+/(appeal|supplement)$~', $path)) $actor->assertPermission(false);
         $auth = preg_match('~/(token|login|register|users|forgot|reset)(/|$)~', $path);
-        if (!$auth && !preg_match('~/(campus|posts|discussions|flags)(/|$)~', $path)) return $handler->handle($r);
+        $resourceAssist = $path === '/api/ucasser/resources/assist';
+        if (!$auth && !$resourceAssist && !preg_match('~/(campus|posts|discussions|flags)(/|$)~', $path)) return $handler->handle($r);
         $auth = $auth && $r->getMethod()==='POST';
-        $window = 900; $limit = $auth ? 240 : ($actor->isAdmin() ? 1200 : 120);
+        $window = 900; $limit = $resourceAssist ? 12 : ($auth ? 240 : ($actor->isAdmin() ? 1200 : 120));
         $ip = (string)($r->getAttribute('ipAddress') ?? $r->getServerParams()['REMOTE_ADDR'] ?? 'unknown');
         // Never persist raw IP, email, password, evidence or token.
         $route = preg_replace('~/\d+(?=/|$)~', '/:id', $path);
