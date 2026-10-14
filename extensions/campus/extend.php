@@ -19,7 +19,7 @@ return [
     (new Extend\Frontend('forum'))->route('/campus/search','campus.search'),
     (new Extend\Frontend('forum'))->route('/campus/cases','campus.cases'),
     (new Extend\Frontend('forum'))->route('/campus/governance','campus.governance'),
-    (new Extend\Frontend('forum'))->route('/campus/aggregation','campus.aggregation')->route('/campus/aggregation/submit','campus.aggregation.submit')->route('/campus/aggregation/review','campus.aggregation.review'),
+    (new Extend\Frontend('forum'))->route('/campus/aggregation','campus.aggregation')->route('/campus/aggregation/submit','campus.aggregation.submit')->route('/campus/aggregation/review','campus.aggregation.review')->route('/campus/aggregation/sources','campus.aggregation.source.manage'),
     (new Extend\Frontend('admin'))->js(__DIR__.'/js/dist/admin.js')->css(__DIR__.'/resources/campus.less'),
     (new Extend\Routes('api'))->get('/campus/home', 'campus.home', Campus\Controller::class)
         ->get('/campus/rules', 'campus.rules', Campus\Controller::class)
@@ -54,7 +54,8 @@ return [
         ->get('/campus/aggregation/mine','campus.aggregation.mine',Campus\AggregationController::class)
         ->get('/campus/aggregation/queue','campus.aggregation.queue',Campus\AggregationController::class)
         ->post('/campus/aggregation/candidates/{id}/review','campus.aggregation.review',Campus\AggregationController::class)
-        ->get('/campus/aggregation/sources','campus.aggregation.sources',Campus\AggregationController::class),
+        ->get('/campus/aggregation/sources','campus.aggregation.sources',Campus\AggregationController::class)
+        ->post('/campus/aggregation/sources','campus.aggregation.source.create',Campus\AggregationController::class),
     (new Extend\Routes('api'))->get('/campus/governance','campus.governance',Campus\GovernanceController::class)->post('/campus/governance','campus.governance.publish',Campus\GovernanceController::class),
     (new Extend\Routes('api'))->get('/campus/cases','campus.cases',Campus\CaseController::class)->post('/campus/cases','campus.cases.create',Campus\CaseController::class)
         ->get('/campus/cases/{id}','campus.case',Campus\CaseController::class)->patch('/campus/cases/{id}','campus.case.update',Campus\CaseController::class)

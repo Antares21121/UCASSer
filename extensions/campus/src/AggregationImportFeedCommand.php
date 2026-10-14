@@ -45,6 +45,15 @@ class AggregationImportFeedCommand extends AbstractCommand
         $db = $this->aggregation->db;
         $source = $db->table('campus_aggregation_sources')->where('adapter', 'we-mp-rss')->where('name', $name)->first();
         if (!$source) {
+            $source = $db->table('campus_aggregation_sources')->where('adapter', 'we-mp-rss-pending')->where('name', $name)->first();
+            if ($source) {
+                $db->table('campus_aggregation_sources')->where('id', $source->id)->update([
+                    'adapter' => 'we-mp-rss', 'updated_at' => gmdate('Y-m-d H:i:s'),
+                ]);
+                $source->adapter = 'we-mp-rss';
+            }
+        }
+        if (!$source) {
             $now = gmdate('Y-m-d H:i:s');
             $id = $db->table('campus_aggregation_sources')->insertGetId([
                 'name' => $name, 'listing_url' => 'https://mp.weixin.qq.com/',

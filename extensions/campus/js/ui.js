@@ -129,7 +129,8 @@ const routeTitles = {
   '/campus/rules': '社区公约与治理',
   '/campus/aggregation': '信息汇集',
   '/campus/aggregation/submit': '提交信息线索',
-  '/campus/aggregation/review': '信息汇集审核'
+  '/campus/aggregation/review': '信息汇集审核',
+  '/campus/aggregation/sources': '信息来源管理'
 };
 export class DataPage extends Page {
   bodyClass = 'CampusApp';

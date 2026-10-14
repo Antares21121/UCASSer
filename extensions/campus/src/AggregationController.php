@@ -48,7 +48,38 @@ class AggregationController implements RequestHandlerInterface
             return new JsonResponse(['data' => $this->aggregation->review($actor, (int) ($query['id'] ?? 0), $input)]);
         }
         if ($route === 'campus.aggregation.sources') {
-            return new JsonResponse(['data' => $db->table('campus_aggregation_sources')->orderBy('id')->get()->all()]);
+            return new JsonResponse(['data' => $db->table('campus_aggregation_sources')->orderByDesc('id')->get()->all()]);
+        }
+        if ($route === 'campus.aggregation.source.create') {
+            $kind = trim((string) ($input['kind'] ?? ''));
+            $name = trim((string) ($input['name'] ?? ''));
+            $url = trim((string) ($input['url'] ?? ''));
+            $parts = parse_url($url);
+            $host = strtolower((string) ($parts['host'] ?? ''));
+            if (!in_array($kind, ['web', 'wechat'], true)) throw new ValidationException(['kind' => '请选择网页或公众号']);
+            if (mb_strlen($name) < 2 || mb_strlen($name) > 120) throw new ValidationException(['name' => '来源名称需为 2–120 字']);
+            if (mb_strlen($url) > 1024 || ($parts['scheme'] ?? '') !== 'https' || !$host || isset($parts['user']) || isset($parts['pass'])) {
+                throw new ValidationException(['url' => '请输入不含账号密码的 HTTPS 链接']);
+            }
+            if ($kind === 'wechat') {
+                if ($host !== 'mp.weixin.qq.com' || !preg_match('~^/s(?:/[A-Za-z0-9_-]+|\?[A-Za-z0-9_=&%.-]+)$~D',
+                    ($parts['path'] ?? '').(isset($parts['query']) ? '?'.$parts['query'] : ''))) {
+                    throw new ValidationException(['url' => '请填写该公众号自行发布的一篇微信原文链接']);
+                }
+            } elseif (!filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) || !str_contains($host, '.') || filter_var($host, FILTER_VALIDATE_IP)) {
+                throw new ValidationException(['url' => '请填写公开网站的域名，不能填写本机或 IP 地址']);
+            }
+            if ($db->table('campus_aggregation_sources')->where('listing_url', $url)->exists()) {
+                throw new ValidationException(['url' => '该链接已经登记']);
+            }
+            $now = gmdate('Y-m-d H:i:s');
+            $id = $db->table('campus_aggregation_sources')->insertGetId([
+                'name' => $name, 'listing_url' => $url,
+                'adapter' => $kind === 'wechat' ? 'we-mp-rss-pending' : 'pending-web',
+                'trust' => 'unofficial', 'visibility' => 'public', 'enabled' => false,
+                'created_at' => $now, 'updated_at' => $now,
+            ]);
+            return new JsonResponse(['data' => ['id' => $id, 'status' => 'pending_adapter']], 201);
         }
         throw new ValidationException(['route' => '未知的信息汇集操作']);
     }
