@@ -19,6 +19,7 @@ return [
     (new Extend\Frontend('forum'))->route('/campus/search','campus.search'),
     (new Extend\Frontend('forum'))->route('/campus/cases','campus.cases'),
     (new Extend\Frontend('forum'))->route('/campus/governance','campus.governance'),
+    (new Extend\Frontend('forum'))->route('/campus/tools','campus.toolbox')->route('/campus/tools/{tool}','campus.toolbox.tool'),
     (new Extend\Frontend('forum'))->route('/campus/aggregation','campus.aggregation')->route('/campus/aggregation/submit','campus.aggregation.submit')->route('/campus/aggregation/review','campus.aggregation.review')->route('/campus/aggregation/sources','campus.aggregation.source.manage'),
     (new Extend\Frontend('admin'))->js(__DIR__.'/js/dist/admin.js')->css(__DIR__.'/resources/campus.less'),
     (new Extend\Routes('api'))->get('/campus/home', 'campus.home', Campus\Controller::class)

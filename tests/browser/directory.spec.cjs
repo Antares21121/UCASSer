@@ -40,5 +40,11 @@ test('native directory forms persist revisions and handle feedback',async({page}
   await expect(report).toHaveCount(0);
   await page.reload();
   await expect(card).toContainText('已核对官方原始来源');
+  await page.getByRole('link',{name:'用问题找链接'}).click();
+  await expect(page.getByRole('heading',{name:'按问题查找资料链接'})).toBeVisible();
+  await page.getByLabel('想找什么资料？').fill(name);
+  await page.getByRole('button',{name:'查找链接'}).click();
+  await expect(page.locator('.Campus-resourceAssistResults')).toContainText(name);
+  await expect(page.locator('.Campus-resourceAssistAI')).toContainText('不存入数据库');
   expect(errors).toEqual([]);
 });

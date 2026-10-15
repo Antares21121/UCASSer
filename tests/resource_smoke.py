@@ -72,6 +72,10 @@ def main():
     assert abs((datetime.now(timezone.utc) - updated_at).total_seconds()) < 60, 'Resource timestamps must be UTC'
     root_results = call('/api/ucasser/resources?category_id=' + str(campus['id']) + '&q=' + urllib.parse.quote('验收资料更新'))
     assert root_results['total'] >= 1 and identifier in {item['id'] for item in root_results['resources']}, 'Root categories must include descendant courses'
+    assisted = call('/api/ucasser/resources/assist?q=' + urllib.parse.quote('验收课程的资料'))['resources']
+    assert identifier in {item['id'] for item in assisted}, 'Question search must use the course path as well as title and description'
+    call('/api/ucasser/resources/assist', 'POST', {'q': '验收课程的资料'}, expected=403)
+    call('/api/ucasser/resources/assist', 'POST', {'q': '验收课程的资料', 'provider': 'gemini', 'model': 'test-model'}, token, 422)
     call('/api/ucasser/resources/' + str(identifier) + '/revisions', expected=403)
     revisions = call('/api/ucasser/resources/' + str(identifier) + '/revisions', token=token)['revisions']
     assert revisions[0]['reason'] == changed['reason']

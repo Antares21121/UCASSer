@@ -163,6 +163,11 @@ export function registerNavigation() {
       icon: 'fas fa-folder-open',
       active: m.route.get().split('?')[0] === '/resources'
     }, '资料分类目录'), -19);
+    items.add('campus-toolbox', m(LinkButton, {
+      href: '/campus/tools',
+      icon: 'fas fa-th-large',
+      active: m.route.get().split('?')[0].startsWith('/campus/tools')
+    }, '校园工具箱'), -20);
     if (app.session.user) items.add('campus-my-space', m(LinkButton, {
       href: '/campus/me',
       icon: 'far fa-user',

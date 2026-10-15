@@ -9,6 +9,7 @@ import registerNotifications from './notifications';
 import { registerBookmarks } from './personal';
 import { CasesPage, registerReports } from './cases';
 import GovernancePage from './governance';
+import ToolboxPage from './toolbox';
 import { AggregationPage, AggregationSubmitPage, AggregationReviewPage, AggregationSourcesPage } from './aggregation';
 import { DataPage, api, pageHeading, link } from './ui';
 import { registerNative, NativeRecordsPage, RecordRedirect, ComposerEntry, NativeCollectionsPage } from './native';
@@ -40,6 +41,8 @@ app.initializers.add('ucasser-campus', () => {
     'campus.search': ['/campus/search', NativeRecordsPage],
     'campus.cases': ['/campus/cases', CasesPage],
     'campus.governance': ['/campus/governance', GovernancePage],
+    'campus.toolbox': ['/campus/tools', ToolboxPage],
+    'campus.toolbox.tool': ['/campus/tools/:tool', ToolboxPage],
     'campus.aggregation': ['/campus/aggregation', AggregationPage],
     'campus.aggregation.submit': ['/campus/aggregation/submit', AggregationSubmitPage],
     'campus.aggregation.review': ['/campus/aggregation/review', AggregationReviewPage],

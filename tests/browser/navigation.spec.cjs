@@ -81,9 +81,16 @@ test('directory and native pages keep readable theme colors and reflow at high D
     for(const theme of ['light','dark','light-hc','dark-hc']) {
       await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
       const contrast=await page.locator('.Campus-directoryDescription').first().evaluate(node=>{
-        const color=v=>v.match(/\d+(\.\d+)?/g).slice(0,3).map(Number).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});
-        const luminance=v=>{const c=color(v);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
-        const a=luminance(getComputedStyle(node).color),b=luminance(getComputedStyle(node.closest('article')).backgroundColor);
+        const channels=value=>value.match(/[\d.]+/g)?.map(Number) || [];
+        const luminance=rgb=>{const c=rgb.slice(0,3).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
+        const background=element=>{
+          if(!element)return [255,255,255];
+          const base=background(element.parentElement),color=channels(getComputedStyle(element).backgroundColor);
+          if(color.length<3)return base;
+          const alpha=color.length>3?color[3]:1;
+          return color.slice(0,3).map((channel,index)=>channel*alpha+base[index]*(1-alpha));
+        };
+        const a=luminance(channels(getComputedStyle(node).color)),b=luminance(background(node));
         return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
       });
       expect(contrast,theme+' text contrast').toBeGreaterThanOrEqual(4.5);
@@ -137,3 +144,4 @@ test('directory and native pages keep readable theme colors and reflow at high D
     expect(errors).toEqual([]);
   } finally {await context.close();}
 });
+
