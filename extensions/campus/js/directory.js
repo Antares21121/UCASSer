@@ -425,11 +425,14 @@ export class ResourceAssistPage extends DataPage {
   }
 }
 export function registerDirectory() {
-  if (app.routes['ucasser.resources']) app.routes['ucasser.resources'] = {
+  // The resources extension registers its directory route in JavaScript. The
+  // assistant is a new client route, so it cannot be gated on already existing.
+  if (!app.routes['ucasser.resources']) return;
+  app.routes['ucasser.resources'] = {
     path: '/resources',
     component: DirectoryPage
   };
-  if (app.routes['ucasser.resources.assist']) app.routes['ucasser.resources.assist'] = {
+  app.routes['ucasser.resources.assist'] = {
     path: '/resources/assist',
     component: ResourceAssistPage
   };
