@@ -34,7 +34,7 @@ const icons = {
   governance: 'balance-scale'
 };
 const primary = [['/campus', '首页', 'compass'], ['/campus/records?type=information', '校园信息', 'bullhorn'], ['/t/campus-resources', '共享资料', 'book-open'], ['/t/campus-questions', '问答', 'comment-dots'], ['/t/campus-courses', '课程经验', 'graduation-cap']];
-const extras = [['/campus/courses', '课程目录', 'graduation-cap'], ['/campus/search', '详细检索', 'search'], ['/campus/identity', '校园身份', 'id-card'], ['/campus/governance', '公开治理', 'balance-scale'], ['/campus/cases', '举报与申诉', 'flag'], ['/campus/rules', '社区公约', 'handshake']];
+const extras = [['/campus/aggregation', '信息汇集', 'stream'], ['/campus/courses', '课程目录', 'graduation-cap'], ['/campus/search', '详细检索', 'search'], ['/campus/identity', '校园身份', 'id-card'], ['/campus/governance', '公开治理', 'balance-scale'], ['/campus/cases', '举报与申诉', 'flag'], ['/campus/rules', '社区公约', 'handshake']];
 // Native sorting serializes filters into the URL; keep the campus criteria
 // when the original IndexPage changes sort order or loads another page.
 const campusFilters = () => {

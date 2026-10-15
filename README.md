@@ -6,6 +6,8 @@
 
 [校园工具箱](docs/toolbox.md)提供日历、食堂菜单、课程表、摆渡车时间表和新生导引入口；实际信息尚待录入。
 
+信息汇集试点见 [设计与运行说明](docs/aggregation-design.md) 和 [交接与自动抓取](docs/aggregation-handoff.md)：独立信息流、用户投稿和管理员审核已接入；公开网页采集先从一个学校栏目开始。
+
 技术栈：Flarum 2.0.0-rc.8、PHP 8.3.35、Composer 2.10.3、MariaDB 11.4.13、Nginx 1.30.1；管理脚本使用 Python 3.11+ 标准库。依赖版本由 `composer.lock` 固定。
 
 **版本边界**：沿用仓库 `2.x` 的 `^2.0.0-rc.8` 核心与官方扩展清单，本机与团队使用同一锁文件。当前锁定核心为 RC，仅开发使用；生产启动、配置桥接和镜像构建均拒绝 RC/beta/dev 核心，升级为正式 2.x 后再验证上线。见 [版本决策](docs/decisions/001-runtime.md)。

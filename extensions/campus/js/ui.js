@@ -126,7 +126,11 @@ const routeTitles = {
   '/campus/courses': '课程目录',
   '/campus/search': '全站搜索与发现',
   '/campus/governance': '公开治理与志愿维护',
-  '/campus/rules': '社区公约与治理'
+  '/campus/rules': '社区公约与治理',
+  '/campus/aggregation': '信息汇集',
+  '/campus/aggregation/submit': '提交信息线索',
+  '/campus/aggregation/review': '信息汇集审核',
+  '/campus/aggregation/sources': '信息来源管理'
 };
 export class DataPage extends Page {
   bodyClass = 'CampusApp';
