@@ -7,7 +7,8 @@
 ## 已落实的基础边界
 
 - Compose 的数据库和 PHP-FPM 没有 `ports`，开发 Web 默认仅发布 `127.0.0.1:8080`。Windows 开发数据库只监听 `127.0.0.1`。
-- Web 根目录为 `public/`。Nginx 和 Windows router 拒绝隐藏文件、非 index.php 的 PHP/PHAR 请求；上传的 PHP 文件不能执行。config、vendor、备份不在 Web 根目录。
+- Web 根目录为 `public/`。Nginx 和 Windows router 拒绝隐藏文件、非 index.php 的 PHP/PHAR 请求；上传的 PHP 文件不能执行。config、vendor、备份不在 Web 根目录。生效的拦截清单以 `docker/web/*.conf` 为准；`public/web.config` 与 `.htaccess` 是未启用的上游样例。Referrer-Policy 由应用层统一发送 `same-origin`，nginx 不再重复下发（重复的响应头会按后值取效，等于架空更严的应用策略）。
+- 生产镜像的构建上下文额外排除 auth.json、证书、私钥、SQL 导出与日志（`.dockerignore`），`scripts/check.py` 持续断言该清单。
 - APP_DEBUG 默认 false，生产强制 false 和 HTTPS；PHP 不向浏览器显示异常。代码桥接不新增虚构 Flarum 配置键。
 - 安装前验证空库、拒绝重复安装。管理员密码通过 getpass 输入，JSON 和官方生成的含密码配置写入私有临时目录，并在 finally 删除。长期 config.php 仅为无秘密的环境桥接，不提交默认密码。
 - `.env*`（示例除外）、config.php、auth.json、工具、运行数据、备份、SQL、密钥不追踪 Git。composer.lock 需要追踪，不能忽略。
@@ -30,7 +31,7 @@ Unix 秘密文件设为 600；不含秘密的 config.php 桥接设为 644，供 
 
 生产 Nginx 日志不记录查询参数。Windows 原始 Web 日志可含 URL 查询参数，logs 显示时隐藏参数；Flarum 日志和备份可能含用户数据，转发前审查。生产日志保留、Flarum 日志轮转、备份加密和异地存储尚待运维配置。
 
-SMTP 密码应在受控后台配置，不在 `.env.example` 填入真实值。后台设置保存在数据库，故数据库备份也应按秘密数据保护。`MAIL_*` 目前只是交接占位，不能误认为已配置邮件服务。
+SMTP 密码应在受控后台配置，不在 `.env.example` 填入真实值。后台设置保存在数据库，故数据库备份也应按秘密数据保护。环境模板已不包含任何 `MAIL_*` 变量（此前注入容器却无人消费，徒增泄密面），不能以环境变量方式配置邮件。
 
 ## 生产发布前必须完成
 

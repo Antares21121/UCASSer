@@ -84,7 +84,7 @@ Windows PHP 不在 PATH 属于正常情况，所有命令由脚本选择 `.tools
 | `COMPOSE_PROJECT_NAME` | 隔离 Compose 网络与数据卷；已有环境不得随意改名 |
 | `TZ` | PHP / 容器时区；备份文件名固定 UTC |
 | `BACKUP_DIR` | 本机备份目录，不自动上传第三方 |
-| `MAIL_*` | 交接占位项，尚未同步到 Flarum；在后台配置 SMTP |
+| `MAIL_*` | 已移除：SMTP 只在 Flarum 后台配置（存数据库），环境模板不再携带邮件变量 |
 | `LOG_LEVEL` | 运维占位项；当前 Nginx warn、PHP 排除弃用警告，非动态日志级别 |
 
 其他配置文件可用 `--env-file .env.team-local` 指定。Docker 脚本会同时设置 Compose 应用使用该文件。禁止把 `docker compose config` 的完整输出发到聊天或工单：其中可能包含密码；检查使用 `config --quiet`。
@@ -98,7 +98,7 @@ python scripts/forum.py start
 python scripts/forum.py healthcheck
 ```
 
-Windows 给这些命令加 `--backend native`。更换 PHP/数据库镜像前阅读变更说明；不要自动删除数据卷以修复启动问题。上游依赖新增迁移时先备份，再按部署文档手动运行 `php flarum migrate` 和清缓存。
+Windows 给这些命令加 `--backend native`。更换 PHP/数据库镜像前阅读变更说明；不要自动删除数据卷以修复启动问题。上游依赖新增迁移时先备份，再运行 `python scripts/forum.py migrate`（它注入 `.env` 环境变量并调用 `php flarum migrate`；native 后端不要在裸 shell 直接调 php）和清缓存。
 
 业务扩展 `ucasser/flarum-campus` 位于 `extensions/campus`，通过 Composer path repository 加载，禁止改 vendor。Node 22.18.0 和 npm 10.x 构建自己的前端；提交源文件与 `js/dist`，不提交 node_modules。更新此包时不升级原仓库官方依赖。
 
