@@ -13,3 +13,12 @@ __pycache__
 node_modules
 test-results
 playwright-report
+auth.json
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.sql
+*.sql.gz
+*.log

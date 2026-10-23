@@ -21,11 +21,15 @@ def main():
         with path.open(encoding='utf-8') as file:
             yaml.safe_load(file)
     values = read_env(ROOT / '.env.example')
-    assert not values['DB_PASSWORD'] and not values['DB_ROOT_PASSWORD'] and not values['MAIL_PASSWORD']
+    assert not values['DB_PASSWORD'] and not values['DB_ROOT_PASSWORD']
+    assert 'MAIL_PASSWORD' not in values, 'SMTP credentials belong in the Flarum admin panel, not the env template'
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
-    forbidden = [path for path in tracked if path == '.env' or path.startswith(('.tools/', '.runtime/', 'backups/', 'vendor/')) or (path.startswith('.env.') and path != '.env.example') or path in ('config.php', 'auth.json') or path.endswith(('.sql', '.key', '.pem'))]
+    forbidden = [path for path in tracked if path == '.env' or path.startswith(('.tools/', '.runtime/', 'backups/', 'vendor/')) or (path.startswith('.env.') and path != '.env.example') or path in ('config.php', 'auth.json', '.envrc') or path.endswith(('.sql', '.key', '.pem', '.crt', '.p12', '.pfx', '.kdbx'))]
     if forbidden:
         raise ValueError('Sensitive/generated files are tracked: ' + ', '.join(forbidden))
+    dockerignore = (ROOT / '.dockerignore').read_text(encoding='utf-8').split()
+    missing = {'.env', 'config.php', 'auth.json', '.runtime', 'backups', 'vendor', 'storage', '*.pem', '*.key', '*.sql', '*.log'} - set(dockerignore)
+    assert not missing, f'.dockerignore must exclude sensitive paths so COPY . . cannot leak them: {sorted(missing)}'
     for sample in ('.env', '.env.production', '.tools/php/php.exe', '.runtime/db/ibdata1', 'backups/forum.zip', 'config.php', 'auth.json', 'storage/logs/flarum.log', 'public/assets/avatars/example.png'):
         subprocess.run(['git', 'check-ignore', '-q', '--no-index', sample], cwd=ROOT, check=True)
     result = subprocess.run(['git', 'check-ignore', '-q', '--no-index', 'composer.lock'], cwd=ROOT)

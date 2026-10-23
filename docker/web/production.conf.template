@@ -3,6 +3,9 @@ server {
     listen 80;
     server_name ${FORUM_HOST};
     location = /healthz { access_log off; return 200 'ok'; }
+    # Explicit HTTP-01 hole: the dotfile 404 rule would otherwise block ACME
+    # validation for operators who renew certificates through this nginx.
+    location ^~ /.well-known/acme-challenge/ { root /var/www/certbot; default_type text/plain; }
     location / { return 301 https://${FORUM_HOST}$request_uri; }
 }
 server {
@@ -18,7 +21,8 @@ server {
     access_log /dev/stdout safe;
     error_log /dev/stderr warn;
     add_header X-Content-Type-Options nosniff always;
-    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    # Referrer-Policy comes from the application (same-origin, see config/environment.php);
+    # duplicating it here would emit two conflicting header values.
     add_header Strict-Transport-Security "max-age=31536000" always;
     location ~ (^|/)\. { return 404; }
     location ~* ^/(?:config\.php|composer\.(?:json|lock)|storage|vendor|backups|flarum|auth\.json) { return 404; }
