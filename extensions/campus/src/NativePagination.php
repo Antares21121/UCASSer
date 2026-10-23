@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-// RC.8's home document sends page[number], while its discussion endpoint
+// Flarum 2's home document sends page[number], while its discussion endpoint
 // accepts offsets. Normalize internal preload requests before the native query.
 class NativePagination implements MiddlewareInterface
 {

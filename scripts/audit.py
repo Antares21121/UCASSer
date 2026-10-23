@@ -30,11 +30,17 @@ def check_report(data):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--backend', choices=['native', 'docker'], default='docker')
+    parser.add_argument('--env-file', default=str(ROOT / '.env'))
+    parser.add_argument('--compose-file', default='compose.yaml',
+                        help='compose file of the stack being audited (compose.yaml or compose.production.yaml)')
     args = parser.parse_args()
     if args.backend == 'native':
         command = [str(ROOT / '.tools/php/php.exe'), str(ROOT / '.tools/composer.phar')]
     else:
-        command = ['docker', 'compose', 'run', '--rm', '--no-deps', '-T', 'app', 'composer']
+        # Mirror scripts/forum.py's compose invocation so the audit always runs
+        # against the stack that is actually deployed (same --env-file, same file).
+        command = ['docker', 'compose', '--env-file', args.env_file, '-f', str(ROOT / args.compose_file),
+                   'run', '--rm', '--no-deps', '-T', 'app', 'composer']
     result = subprocess.run([*command, 'audit', '--locked', '--format=json'], cwd=ROOT, capture_output=True)
     if result.returncode not in (0, 1, 2, 3):
         raise RuntimeError('Composer audit failed to execute')

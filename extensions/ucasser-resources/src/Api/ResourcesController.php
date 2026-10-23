@@ -25,8 +25,19 @@ class ResourcesController extends Support implements RequestHandlerInterface
         $query = $request->getQueryParams();
         $categoryId = filter_var($query['category_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         $page = filter_var($query['page'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: 1;
+        // Hard cap keeps the offset arithmetic bounded; 10,000 pages x 25 rows is far
+        // beyond any realistic directory size, and the effective page is echoed back.
         $page = min($page, 10000);
-        $search = $this->text($query['q'] ?? '', 100);
+        $rawSearch = $query['q'] ?? '';
+        if (isset($query['q']) && ! is_string($rawSearch)) {
+            return $this->error('搜索词格式无效');
+        }
+        $search = $this->text($rawSearch, 100);
+        if ($rawSearch !== '' && ! $search) {
+            // An over-long or whitespace/invisible-only keyword must not silently
+            // disable the filter and return the unfiltered full list.
+            return $this->error(mb_strlen($rawSearch) > 100 ? '搜索词最长 100 字' : '搜索词不能只包含空白或不可见字符');
+        }
         $rows = $this->db->table('ucasser_resources')->orderByDesc('updated_at')->orderByDesc('id');
 
         if ($categoryId) {
@@ -80,11 +91,23 @@ class ResourcesController extends Support implements RequestHandlerInterface
         $status = $input['status'] ?? 'active';
         $reason = ($input['reason'] ?? '') === '' ? null : $this->text($input['reason'], 255);
 
-        if (! $title || ! $url || ! in_array($status, ['active', 'needs_review'], true)
-            || (($input['description'] ?? '') !== '' && ! $description)
-            || (($input['source_url'] ?? '') !== '' && ! $sourceUrl)
-            || (($input['reason'] ?? '') !== '' && ! $reason)) {
-            return $this->error('请填写有效标题和 http(s) 链接；简介最多 2000 字');
+        if (! $title) {
+            return $this->error('请填写有效标题（最长 180 字）');
+        }
+        if (! $url) {
+            return $this->error('请填写有效的 http(s) 访问链接');
+        }
+        if (! in_array($status, ['active', 'needs_review'], true)) {
+            return $this->error('资料状态只能是 active 或 needs_review');
+        }
+        if (($input['description'] ?? '') !== '' && ! $description) {
+            return $this->error('简介最长 2000 字');
+        }
+        if (($input['source_url'] ?? '') !== '' && ! $sourceUrl) {
+            return $this->error('来源链接必须是有效的 http(s) 地址');
+        }
+        if (($input['reason'] ?? '') !== '' && ! $reason) {
+            return $this->error('修订原因最长 255 字');
         }
 
         $id = null;
@@ -113,19 +136,30 @@ class ResourcesController extends Support implements RequestHandlerInterface
             'updated_at' => $now,
         ];
 
-        $id = $this->db->transaction(function () use ($id, $previous, $values, $now, $actorId, $reason) {
+        $id = $this->db->transaction(function () use ($id, $values, $now, $actorId, $reason) {
             $table = $this->db->table('ucasser_resources');
+            $previous = null;
             if ($id) {
+                // Lock the row so concurrent edits cannot interleave: previous_data in
+                // the revision log must describe the state this transaction replaces.
+                $previous = $table->where('id', $id)->lockForUpdate()->first();
+                if (! $previous) {
+                    throw new \RuntimeException('资料不存在');
+                }
                 $table->where('id', $id)->update($values);
             } else {
                 $id = $table->insertGetId($values + ['created_at' => $now]);
             }
 
+            // Keep the two JSON snapshots key-compatible (both carry id/created_at)
+            // so per-field diffs do not have to ignore structural key differences.
+            $newData = $values + ['id' => (int) $id, 'created_at' => $previous->created_at ?? $now];
+
             $this->db->table('ucasser_resource_revisions')->insert([
                 'resource_id' => $id,
                 'editor_id' => $actorId,
                 'previous_data' => $previous ? json_encode($previous, JSON_UNESCAPED_UNICODE) : null,
-                'new_data' => json_encode($values, JSON_UNESCAPED_UNICODE),
+                'new_data' => json_encode($newData, JSON_UNESCAPED_UNICODE),
                 'reason' => $reason,
                 'created_at' => $now,
             ]);

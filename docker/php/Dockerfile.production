@@ -8,6 +8,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/forum.ini
 COPY docker/php/zz-forum.conf /usr/local/etc/php-fpm.d/zz-forum.conf
+# Production-only PHP hardening: the image is immutable so opcache never needs
+# to revalidate timestamps, and production always serves HTTPS so session
+# cookies can require the secure flag. The development image keeps none of this.
+RUN printf 'opcache.validate_timestamps=0\nopcache.memory_consumption=128\nsession.cookie_secure=1\n' > /usr/local/etc/php/conf.d/zz-production.ini
 WORKDIR /var/www/forum
 COPY extensions/ucasser-resources ./extensions/ucasser-resources
 COPY composer.json composer.lock ./

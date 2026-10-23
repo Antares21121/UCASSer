@@ -8,15 +8,15 @@
 
 信息汇集试点见 [设计与运行说明](docs/aggregation-design.md) 和 [交接与自动抓取](docs/aggregation-handoff.md)：独立信息流、用户投稿和管理员审核已接入；公开网页采集先从一个学校栏目开始。
 
-技术栈：Flarum 2.0.0-rc.8、PHP 8.3.35、Composer 2.10.3、MariaDB 11.4.13、Nginx 1.30.1；管理脚本使用 Python 3.11+ 标准库。依赖版本由 `composer.lock` 固定。
+技术栈：Flarum 2.0.2、PHP 8.3.35、Composer 2.10.3、MariaDB 11.4.13、Nginx 1.30.1；管理脚本使用 Python 3.11+ 标准库。依赖版本由 `composer.lock` 固定。
 
-**版本边界**：沿用仓库 `2.x` 的 `^2.0.0-rc.8` 核心与官方扩展清单，本机与团队使用同一锁文件。当前锁定核心为 RC，仅开发使用；生产启动、配置桥接和镜像构建均拒绝 RC/beta/dev 核心，升级为正式 2.x 后再验证上线。见 [版本决策](docs/decisions/001-runtime.md)。
+**版本边界**：核心约束 `^2.0.2`，官方扩展与全部锁定包均为正式稳定版（2026-10-24 由 RC 升级解析）。生产启动、配置桥接和镜像构建仍读取 composer.lock 并拒绝 RC/beta/dev 或非 2.x 正式核心；生产发布另需完成部署文档的暂存验证与上线检查单。见 [版本决策](docs/decisions/001-runtime.md)。
 
 ## 快速开始：团队首选 Docker Compose
 
 安装 Git、Python 3.11+、Docker Engine/Desktop 和 Compose v2（建议 2.24+）。Windows Docker Desktop 需要可用的 WSL2 或 Hyper-V 后端，Linux 容器模式。
 
-本轮 PR 合并前，克隆后先执行 `git switch codex/phases1-12`；合并后使用默认 `2.x` 分支。
+克隆后使用默认 `2.x` 分支；阶段分支（如 codex/phases1-12）均已合并，无需再切换。
 
 ```console
 git clone https://github.com/Antares21121/UCASSer.git

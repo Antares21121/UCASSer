@@ -134,6 +134,89 @@ class LauncherTests(unittest.TestCase):
                 self.assertEqual(list(instance.backups_dir().glob('*.zip')), [])
                 restart.assert_called_once()
 
+    def test_run_isolates_stdin_and_limits_env(self):
+        with tempfile.TemporaryDirectory() as directory:
+            instance = self.make_forum(directory)
+
+            class FakeProc:
+                returncode = 0
+                stdout = b''
+                stderr = b''
+
+            captured = {}
+
+            def fake_run(argv, **kwargs):
+                captured.clear()
+                captured.update(kwargs)
+                return FakeProc()
+
+            with mock.patch.object(forum.subprocess, 'run', side_effect=fake_run):
+                instance.run(['git', 'rev-parse', 'HEAD'], capture=True)
+                self.assertIs(captured.get('stdin'), forum.subprocess.DEVNULL)
+                self.assertNotIn('input', captured)
+                self.assertNotIn('DB_PASSWORD', captured['env'])
+                instance.run([instance.php_path(), '-r', 'echo 1;'], capture=True, stdin=b'x', forum_env=True)
+                self.assertEqual(captured.get('input'), b'x')
+                self.assertNotIn('stdin', captured)
+                self.assertEqual(captured['env']['DB_PASSWORD'], 'local-test-only')
+
+    def test_backup_without_git_records_unavailable_and_leaves_no_partial(self):
+        with tempfile.TemporaryDirectory() as directory:
+            instance = self.make_forum(directory)
+            (Path(directory) / 'config.php').write_text(forum.BRIDGE)
+            for name in ('composer.json', 'extend.php', 'scripts/runtime-lock.json', 'config/environment.php', 'config/release.php'):
+                path = Path(directory) / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('{}' if name.endswith('.json') else '<?php return [];')
+            (Path(directory) / 'extensions').mkdir(exist_ok=True)
+            (Path(directory) / 'public/assets').mkdir(parents=True, exist_ok=True)
+            (Path(directory) / 'storage').mkdir(exist_ok=True)
+
+            class FakeProc:
+                def __init__(self, stdout=b''):
+                    self.returncode = 0
+                    self.stdout = stdout
+                    self.stderr = b''
+
+            def fake_run(command, **kwargs):
+                argv = [str(item) for item in command]
+                if argv[:3] == ['git', 'rev-parse', 'HEAD']:
+                    raise RuntimeError('Command failed (128); see .runtime/last-error.log')
+                if 'mariadb-dump' in argv[0]:
+                    kwargs['stdout'].write(b'-- campus forum fake dump line\n' * 20)
+                    return FakeProc()
+                return FakeProc(b'ok')
+
+            with mock.patch.object(instance, 'php'), mock.patch.object(instance, 'stop_web'), \
+                 mock.patch.object(instance, 'start_process'), mock.patch.object(instance, 'run', side_effect=fake_run), \
+                 mock.patch.object(instance, 'db_bin', side_effect=lambda name: name), \
+                 mock.patch.object(instance, 'db_credentials') as creds:
+                creds.return_value.__enter__.return_value = ['--defaults-extra-file=ignored', 'restored']
+                result = instance.backup()
+            manifest = json.loads(zipfile.ZipFile(result).read('manifest.json'))
+            self.assertEqual(manifest['git_commit'], 'unavailable (not a git workspace)')
+            self.assertEqual(list(instance.backups_dir().glob('*.partial')), [])
+
+    def test_development_requires_app_url_port_and_loopback_consistency(self):
+        with tempfile.TemporaryDirectory() as directory:
+            instance = self.make_forum(directory)
+            instance.values.update(APP_URL='http://127.0.0.1:8080', HTTP_PORT='8081')
+            with self.assertRaises(ValueError):
+                instance.validate()
+            instance.values.update(APP_URL='http://example.invalid:8080')
+            with self.assertRaises(ValueError):
+                instance.validate()
+            instance.values.update(APP_URL='http://127.0.0.1:8080', HTTP_PORT='8080')
+            instance.validate()
+
+    def test_migrate_subcommand_runs_flarum_migrate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            instance = self.make_forum(directory)
+            with mock.patch.object(instance, 'php') as php, mock.patch('sys.stdout', new=io.StringIO()) as out:
+                instance.migrate()
+            php.assert_called_once_with('flarum', 'migrate')
+            self.assertIn('Migrations complete', out.getvalue())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -44,6 +44,9 @@ class Api:
             if codes != ['too_many_requests']:
                 break
             time.sleep(10.1)
+        if status not in acceptable and status == 429:
+            # Print which throttling layer answered so CI failures are diagnosable.
+            print(f'THROTTLE-DIAG {method} {path}: {body[:300]!r}', flush=True)
         assert status in acceptable, f'{method} {path}: expected {acceptable}, got {status}'
         try: return json.loads(body)
         except (json.JSONDecodeError, UnicodeDecodeError): return body

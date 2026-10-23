@@ -1,7 +1,7 @@
 <?php
 
 // Prepare directories as the installer, before the web process reads packages.
-// The locked Flarum 2 RC bundles register jsDirectory() for frontends even when
+// The locked Flarum 2 bundles register jsDirectory() for frontends even when
 // a frontend has no chunks. Composer archives omit empty directories, while
 // Flysystem tries to create missing source roots during asset compilation.
 $root = dirname(__DIR__);

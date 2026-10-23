@@ -13,7 +13,7 @@
 | Composer | 2.10.3 | 镜像 / 固定 PHAR 与 SHA256 |
 | MariaDB | 11.4.13 LTS | Compose 私有网络 / Windows 便携版 |
 | Nginx | 1.30.1 | Compose Web 服务；Windows 替代方案不使用 Nginx |
-| Flarum | 核心 2.0.0-rc.8 | `^2.0.0-rc.8` + 精确 `composer.lock`，沿用上游 beta + prefer-stable |
+| Flarum | 核心 2.0.2 | `^2.0.2` + 精确 `composer.lock`，沿用上游 beta + prefer-stable |
 | Node / npm | 22.18.0 / 10.x | `package-lock.json` 固定前端构建与浏览器验收工具 |
 
 Flarum 官方安装要求见 [2.x 安装指南](https://docs.flarum.org/install/)。项目启用 curl、dom、fileinfo、gd、json、mbstring、openssl、pdo_mysql、tokenizer、zip，并增加 intl、OPcache（容器）。官方 Composer 安装及现有骨架兼容，Web 根目录固定为 `public/`。RC 开发与正式生产边界见 [ADR 001](decisions/001-runtime.md)。
@@ -84,7 +84,7 @@ Windows PHP 不在 PATH 属于正常情况，所有命令由脚本选择 `.tools
 | `COMPOSE_PROJECT_NAME` | 隔离 Compose 网络与数据卷；已有环境不得随意改名 |
 | `TZ` | PHP / 容器时区；备份文件名固定 UTC |
 | `BACKUP_DIR` | 本机备份目录，不自动上传第三方 |
-| `MAIL_*` | 交接占位项，尚未同步到 Flarum；在后台配置 SMTP |
+| `MAIL_*` | 已移除：SMTP 只在 Flarum 后台配置（存数据库），环境模板不再携带邮件变量 |
 | `LOG_LEVEL` | 运维占位项；当前 Nginx warn、PHP 排除弃用警告，非动态日志级别 |
 
 其他配置文件可用 `--env-file .env.team-local` 指定。Docker 脚本会同时设置 Compose 应用使用该文件。禁止把 `docker compose config` 的完整输出发到聊天或工单：其中可能包含密码；检查使用 `config --quiet`。
@@ -98,7 +98,7 @@ python scripts/forum.py start
 python scripts/forum.py healthcheck
 ```
 
-Windows 给这些命令加 `--backend native`。更换 PHP/数据库镜像前阅读变更说明；不要自动删除数据卷以修复启动问题。上游依赖新增迁移时先备份，再按部署文档手动运行 `php flarum migrate` 和清缓存。
+Windows 给这些命令加 `--backend native`。更换 PHP/数据库镜像前阅读变更说明；不要自动删除数据卷以修复启动问题。上游依赖新增迁移时先备份，再运行 `python scripts/forum.py migrate`（它注入 `.env` 环境变量并调用 `php flarum migrate`；native 后端不要在裸 shell 直接调 php）和清缓存。
 
 业务扩展 `ucasser/flarum-campus` 位于 `extensions/campus`，通过 Composer path repository 加载，禁止改 vendor。Node 22.18.0 和 npm 10.x 构建自己的前端；提交源文件与 `js/dist`，不提交 node_modules。更新此包时不升级原仓库官方依赖。
 
@@ -121,7 +121,7 @@ python -m unittest discover -s tests -p "test_*.py" -v
 - 下载慢：本次 GitHub zip 下载曾超时，Composer 最终完成。保留缓存和锁文件重试 `setup`，不更换未核实的镜像源、不关闭 HTTPS。
 - MariaDB 无法连接：检查 `.runtime/db.log`、端口和 PID 状态；查看 `.runtime/last-error.log`。已有数据库的密码不会因修改 `.env` 自动变化，应恢复原配置或明确执行凭据轮换。
 - HTTP 500：先查看 `storage/logs/`、PHP 日志、环境桥接、文件权限和数据库。默认关闭向浏览器显示详细错误。
-- 全新安装的资源目录：setup 和 install 会执行 `scripts/prepare-runtime.php`，补齐运行缓存及锁定 Flarum 2 RC 包中被归档省略的空前端目录。依赖内容和版本不变，运行账户无需写入 vendor；更新依赖后重新执行 setup。
+- 全新安装的资源目录：setup 和 install 会执行 `scripts/prepare-runtime.php`，补齐运行缓存及锁定 Flarum 2 包中被归档省略的空前端目录。依赖内容和版本不变，运行账户无需写入 vendor；更新依赖后重新执行 setup。
 - `.runtime/last-error.log` 只记录最近一次错误，已知秘密会脱敏；转发日志前仍应审查个人信息。Windows 原始 Web 日志可能包含查询参数，`logs` 命令会隐藏它们。
 
 本次机器检查与已验证范围详见 [verification.md](verification.md)。
@@ -154,7 +154,7 @@ Windows 的 Python 命令加 `--backend native`。已有数据库在 migrate 前
 
 ## 同步深度定制界面
 
-本机与团队统一沿用 `composer.lock` 中的 Flarum 2.0.0-rc.8 和 `package-lock.json`，不升级官方包。拉取 PR #2 分支后执行构建、备份和 `campus.py migrate`（Windows 加 `--backend native`），再刷新浏览器。setup 会幂等补齐中文、蓝色及分区图标的首次默认值；已有管理员定制的语言、颜色和图标保留。
+本机与团队统一沿用 `composer.lock` 中的 Flarum 2.0.2 和 `package-lock.json`，不擅自升级官方包（升级走 ADR 001 流程：暂存环境验证后再动锁文件）。拉取业务更新后执行构建、备份和 `campus.py migrate`（Windows 加 `--backend native`），再刷新浏览器。setup 会幂等补齐中文、蓝色及分区图标的首次默认值；已有管理员定制的语言、颜色和图标保留。
 
 首页和顶栏、各板块列表、详情及发布都建立在 Flarum 原生组件上。入口和组件说明见 [native-ui.md](native-ui.md)。修改 JS 后运行 `npm run build`，修改 LESS/语言/扩展注册后清缓存；`campus.py migrate` 包含 setup 和清缓存。提交 `js/dist` 和源码、LESS、语言文件，不能只提交本机 assets 缓存。
 

@@ -38,9 +38,20 @@ abstract class Support
             return null;
         }
 
-        $value = trim($value);
+        // Unicode-aware trim: plain trim() only strips ASCII whitespace, so a
+        // full-width space (U+3000) would survive as a "non-empty" name.
+        $value = preg_replace('/^[\pZ\pC]+|[\pZ\pC]+$/u', '', $value);
+        if ($value === null || $value === '') {
+            return null;
+        }
 
-        return $value !== '' && mb_strlen($value) <= $max ? $value : null;
+        // Format/bidi characters (U+200B, U+202E, ...) are rejected outright:
+        // they enable invisible and direction-spoofing names.
+        if (preg_match('/\p{Cf}/u', $value)) {
+            return null;
+        }
+
+        return mb_strlen($value) <= $max ? $value : null;
     }
 
     protected function url(mixed $value): ?string
