@@ -57,12 +57,18 @@ def call(url, method='GET', body=None, token=None, expected=200):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--backend', choices=['docker', 'native'], default='docker')
+    parser.add_argument('--admin-user', required=True,
+                        help='administrator username of the installed forum (tests/smoke.py installs phase0_admin)')
+    parser.add_argument('--password-file', type=Path, required=True,
+                        help='file holding the administrator password on its first line '
+                             '(smoke.py writes .runtime/admin-initial-password.txt)')
     options = parser.parse_args()
 
-    password_file = ROOT / '.runtime/admin-initial-password.txt'
-    if not password_file.exists():
-        raise SystemExit('admin password file missing; run tests/smoke.py or install first')
-    password = password_file.read_text(encoding='utf-8').strip()
+    password_path = options.password_file if options.password_file.is_absolute() else ROOT / options.password_file
+    if not password_path.exists():
+        raise SystemExit(f'admin password file not found: {password_path}; smoke.py writes '
+                         '.runtime/admin-initial-password.txt for the instances it installs')
+    password = password_path.read_text(encoding='utf-8').strip()
 
     args = argparse.Namespace(backend=options.backend, profile='development', env_file=str(ROOT / '.env'),
                               archive=None, target_db=None, confirm=None)
@@ -72,7 +78,7 @@ def main():
     wait_health(forum)
 
     base = forum.values['APP_URL'].rstrip('/')
-    token = call(base + '/api/token', 'POST', {'identification': 'phase0_admin', 'password': password})['token']
+    token = call(base + '/api/token', 'POST', {'identification': options.admin_user, 'password': password})['token']
     call(base + '/api/extensions/' + EXTENSION, 'PATCH', {'enabled': True}, token, expected=204)
 
     categories = call(base + '/api/ucasser/categories')['categories']
