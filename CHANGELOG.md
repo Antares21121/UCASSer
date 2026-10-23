@@ -10,6 +10,7 @@
 - 基础设施：`.dockerignore` 补齐证书/私钥/SQL/日志/auth.json（check.py 断言）；nginx 不再重复下发 Referrer-Policy（应用层 same-origin 为唯一来源）；生产镜像追加不可变 opcache 与 `session.cookie_secure` 覆盖；生产 80 端口预留 ACME HTTP-01 验证位；IIS 样例修正模式并注明未启用；`.env.example` 移除无消费方的 `MAIL_*`。
 - 文档：删除已合并分支的切换指引；启用脚本与 migrate 命令的文档同步实际参数；安全文档更新 Referrer-Policy/IIS/SMTP 边界；资料文档补分页上限与搜索词约束。
 - **升级至 Flarum 2.0.2**（ADR 001 约定的正式版条件已满足：2.0.0 于 2026-10-09 发布）：核心约束 `^2.0.2`，22 个官方扩展全部解析为 v2.0.x 稳定版，无预发布残留；生产三层闸门保留并放行 2.y.z；README/security/deployment/ADR 001/development 版本叙事同步；`composer audit` 无漏洞。Docker 隔离环境全新安装、扩展迁移（含 is_campus 新迁移）、resource_smoke 全部回归闸、备份与 `forum.py start`（Windows 容器 16 秒转 healthy，验证 UCS-03 修复）均复验通过。
+- 适配核心 2.0.2 新增的失败登录节流（同账号+IP 5 次/60 秒）：phase 11 的限流回归改为层无关断言（失败登录最终被 429 即通过，接受核心 `too_many_requests` 或校园 `rate_limit`），security.md 记录两层限流的先后关系。
 
 ## 2026-10-11 列表体验与资料目录整合
 

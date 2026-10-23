@@ -60,9 +60,17 @@ def security_checks(f, guest, admin):
         admin.call(user,'PATCH',{'data':{'type':'users','id':str(first['id']),'attributes':{'suspendedUntil':None}}})
     member.call('/api/campus/records/'+str(record['id'])+'/bookmark','POST',{'enabled':True})
     # Identity bucket cannot be bypassed by rotating client addresses or resource IDs.
+    # Failed logins are throttled by two layers: Flarum 2.0.2 core (5 failures per
+    # account+IP per 60s -> 429 too_many_requests) and the campus middleware
+    # (20 per account per 15min -> 429 rate_limit). Accept either source.
     identification='missing_'+secrets.token_hex(8)
-    for _ in range(20): guest.call('/api/token','POST',{'identification':identification,'password':'incorrect-development-password'},expected=401)
-    guest.call('/api/token','POST',{'identification':identification,'password':'incorrect-development-password'},expected=429)
+    throttled=None
+    for _ in range(25):
+        body=guest.call('/api/token','POST',{'identification':identification,'password':'incorrect-development-password'},expected=(401,429))
+        codes={e.get('code') for e in body.get('errors',[])} if isinstance(body,dict) else set()
+        if codes & {'rate_limit','too_many_requests'}:
+            throttled=codes; break
+    assert throttled, 'failed logins must eventually be rate limited'
     member.call('/api/campus/records','POST',{**information(admin,section['id']),'source_url':'javascript:alert(1)'},expected=422)
     assert guest.call('/api/campus/catalog')['data']['anonymousReviews'] is False
     print('PASS phase 11: CSRF, suspended native/custom writers, unban, duplicate submission, per-identity rate limiting, unsafe URLs and anonymous-off policy')
