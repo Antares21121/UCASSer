@@ -100,6 +100,18 @@ class Forum:
                 raise ValueError('Invalid identifier: ' + key)
         if self.values.get('APP_DEBUG') not in ('true', 'false'):
             raise ValueError('APP_DEBUG must be true or false')
+        split = urllib.parse.urlsplit(self.values['APP_URL'])
+        if split.scheme not in ('http', 'https') or not split.hostname:
+            raise ValueError('APP_URL must be an absolute http(s) URL')
+        if self.args.profile != 'production' and self.values.get('APP_ENV') != 'production':
+            # HTTP_BIND/HTTP_PORT only drive the development compose file and the
+            # native server; production serves 80/443 and must not be compared here.
+            bind = self.values.get('HTTP_BIND', '127.0.0.1')
+            port = str(self.values.get('HTTP_PORT', '8080'))
+            if split.port is not None and str(split.port) != port:
+                raise ValueError(f'APP_URL port {split.port} does not match HTTP_PORT={port}; keep them consistent or assets will point at the wrong origin')
+            if bind == '127.0.0.1' and split.hostname not in ('localhost', '127.0.0.1', '::1'):
+                raise ValueError('APP_URL hostname must be loopback when HTTP_BIND=127.0.0.1')
         if self.values.get('APP_ENV') == 'production':
             if not self.values['APP_URL'].startswith('https://') or self.values['APP_DEBUG'] != 'false':
                 raise ValueError('Production requires HTTPS and APP_DEBUG=false')
@@ -115,11 +127,18 @@ class Forum:
                 return package['version']
         raise ValueError('Missing locked flarum/core version')
 
-    def run(self, command, *, capture=False, stdin=None, stdout=None, cwd=None):
+    def run(self, command, *, capture=False, stdin=None, stdout=None, cwd=None, forum_env=False):
+        # Only docker/php/composer children need the .env values; unrelated tools
+        # (git, powershell, taskkill, database binaries) get the plain OS environment
+        # so database and mail passwords are not propagated into their process trees.
+        env = self.environment() if forum_env else dict(os.environ)
+        # input= and stdin= are mutually exclusive; without explicit input the child
+        # gets DEVNULL so it can never consume this launcher's own stdin.
+        stdin_options = {'input': stdin} if stdin is not None else {'stdin': subprocess.DEVNULL}
         try:
             proc = subprocess.run([str(item) for item in command], cwd=cwd or self.root,
-                                  env=self.environment(), input=stdin, stdout=subprocess.PIPE if capture else stdout,
-                                  stderr=subprocess.PIPE, check=False)
+                                  env=env, stdout=subprocess.PIPE if capture else stdout,
+                                  stderr=subprocess.PIPE, check=False, **stdin_options)
         except FileNotFoundError:
             raise RuntimeError('Required executable missing: ' + str(command[0])) from None
         if proc.returncode:
@@ -134,7 +153,7 @@ class Forum:
 
     def compose(self, *command, **kwargs):
         file = 'compose.production.yaml' if self.args.profile == 'production' else 'compose.yaml'
-        return self.run(['docker', 'compose', '--env-file', self.env_path, '-f', self.root / file, *command], **kwargs)
+        return self.run(['docker', 'compose', '--env-file', self.env_path, '-f', self.root / file, *command], forum_env=True, **kwargs)
 
     def php_path(self):
         portable = self.tools / 'php' / 'php.exe'
@@ -144,13 +163,13 @@ class Forum:
         root = kwargs.pop('root', False)
         if self.args.backend == 'docker':
             return self.compose('exec', '-T', '-u', '0' if root else 'www-data', 'app', 'php', *command, **kwargs)
-        return self.run([self.php_path(), *command], **kwargs)
+        return self.run([self.php_path(), *command], forum_env=True, **kwargs)
 
     def composer(self, *command):
         if self.args.backend == 'docker':
             self.compose('run', '--rm', '--no-deps', '-u', '0', 'app', 'composer', *command)
         else:
-            self.run([self.php_path(), self.tools / 'composer.phar', *command])
+            self.run([self.php_path(), self.tools / 'composer.phar', *command], forum_env=True)
 
     def doctor(self):
         print(f'OS: {sys.platform}; Python: {sys.version.split()[0]}; workspace: {self.root}')
@@ -292,6 +311,13 @@ class Forum:
             result = self.run(['powershell.exe', '-NoProfile', '-Command', command], capture=True).decode(errors='replace')
             if str(self.root).lower() not in result.lower() or executable.lower() not in result.lower():
                 raise ValueError('PID belongs to an unrelated process; refusing to signal it')
+        else:
+            try:
+                cmdline = Path(f'/proc/{int(pid)}/cmdline').read_bytes().replace(b'\0', b' ').decode(errors='replace')
+            except OSError:
+                return False
+            if str(self.root).lower() not in cmdline.lower() or executable.lower() not in cmdline.lower():
+                raise ValueError('PID belongs to an unrelated process; refusing to signal it')
         return True
 
     def start_process(self, name, command):
@@ -418,6 +444,11 @@ class Forum:
             self.compose('exec', '-T', '-u', '0', 'app', 'chown', '-R', 'www-data:www-data', '/var/www/forum/storage', '/var/www/forum/public/assets')
         print('Flarum installed; configure SMTP and forum permissions in admin before inviting users')
 
+    def migrate(self):
+        self.validate()
+        self.php('flarum', 'migrate')
+        print('Migrations complete')
+
     def health(self):
         self.validate()
         self.php('scripts/db.php', 'installed')
@@ -464,12 +495,19 @@ class Forum:
                             # database must follow options for mariadb-dump.
                             self.run([self.db_bin('mariadb-dump'), options[0], '--single-transaction', '--quick', '--skip-comments', '--hex-blob', *options[1:]], stdout=output)
                 if dump.stat().st_size < 100:
+                    # Even an empty schema dump is larger than this; anything smaller
+                    # means mariadb-dump failed silently and wrote (almost) nothing.
                     raise ValueError('Empty database backup')
+                try:
+                    git_commit = self.run(['git', 'rev-parse', 'HEAD'], capture=True).decode().strip()
+                except RuntimeError:
+                    # Metadata only: a workspace copied without .git can still back up.
+                    git_commit = 'unavailable (not a git workspace)'
                 metadata = {'format': 1, 'flarum': self.core_version(), 'created_utc': stamp, 'database': self.values['DB_NAME'],
                             'app_url': self.values['APP_URL'], 'backend': self.args.backend,
-                            'git_commit': self.run(['git', 'rev-parse', 'HEAD'], capture=True).decode().strip(),
+                            'git_commit': git_commit,
                             'config': {key: self.values[key] for key in ('APP_ENV', 'APP_URL', 'FORUM_TITLE', 'APP_DEBUG', 'TZ', 'LOG_LEVEL', 'DB_NAME', 'DB_USER', 'DB_PREFIX', 'HTTP_PORT', 'COMPOSE_PROJECT_NAME') if key in self.values},
-                            'note': 'Secrets excluded; configure new env on restore. All current persistent files included.'}
+                            'note': 'Secrets excluded; configure new env on restore. Regular workspace files and runtime state included; symlinks and empty directories are skipped on native.'}
                 files = {'database.sql': dump, 'composer.json': self.root / 'composer.json',
                          'composer.lock': self.root / 'composer.lock', 'config.php': self.root / 'config.php',
                          'config/environment.php': self.root / 'config/environment.php',
@@ -499,6 +537,9 @@ class Forum:
                 final.chmod(0o600)
                 write_private(final.with_suffix('.sha256'), sha256(final) + '  ' + final.name + '\n')
         finally:
+            # On success partial was renamed onto final; on failure the leftover
+            # .partial must not survive (only *.zip/*.sha256 are ever published).
+            partial.unlink(missing_ok=True)
             if self.args.backend == 'docker':
                 self.compose('start', 'app', 'web')
             else:
@@ -629,7 +670,7 @@ def main():
     parser.add_argument('--backend', choices=['docker', 'native'], default='docker')
     parser.add_argument('--profile', choices=['development', 'production'], default='development')
     parser.add_argument('--env-file', default=str(ROOT / '.env'))
-    parser.add_argument('command', choices=['doctor', 'bootstrap-native', 'setup', 'start', 'stop', 'status', 'logs', 'install', 'healthcheck', 'backup', 'restore', 'backups', 'versions'])
+    parser.add_argument('command', choices=['doctor', 'bootstrap-native', 'setup', 'start', 'stop', 'status', 'logs', 'install', 'healthcheck', 'migrate', 'backup', 'restore', 'backups', 'versions'])
     parser.add_argument('--archive')
     parser.add_argument('--target-db')
     parser.add_argument('--confirm', help='Explicit confirmation equal to the target database; for automation')
@@ -642,6 +683,9 @@ def main():
                 print(f'{path.name} ({path.stat().st_size} bytes)')
         else:
             getattr(forum, command)()
+    except EOFError:
+        print('ERROR: interactive input ended; for automation use tests/smoke.py or pass --confirm where available', file=sys.stderr)
+        return 1
     except (ValueError, RuntimeError, OSError, zipfile.BadZipFile) as error:
         print('ERROR: ' + str(error), file=sys.stderr)
         return 1
