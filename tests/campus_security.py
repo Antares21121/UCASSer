@@ -55,9 +55,19 @@ def security_checks(f, guest, admin):
         admin.call(user,'PATCH',{'data':{'type':'users','id':str(first['id']),'attributes':{'suspendedUntil':until,'suspendReason':'【示例】封禁接口验收','suspendMessage':'【示例】临时封禁'}}})
         member.call('/api/campus/records','POST',information(admin,section['id']),expected=(401,403))
         member.call('/api/campus/records/'+str(record['id'])+'/bookmark','POST',{'enabled':True},expected=(401,403))
-        member.call('/api/discussions','POST',{'data':{'type':'discussions','attributes':{'title':'【示例】封禁拒绝','content':'【示例】原生讨论接口也必须拒绝'}}},expected=(401,403,422))
     finally:
         admin.call(user,'PATCH',{'data':{'type':'users','id':str(first['id']),'attributes':{'suspendedUntil':None}}})
+    # The native-write suspension probe uses a dedicated fresh account: `first`
+    # has just edited a post, and core 2.0.2's post-floodgate (10s create-or-edit
+    # window) would preempt the permission check with 429 before it can be tested.
+    gate=account(guest,admin)
+    until=(datetime.now(timezone.utc)+timedelta(days=1)).isoformat()
+    gate_user='/api/users/'+str(gate['id'])
+    try:
+        admin.call(gate_user,'PATCH',{'data':{'type':'users','id':str(gate['id']),'attributes':{'suspendedUntil':until,'suspendReason':'【示例】封禁接口验收','suspendMessage':'【示例】临时封禁'}}})
+        gate['api'].call('/api/discussions','POST',{'data':{'type':'discussions','attributes':{'title':'【示例】封禁拒绝','content':'【示例】原生讨论接口也必须拒绝'}}},expected=(401,403,422))
+    finally:
+        admin.call(gate_user,'PATCH',{'data':{'type':'users','id':str(gate['id']),'attributes':{'suspendedUntil':None}}})
     member.call('/api/campus/records/'+str(record['id'])+'/bookmark','POST',{'enabled':True})
     # Identity bucket cannot be bypassed by rotating client addresses or resource IDs.
     # Failed logins are throttled by two layers: Flarum 2.0.2 core (5 failures per
