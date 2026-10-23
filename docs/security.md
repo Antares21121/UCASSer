@@ -17,9 +17,9 @@
 
 ## 版本与依赖安全
 
-当前开发核心沿用仓库 Flarum 2.0.0-rc.8。RC 不作为生产基线，生产启动、配置桥接和镜像构建均读取 composer.lock，要求正式 2.x 版本。详细政策见 [ADR 001](decisions/001-runtime.md)。
+开发核心为 Flarum 2.0.2（2026-10-24 由 RC 升级），全部官方扩展为正式稳定版。生产启动、配置桥接和镜像构建均读取 composer.lock，要求正式 2.x 版本并拒绝 RC/beta/dev。详细政策见 [ADR 001](decisions/001-runtime.md)。
 
-清单保持上游 beta + prefer-stable 以解析 RC，核心与扩展精确版本由锁文件保证；正式版上线前改为 stable 并重新验证。没有沿用 1.x 的 Flysystem 审计忽略项，也没有关闭 Composer 安全阻断。`scripts/audit.py` 对任何已报告漏洞或停止维护依赖返回非零。
+清单保持上游 beta + prefer-stable 设置（prefer-stable 使稳定版优先生效），核心与扩展精确版本由锁文件保证。没有沿用 1.x 的 Flysystem 审计忽略项，也没有关闭 Composer 安全阻断。`scripts/audit.py` 对任何已报告漏洞或停止维护依赖返回非零。
 
 审计通过仅意味着当前数据源没有报告命中的问题，不能保证不存在未知漏洞。提交前记录实际审计结果，新增问题应修复或独立评估，不用空白测试或 continue-on-error 掩盖。
 

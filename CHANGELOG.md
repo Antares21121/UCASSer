@@ -1,14 +1,15 @@
 # Changelog
 
-## 2026-10-24 深度审查修复（P1×1、P2×8、P3 活条目）
+## 2026-10-24 深度审查修复（P1×1、P2×8、P3 活条目）与 Flarum 2.0.2 升级
 
-依据 2026-10-24 深度审查报告（三轮审查 + 隔离环境验收取证）修复基线 820ae29 上仍然存活的缺陷：
+依据 2026-10-24 深度审查报告（三轮审查 + 隔离环境验收取证）修复基线 820ae29 上仍然存活的缺陷；同波次完成 ADR 001 约定的正式版升级。
 
 - 启动器：子进程 stdin 隔离与 EOFError 友好报错；备份不再被 git 工作区缺失阻断（git_commit 记 `unavailable`）；失败备份不再残留 `.partial`；开发档校验 APP_URL 与 HTTP_PORT/HTTP_BIND 一致性；新增 `migrate` 子命令统一两后端的 `php flarum migrate`；与论坛无关的子进程不再继承数据库/邮件密码。
 - 资料目录扩展：服务端中文错误现在能到达前端（改读 `error.response.error`）；搜索词超长/全空白返回 422 而非静默忽略；分类 (parent_id, name) 唯一索引兜底并发重名；修订行锁入事务、前后快照键集一致；校外根判定改用显式 `is_campus` 标记（新迁移）；重命名根分类 400、重复处理反馈 409；Unicode 感知 trim 拒绝全角/不可见空白名称；列表请求令牌丢弃过期响应；prompt 空输入给出反馈；时间显示截断到分钟；种子迁移可安全重跑。
 - 脚本与 CI：`enable_resources.py` 凭据参数化（删除硬编码 phase0_admin 与误导报错）；`audit.py` 与启动器同构的 compose 上下文（`--env-file`/`-f`）；CI 四个 action 锁定 commit SHA；CI 启用扩展步骤显式传参。
 - 基础设施：`.dockerignore` 补齐证书/私钥/SQL/日志/auth.json（check.py 断言）；nginx 不再重复下发 Referrer-Policy（应用层 same-origin 为唯一来源）；生产镜像追加不可变 opcache 与 `session.cookie_secure` 覆盖；生产 80 端口预留 ACME HTTP-01 验证位；IIS 样例修正模式并注明未启用；`.env.example` 移除无消费方的 `MAIL_*`。
 - 文档：删除已合并分支的切换指引；启用脚本与 migrate 命令的文档同步实际参数；安全文档更新 Referrer-Policy/IIS/SMTP 边界；资料文档补分页上限与搜索词约束。
+- **升级至 Flarum 2.0.2**（ADR 001 约定的正式版条件已满足：2.0.0 于 2026-10-09 发布）：核心约束 `^2.0.2`，22 个官方扩展全部解析为 v2.0.x 稳定版，无预发布残留；生产三层闸门保留并放行 2.y.z；README/security/deployment/ADR 001/development 版本叙事同步；`composer audit` 无漏洞。Docker 隔离环境全新安装、扩展迁移（含 is_campus 新迁移）、resource_smoke 全部回归闸、备份与 `forum.py start`（Windows 容器 16 秒转 healthy，验证 UCS-03 修复）均复验通过。
 
 ## 2026-10-11 列表体验与资料目录整合
 
