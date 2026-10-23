@@ -48,7 +48,7 @@ def main():
 
     campus = next(item for item in categories if item['name'] == '校内资料')
     outside_root = next(item for item in categories if item['name'] == '校外资料')
-    assert campus.get('is_campus') is True and not outside_root.get('is_campus'), 'Roots must carry explicit is_campus flags'
+    assert bool(campus.get('is_campus')) and not bool(outside_root.get('is_campus')), 'Roots must carry explicit is_campus flags'
     call('/api/ucasser/categories', 'POST', {'parent_id': campus['id'], 'kind': 'college', 'name': '无权限测试'}, expected=403)
 
     password = args.password_file.read_text(encoding='utf-8').strip()

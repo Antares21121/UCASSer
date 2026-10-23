@@ -13,7 +13,11 @@ class CategoriesController extends Support implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         return match ($request->getMethod()) {
-            'GET' => new JsonResponse(['categories' => $this->db->table('ucasser_resource_categories')->orderBy('id')->get()]),
+            'GET' => new JsonResponse(['categories' => $this->db->table('ucasser_resource_categories')->orderBy('id')->get()
+                ->each(function ($row) {
+                    // TINYINT(1) arrives as a PHP int; expose a real JSON boolean.
+                    $row->is_campus = (bool) $row->is_campus;
+                })]),
             'POST' => $this->create($request),
             'PATCH' => $this->rename($request),
             default => $this->error('不支持的操作', 405),
