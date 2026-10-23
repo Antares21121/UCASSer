@@ -1,10 +1,20 @@
 <?php
 use Flarum\Extend;
 use Flarum\Discussion\Discussion;
+use Flarum\Http\RequestUtil;
 use Flarum\Tags\Tag;
 use UCASSer\Campus;
 return [
     (new Extend\ServiceProvider())->register(Campus\LocaleProvider::class),
+    // First-party internal API calls (controllers re-dispatching through
+    // Flarum\Api\Client to create or revise the backing discussions) must not be
+    // flood-throttled as if the user were hammering the endpoints: on core 2.0.2
+    // the 10s post window fires inside the inner pipe and breaks record writes a
+    // few seconds apart. Campus HTTP routes keep their own per-user limits; only
+    // the internal re-dispatch is exempt, matching core's bypassThrottling design.
+    (new Extend\ThrottleApi())->set('campusInternalBypass', function ($request) {
+        return RequestUtil::isInternal($request) ? false : null;
+    }),
     new Extend\Locales(__DIR__.'/locale'),
     (new Extend\Middleware('forum'))->replace(\Flarum\Http\Middleware\SetLocale::class, Campus\ForumLocale::class),
     (new Extend\Middleware('api'))->replace(\Flarum\Http\Middleware\SetLocale::class, Campus\ForumLocale::class),
