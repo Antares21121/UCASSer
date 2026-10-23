@@ -47,6 +47,8 @@ def main():
     assert {'https://cet.neea.edu.cn/', 'https://ncre.neea.edu.cn/'} <= {item['url'] for item in initial}
 
     campus = next(item for item in categories if item['name'] == '校内资料')
+    outside_root = next(item for item in categories if item['name'] == '校外资料')
+    assert campus.get('is_campus') is True and not outside_root.get('is_campus'), 'Roots must carry explicit is_campus flags'
     call('/api/ucasser/categories', 'POST', {'parent_id': campus['id'], 'kind': 'college', 'name': '无权限测试'}, expected=403)
 
     password = args.password_file.read_text(encoding='utf-8').strip()
@@ -58,9 +60,13 @@ def main():
     assert {item['name'] for item in groups} == {'必修课', '选修课'}
     mandatory = next(item for item in groups if item['name'] == '必修课')
     course = call('/api/ucasser/categories', 'POST', {'parent_id': mandatory['id'], 'kind': 'course', 'name': '验收课程'}, token, 201)['id']
+    call('/api/ucasser/categories', 'POST', {'parent_id': mandatory['id'], 'kind': 'course', 'name': '验收课程'}, token, 422)  # duplicate name in the same parent
+    call('/api/ucasser/categories', 'POST', {'parent_id': outside_root['id'], 'kind': 'college', 'name': '越界学院'}, token, 422)  # colleges only under the campus root
+    call('/api/ucasser/categories/' + str(campus['id']), 'PATCH', {'name': '改名测试'}, token, 400)  # roots cannot be renamed
 
     resource = {'category_id': course, 'title': '验收资料', 'url': 'https://example.org/', 'description': '独立测试环境中的资料链接', 'source_url': 'https://example.org/', 'status': 'active'}
     call('/api/ucasser/resources', 'POST', resource | {'url': 'javascript:alert(1)'}, token, 422)
+    call('/api/ucasser/resources', 'POST', resource | {'title': '\u3000'}, token, 422)  # invisible/full-width whitespace is not a title
     call('/api/ucasser/resources', 'POST', resource, expected=403)
     identifier = call('/api/ucasser/resources', 'POST', resource, token, 201)['id']
     call('/api/ucasser/resources/' + str(identifier), 'PATCH', resource, token, 422)
@@ -68,6 +74,8 @@ def main():
     call('/api/ucasser/resources/' + str(identifier), 'PATCH', changed, token, 200)
     results = call('/api/ucasser/resources?category_id=' + str(course) + '&q=' + urllib.parse.quote('验收资料更新'))['resources']
     assert len(results) == 1 and results[0]['url'] == changed['url']
+    call('/api/ucasser/resources?q=' + urllib.parse.quote('长' * 101), expected=422)  # over-long keyword must not silently disable filtering
+    call('/api/ucasser/resources?q=' + urllib.parse.quote('\u3000'), expected=422)  # whitespace-only keyword is rejected too
     updated_at = datetime.strptime(results[0]['updated_at'], '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone.utc)
     assert abs((datetime.now(timezone.utc) - updated_at).total_seconds()) < 60, 'Resource timestamps must be UTC'
     root_results = call('/api/ucasser/resources?category_id=' + str(campus['id']) + '&q=' + urllib.parse.quote('验收资料更新'))
@@ -86,8 +94,11 @@ def main():
     assert report in {item['id'] for item in reports}
     call('/api/ucasser/reports/' + str(report), 'PATCH', {'status': 'resolved'}, token, 200)
     assert report not in {item['id'] for item in call('/api/ucasser/reports', token=token)['reports']}
+    again = call('/api/ucasser/reports', 'POST', {'resource_id': identifier, 'reason': '再次失效'}, token, 201)['id']  # re-report after resolve stays allowed
+    call('/api/ucasser/reports/' + str(again), 'PATCH', {'status': 'resolved'}, token, 200)
+    call('/api/ucasser/reports/' + str(again), 'PATCH', {'status': 'resolved'}, token, 409)  # double resolve is a conflict, not 404
 
-    print('PASS: public directory, categories, link creation and revision, access checks, search, and report handling')
+    print('PASS: public directory, categories, link creation and revision, access checks, search, report handling, and review regression gates')
 
 
 if __name__ == '__main__':

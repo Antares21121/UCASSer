@@ -36,8 +36,12 @@ class ReportsController extends Support implements RequestHandlerInterface
             }
 
             $updated = $this->db->table('ucasser_resource_reports')->where('id', $id)->where('status', 'pending')->update(['status' => 'resolved']);
-
-            return $updated ? new JsonResponse(['id' => $id]) : $this->error('反馈不存在或已处理', 404);
+            if ($updated) {
+                return new JsonResponse(['id' => $id]);
+            }
+            $exists = $this->db->table('ucasser_resource_reports')->where('id', $id)->exists();
+            // Already processed is a conflict, not "not found".
+            return $this->error($exists ? '这条反馈已处理过' : '反馈不存在', $exists ? 409 : 404);
         }
 
         if ($request->getMethod() !== 'POST') {

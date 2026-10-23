@@ -10,6 +10,12 @@
       .sort(function (a, b) { return a.position - b.position || a.id - b.id; });
   }
 
+  function serverMessage(error) {
+    // Flarum's RequestError carries no message property; the controllers' Chinese
+    // error text arrives as {"error": "..."} on error.response.
+    return (error && error.response && typeof error.response.error === 'string' && error.response.error) || '';
+  }
+
   function categoryPath(categories, category) {
     var names = [];
     while (category) {
@@ -33,6 +39,7 @@
     this.editing = null;
     this.form = { category_id: '', title: '', url: '', description: '', source_url: '', status: 'active', reason: '' };
     this.reports = [];
+    this.requestSeq = 0;
   }
 
   ResourcePage.prototype.oninit = function () {
@@ -50,15 +57,20 @@
   ResourcePage.prototype.load = function () {
     var page = this;
     page.loading = true;
+    // Token guard: rapid paging/search fires overlapping requests; a stale late
+    // response must not overwrite the results of a newer one.
+    var seq = ++page.requestSeq;
     var query = '?page=' + page.page + (page.selected ? '&category_id=' + page.selected : '') + (page.query ? '&q=' + encodeURIComponent(page.query) : '');
     return app.request({ url: api('resources') + query }).then(function (data) {
+      if (seq !== page.requestSeq) return;
       page.resources = data.resources;
       page.hasMore = data.has_more;
       page.canManage = data.can_manage;
       page.loading = false;
       m.redraw();
-    }).catch(function () {
-      page.error = '资料暂时无法加载，请稍后重试。';
+    }).catch(function (error) {
+      if (seq !== page.requestSeq) return;
+      page.error = serverMessage(error) || '资料暂时无法加载，请稍后重试。';
       page.loading = false;
       m.redraw();
     });
@@ -75,24 +87,27 @@
   ResourcePage.prototype.addCategory = function (parent, kind) {
     var page = this;
     var name = window.prompt(kind === 'college' ? '学院名称' : '课程名称');
-    if (!name) return;
+    if (name === null) return;
+    if (!String(name).trim()) { page.error = '名称不能为空'; m.redraw(); return; }
     app.request({ method: 'POST', url: api('categories'), body: { parent_id: parent.id, kind: kind, name: name } })
       .then(function () { page.notice = '分类已添加'; page.error = ''; return page.refreshCategories(); })
-      .catch(function (error) { page.error = error.message || '添加分类失败'; m.redraw(); });
+      .catch(function (error) { page.error = serverMessage(error) || '添加分类失败'; m.redraw(); });
   };
 
   ResourcePage.prototype.renameCategory = function (category) {
     var page = this;
     var name = window.prompt('修改名称', category.name);
-    if (!name || name === category.name) return;
+    if (name === null || name === category.name) return;
+    if (!String(name).trim()) { page.error = '名称不能为空'; m.redraw(); return; }
     app.request({ method: 'PATCH', url: api('categories/' + category.id), body: { name: name } })
       .then(function () { page.notice = '名称已修改'; page.error = ''; return page.refreshCategories(); })
-      .catch(function (error) { page.error = error.message || '修改名称失败'; m.redraw(); });
+      .catch(function (error) { page.error = serverMessage(error) || '修改名称失败'; m.redraw(); });
   };
 
   function isCampusRoot(categories, category) {
-    return category.kind === 'root' && category.parent_id === null
-      && !childCategories(categories, category.id).some(function (child) { return child.kind === 'external_topic'; });
+    // The backend marks the campus root explicitly (is_campus); sibling-based
+    // inference breaks if the external topics are ever removed.
+    return category.kind === 'root' && category.parent_id === null && !!category.is_campus;
   }
 
   ResourcePage.prototype.categoryNode = function (category, depth) {
@@ -151,16 +166,17 @@
     var path = editing ? 'resources/' + editing : 'resources';
     app.request({ method: editing ? 'PATCH' : 'POST', url: api(path), body: page.form })
       .then(function () { page.editing = null; page.notice = editing ? '资料已更新' : '资料已添加'; page.error = ''; return page.load(); })
-      .catch(function (error) { page.error = error.message || '保存失败，请检查填写内容'; m.redraw(); });
+      .catch(function (error) { page.error = serverMessage(error) || '保存失败，请检查填写内容'; m.redraw(); });
   };
 
   ResourcePage.prototype.report = function (item) {
     var page = this;
     var reason = window.prompt('请说明链接失效或资料错误的情况');
-    if (!reason) return;
+    if (reason === null) return;
+    if (!String(reason).trim()) { page.error = '请填写问题说明'; m.redraw(); return; }
     app.request({ method: 'POST', url: api('reports'), body: { resource_id: item.id, reason: reason } })
       .then(function () { page.notice = '反馈已提交，等待维护者核对'; page.error = ''; m.redraw(); })
-      .catch(function (error) { page.error = error.message || '提交反馈失败，请先登录'; m.redraw(); });
+      .catch(function (error) { page.error = serverMessage(error) || '提交反馈失败，请先登录'; m.redraw(); });
   };
 
   ResourcePage.prototype.loadReports = function () {
@@ -237,7 +253,7 @@
                 app.session.user ? m('button.Button', { type: 'button', onclick: function () { page.report(item); } }, '反馈问题') : null,
                 page.canManage ? m('button.Button', { type: 'button', onclick: function () { page.startEdit(item); } }, '修改') : null
               ]),
-              m('div.ResourceDirectory-itemMeta', ['更新于 ', item.updated_at])
+              m('div.ResourceDirectory-itemMeta', ['更新于 ', String(item.updated_at || '').slice(0, 16)])
             ]);
           }) : m('p.ResourceDirectory-empty', '这里还没有资料链接。'),
           m('div.ResourceDirectory-pages', [
