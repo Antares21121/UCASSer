@@ -1,6 +1,7 @@
 """Real HTTP security regression; no secrets enter the report."""
 import json
 import secrets
+import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timedelta, timezone
@@ -39,6 +40,9 @@ def security_checks(f, guest, admin):
     member.call('/api/campus/records','POST',payload,expected=422)
     native=member.call('/api/discussions/'+str(record['discussion_id']))
     post=next(p for p in native['included'] if p['type']=='posts' and p['attributes'].get('number')==1)
+    # Core 2.0.2 floods content edits the same as creations: the record's post was
+    # created seconds ago, so wait out the shared 10s window before the native edit.
+    time.sleep(11)
     member.call('/api/posts/'+post['id'],'PATCH',{'data':{'type':'posts','id':post['id'],'attributes':{'content':'【示例】使用原生编辑控件修改，历史版本仍须保留。'}}})
     changed=member.call('/api/campus/records/'+str(record['id']))['data']
     assert changed['version']==record['version']+1 and changed['history']
