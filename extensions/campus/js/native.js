@@ -35,6 +35,24 @@ const icons = {
 };
 const primary = [['/campus', '首页', 'compass'], ['/campus/records?type=information', '校园信息', 'bullhorn'], ['/t/campus-resources', '共享资料', 'book-open'], ['/t/campus-questions', '问答', 'comment-dots'], ['/t/campus-courses', '课程经验', 'graduation-cap']];
 const extras = [['/campus/aggregation', '信息汇集', 'stream'], ['/campus/courses', '课程目录', 'graduation-cap'], ['/campus/search', '详细检索', 'search'], ['/campus/identity', '校园身份', 'id-card'], ['/campus/governance', '公开治理', 'balance-scale'], ['/campus/cases', '举报与申诉', 'flag'], ['/campus/rules', '社区公约', 'handshake']];
+const isCampusHome = () => ['/', '/campus', '/all'].includes((m.route.get() || '').split('?')[0]);
+const homePaths = [
+  ['/campus/aggregation', '查看校园信息', '学校、学院与同学分享的消息，逐条标明来源和核验状态。', 'bullhorn'],
+  ['/resources', '寻找学习资料', '按学院和课程查找资料链接，也能查看校外学习资源。', 'book-open'],
+  ['/t/campus-questions', '提出一个问题', '从已有问答里找经验，或向社区发起讨论。', 'comment-dots'],
+  ['/campus/tools', '打开校园工具', '日历、食堂、课程与出行入口集中在这里。', 'th-large']
+];
+const homeGuide = () => m('section.Campus-homeGuide', { 'aria-labelledby': 'campus-home-guide-title' }, [
+  m('div.Campus-homeGuideHeading', [
+    m('h2#campus-home-guide-title', '今天从哪里开始？'),
+    m('p', '选一个需要的入口，或继续往下看同学们的最新讨论。')
+  ]),
+  m('nav.Campus-homePaths', { 'aria-label': '校园常用入口' }, homePaths.map(([href, title, description, icon], index) =>
+    link(href, [m('span.Campus-homePathIcon', symbol(icon)), m('span.Campus-homePathText', [m('strong', title), m('small', description)]), m('span.Campus-homePathArrow', { 'aria-hidden': 'true' }, '→')], {
+      className: 'Campus-homePath' + (index === 0 ? ' Campus-homePath--lead' : '')
+    })
+  ))
+]);
 // Native sorting serializes filters into the URL; keep the campus criteria
 // when the original IndexPage changes sort order or loads another page.
 const campusFilters = () => {
@@ -766,6 +784,10 @@ export function registerNative() {
       items.setContent('title', m('h1.Hero-title', app.forum.attribute('title')));
       items.setContent('subtitle', m('div.Hero-subtitle', app.forum.attribute('description') || '共同维护校园信息，让经验与知识帮助更多同学。'));
     }
+    if (isCampusHome()) items.add('campus-home-actions', m('nav.Campus-homeHeroActions', { 'aria-label': '首页快捷入口' }, [
+      link('/campus/aggregation', [symbol('bullhorn'), '看校园信息'], { className: 'Campus-homeHeroAction Campus-homeHeroAction--primary' }),
+      link('/resources', [symbol('book-open'), '找学习资料'], { className: 'Campus-homeHeroAction' })
+    ]), -1000);
   });
   override(GlobalSearchState.prototype, 'params', function (original) {
     const params = original();
@@ -838,10 +860,11 @@ export function registerNative() {
   });
   extend(IndexPage.prototype, 'contentItems', function (items) {
     if (this instanceof NativeRecordsPage || app.search.state.params().q || m.route.param('tags')) return;
+    if (isCampusHome()) items.add('campus-home-guide', homeGuide(), 130);
     const cache = app.cache.campusCatalog;
     if (cache?.data) items.add('campus-sections', m('nav.Campus.Campus-nativeExplore', {
       'aria-label': '探索校园板块'
-    }, [m('div.Campus-sectionHeading', [m('h2', '校园广场'), link('/tags', '全部板块')]), m('div.Campus-grid', cache.data.sections.map(s => link('/t/' + s.slug, [m('span.Campus-sectionIcon', symbol(icons[s.key] || 'folder-open')), m('strong', s.name)], {
+    }, [m('div.Campus-sectionHeading', [m('h2', '按主题浏览'), link('/tags', '全部板块')]), m('div.Campus-grid', cache.data.sections.map(s => link('/t/' + s.slug, [m('span.Campus-sectionIcon', symbol(icons[s.key] || 'folder-open')), m('strong', s.name)], {
       className: 'Campus-section',
       title: s.description
     })))]), 120);

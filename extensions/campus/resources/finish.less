@@ -35,6 +35,75 @@
 .Header,.CampusBoardHero,.IndexPage .DiscussionList,
 .IndexPage-nav.sideNav,.Campus-nativeRecord { background:var(--campus-surface); }
 .Campus-nativeExplore { background:transparent; }
+// Visitor home: task paths sit before the forum feed without replacing it.
+.IndexPage.Campus-feedPage .WelcomeHero {
+  color:#f7faff;
+  background:#183158;
+  border-bottom:1px solid #294671;
+}
+.IndexPage.Campus-feedPage .WelcomeHero .container { position:relative; padding-top:35px; padding-bottom:35px; }
+.IndexPage.Campus-feedPage .WelcomeHero .container::after {
+  content:''; position:absolute; top:18px; right:18px; bottom:18px; width:1px;
+  background:rgba(222,234,255,.27);
+}
+.IndexPage.Campus-feedPage .WelcomeHero .Hero-title {
+  margin-bottom:9px; color:#fff; font-size:clamp(26px,3.2vw,40px);
+  line-height:1.3; letter-spacing:-.02em;
+}
+.IndexPage.Campus-feedPage .WelcomeHero .Hero-subtitle { color:#d7e5f8; font-size:14px; line-height:1.75; }
+.IndexPage.Campus-feedPage .WelcomeHero .Hero-close { color:#d7e5f8; }
+.Campus-homeHeroActions { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+.Campus-homeHeroAction {
+  display:inline-flex; align-items:center; gap:9px; min-height:42px; padding:9px 15px;
+  border:1px solid rgba(225,236,255,.58); border-radius:7px;
+  color:#fff!important; font-size:13px; font-weight:650; text-decoration:none!important;
+  transition:background .18s,border-color .18s,transform .18s;
+}
+.Campus-homeHeroAction--primary { border-color:#fff; background:#fff; color:#183158!important; }
+.Campus-homeHeroAction:hover { background:rgba(255,255,255,.15); border-color:#fff; transform:translateY(-1px); }
+.Campus-homeHeroAction--primary:hover { background:#eaf2ff; }
+.Campus-homeHeroAction:focus-visible { outline:2px solid #fff; outline-offset:3px; }
+.Campus-homeGuide { margin:0 0 30px; }
+.Campus-homeGuideHeading { display:flex; justify-content:space-between; align-items:end; gap:18px; margin:0 0 16px; }
+.Campus-homeGuideHeading h2 { margin:0; color:var(--campus-ink); font-size:22px; line-height:1.4; font-weight:700; letter-spacing:-.02em; }
+.Campus-homeGuideHeading p { max-width:30ch; margin:0 0 2px; color:var(--campus-muted); font-size:12px; line-height:1.6; text-align:right; }
+.Campus-homePaths { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:0 20px; border-top:1px solid var(--campus-divider); border-bottom:1px solid var(--campus-divider); }
+.Campus-homePath { display:flex; align-items:center; gap:12px; min-width:0; min-height:76px; padding:13px 4px; color:var(--campus-ink)!important; text-decoration:none!important; border-bottom:1px solid var(--campus-divider); }
+.Campus-homePath:last-child { border-bottom:0; }
+.Campus-homePath--lead { grid-row:span 3; align-items:flex-start; flex-direction:column; justify-content:center; gap:15px; min-height:230px; padding:22px 24px; border-bottom:0; background:var(--campus-soft); }
+.Campus-homePathIcon { flex:none; display:grid; place-items:center; width:34px; height:34px; border-radius:8px; background:var(--campus-soft); color:var(--campus-link); font-size:15px; }
+.Campus-homePath--lead .Campus-homePathIcon { width:42px; height:42px; background:var(--campus-surface); font-size:19px; }
+.Campus-homePathText { display:grid; gap:3px; min-width:0; flex:1; }
+.Campus-homePathText strong { color:var(--campus-ink); font-size:15px; line-height:1.45; }
+.Campus-homePath--lead .Campus-homePathText strong { font-size:21px; }
+.Campus-homePathText small { max-width:38ch; color:var(--campus-muted); font-size:12px; line-height:1.6; }
+.Campus-homePathArrow { flex:none; align-self:center; color:var(--campus-link); font-size:19px; }
+.Campus-homePath--lead .Campus-homePathArrow { align-self:flex-start; }
+.Campus-homePath:hover .Campus-homePathText strong,.Campus-homePath:focus-visible .Campus-homePathText strong { color:var(--campus-link); }
+.Campus-homePath:focus-visible { outline:2px solid var(--campus-link); outline-offset:2px; }
+.Campus-nativeExplore .Campus-sectionHeading h2 { font-size:17px; }
+.Campus-nativeExplore .Campus-grid { gap:7px!important; }
+.Campus-nativeExplore .Campus-section { min-height:44px!important; padding:8px 11px!important; border-radius:7px; background:var(--campus-surface); border:1px solid var(--campus-divider); }
+.Campus-nativeExplore .Campus-section:hover { border-color:var(--campus-link); }
+@media(max-width:767px) {
+  .IndexPage.Campus-feedPage .WelcomeHero .container { padding-top:26px; padding-bottom:27px; }
+  .IndexPage.Campus-feedPage .WelcomeHero .container::after { display:none; }
+  .IndexPage.Campus-feedPage .WelcomeHero .Hero-title { font-size:25px; }
+  .Campus-homeHeroActions { margin-top:19px; }
+  .Campus-homeHeroAction { min-height:44px; }
+  .Campus-homeGuide { padding:22px 15px 0; margin-bottom:20px; }
+  .Campus-homeGuideHeading { display:block; margin-bottom:13px; }
+  .Campus-homeGuideHeading h2 { font-size:20px; }
+  .Campus-homeGuideHeading p { max-width:none; margin:5px 0 0; text-align:left; }
+  .Campus-homePaths { display:block; }
+  .Campus-homePath { min-height:72px; }
+  .Campus-homePath--lead { min-height:0; padding:16px; flex-direction:row; align-items:center; gap:12px; }
+  .Campus-homePath--lead .Campus-homePathIcon { width:36px; height:36px; font-size:16px; }
+  .Campus-homePath--lead .Campus-homePathText strong { font-size:16px; }
+  .Campus-homePath--lead .Campus-homePathArrow { align-self:center; }
+  .Campus-homePath:last-child { border-bottom:0; }
+}
+@media(prefers-reduced-motion:reduce) { .Campus-homeHeroAction { transition:none; } .Campus-homeHeroAction:hover { transform:none; } }
 // Detail structure follows the board's task, on top of the native PostStream.
 .Campus-detailHeading { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px; }
 .Campus-detailHeading h2 { flex:1; min-width:0; font-size:16px; line-height:1.5; margin:0; color:var(--campus-ink); overflow-wrap:anywhere; }
