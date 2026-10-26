@@ -26,5 +26,7 @@ test('visitor home makes the four main tasks reachable on desktop and phone', as
   await page.goto('/campus');
   await paths.getByRole('link', { name: /查看校园信息/ }).click();
   await expect(page).toHaveURL(/\/campus\/aggregation$/);
+  await page.getByRole('button', { name: '登录后提交线索' }).click();
+  await expect(page.locator('.LogInModal')).toBeVisible();
   expect(errors).toEqual([]);
 });

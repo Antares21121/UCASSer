@@ -27,7 +27,10 @@ export class AggregationPage extends DataPage {
   }
   content() {
     return m('div.Aggregation', [
-      pageHeading('信息汇集', '来自校园公开网页和成员线索。每条信息标明来源与核实状态，内容以原发布方为准。', app.session.user ? link('/campus/aggregation/submit', '提交线索', { className: 'Button Button--primary' }) : null),
+      pageHeading('信息汇集', '来自校园公开网页和成员线索。每条信息标明来源与核实状态，内容以原发布方为准。', app.session.user ? link('/campus/aggregation/submit', '提交线索', { className: 'Button Button--primary' }) : m(Button, {
+        className: 'Button Button--primary',
+        onclick: () => app.modal.show(() => import('flarum/forum/components/LogInModal'))
+      }, '登录后提交线索')),
       tabs('feed'),
       m('p.Aggregation-explainer', [symbol('info-circle'), ' “未核实”表示管理员已审核展示，但尚未确认事实；请勿据此直接缴费或报名。']),
       this.data.length ? m('div.Aggregation-list', this.data.map(entry => m('article.Aggregation-entry', { key: entry.id }, [
