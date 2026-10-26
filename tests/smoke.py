@@ -77,20 +77,21 @@ def main():
     wait_health(original)
 
     def verify(instance):
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         administrator_password = (ROOT / '.runtime/admin-initial-password.txt').read_text().strip()
         request = urllib.request.Request(instance.values['APP_URL'] + '/api/token',
                                          data=json.dumps({'identification': 'phase0_admin', 'password': administrator_password}).encode(),
                                          headers={'Content-Type': 'application/json'}, method='POST')
-        with urllib.request.urlopen(request, timeout=15) as response:
+        with opener.open(request, timeout=15) as response:
             result = json.load(response)
             assert response.status == 200 and result.get('token'), 'Administrator login failed'
         query = php + '$s=$p->query("SELECT value FROM `".$d["prefix"]."settings` WHERE `key`=\'phase0_verification\'");echo $s->fetchColumn();'
         assert instance.php('-r', query, capture=True).decode().strip() == token, 'Database setting mismatch'
-        with urllib.request.urlopen(instance.values['APP_URL'] + '/assets/phase0-probe.txt', timeout=10) as response:
+        with opener.open(instance.values['APP_URL'] + '/assets/phase0-probe.txt', timeout=10) as response:
             assert response.read() == fixture, 'Uploaded asset mismatch'
         for path in ('/.env', '/config.php', '/composer.json', '/storage/logs', '/assets/phase0-denied.php'):
             try:
-                urllib.request.urlopen(instance.values['APP_URL'] + path, timeout=10)
+                opener.open(instance.values['APP_URL'] + path, timeout=10)
             except urllib.error.HTTPError as error:
                 assert error.code in (403, 404), f'Sensitive path status {path}: {error.code}'
             else:
@@ -104,10 +105,11 @@ def main():
     original.php('scripts/campus.php','seed')
     original.php('flarum','cache:clear')
     def campus_state(instance):
-        with urllib.request.urlopen(instance.values['APP_URL']+'/api/campus/home',timeout=15) as response:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(instance.values['APP_URL']+'/api/campus/home',timeout=15) as response:
             home=json.load(response)['data']
         assert len(home['sections'])==10 and home['latest'], 'Business extension missing after restore'
-        with urllib.request.urlopen(instance.values['APP_URL']+'/api/campus/governance',timeout=15) as response:
+        with opener.open(instance.values['APP_URL']+'/api/campus/governance',timeout=15) as response:
             stats=json.load(response)['data']['statistics']
         return {'sections':[(s['id'],s['key']) for s in home['sections']], 'statistics':stats}
     expected_campus=campus_state(original)
