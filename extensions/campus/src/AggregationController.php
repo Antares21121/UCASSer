@@ -50,6 +50,30 @@ class AggregationController implements RequestHandlerInterface
         if ($route === 'campus.aggregation.sources') {
             return new JsonResponse(['data' => $db->table('campus_aggregation_sources')->orderByDesc('id')->get()->all()]);
         }
+        if ($route === 'campus.aggregation.source.update') {
+            $id = (int) ($query['id'] ?? 0);
+            $source = $db->table('campus_aggregation_sources')->where('id', $id)->first();
+            if (!$source) throw new ModelNotFoundException;
+            if ($source->adapter !== 'ucass-notices') {
+                throw new ValidationException(['source' => '此来源尚未接入站内网页采集，请在对应订阅服务中管理']);
+            }
+            if (!array_key_exists('enabled', $input) || !is_bool($input['enabled'])) {
+                throw new ValidationException(['enabled' => '请选择开启或暂停']);
+            }
+            if ((bool) $source->enabled !== $input['enabled']) {
+                $db->transaction(function () use ($db, $id, $actor, $input) {
+                    $now = gmdate('Y-m-d H:i:s');
+                    $db->table('campus_aggregation_sources')->where('id', $id)->update([
+                        'enabled' => $input['enabled'], 'updated_at' => $now
+                    ]);
+                    $db->table('campus_audit')->insert([
+                        'actor_id' => $actor->id, 'action' => $input['enabled'] ? 'aggregation.source.resume' : 'aggregation.source.pause',
+                        'target' => 'aggregation_source:'.$id, 'reason' => null, 'created_at' => $now
+                    ]);
+                });
+            }
+            return new JsonResponse(['data' => ['id' => $id, 'enabled' => $input['enabled']]]);
+        }
         if ($route === 'campus.aggregation.source.create') {
             $kind = trim((string) ($input['kind'] ?? ''));
             $name = trim((string) ($input['name'] ?? ''));
