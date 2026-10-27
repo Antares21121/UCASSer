@@ -29,7 +29,8 @@ const time = value => value ? new Date(value.replace(' ', 'T') + 'Z').toLocaleSt
 class CampusAdmin extends ExtensionPage {
   oninit(v) {
     super.oninit(v);
-    this.tab = 'sections';
+    const requestedTab = new URLSearchParams(window.location.hash.split('?')[1] || '').get('tab');
+    this.tab = tabs.some(([key]) => key === requestedTab) ? requestedTab : 'sections';
     this.notice = '';
     this.grant = {
       user_id: '',
@@ -245,7 +246,9 @@ class CampusAdmin extends ExtensionPage {
       'case.restore': '举报恢复',
       'case.delete': '永久删除',
       'case.suspend': '封禁账号',
-      'case.unban': '解除封禁'
+      'case.unban': '解除封禁',
+      'aggregation.source.pause': '暂停网页采集',
+      'aggregation.source.resume': '恢复网页采集'
     };
     return [m('h2', '近期操作审计'), m('p.Campus-lead', '仅管理员可见。近期记录用于核对操作与理由，不公开个人材料。'), m('ul.Campus-list', this.audit.map(r => m('li', [m('strong', names[r.action] || r.action), m('small', time(r.created_at) + ' · 操作者 #' + (r.actor_id || '已移除') + ' · 对象 ' + r.target), m('p.Campus-text', r.reason || '无补充理由')]))), this.audit.length ? null : m('p.Campus-empty', '暂无审计记录。')];
   }

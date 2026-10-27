@@ -216,7 +216,7 @@ export class CasesPage extends DataPage {
           page: 1
         });
       }
-    }, [this.select('处理状态', this.filterStatus ?? this.params.status ?? '', v => this.filterStatus = v, [['', '全部状态'], ...statuses.map(v => [v, stateLabels[v]])]), m('label', [m('input', {
+    }, [this.select('处理状态', this.filterStatus ?? this.params.status ?? '', v => this.filterStatus = v, [['', '全部状态'], ['open', '未结案件'], ...statuses.map(v => [v, stateLabels[v]])]), m('label', [m('input', {
       type: 'checkbox',
       checked: this.mine ?? this.params.mine === '1',
       onchange: e => this.mine = e.target.checked

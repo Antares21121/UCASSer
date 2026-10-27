@@ -21,7 +21,7 @@ return [
     (new Extend\ApiResource(\Flarum\Api\Resource\DiscussionResource::class))->fields(Campus\NativeRecordFields::class)
         ->endpoint('index', fn(\Flarum\Api\Endpoint\Index $endpoint) => $endpoint->addDefaultInclude(['firstPost'])->eagerLoad(['firstPost'])->after(Campus\NativeListFields::hydrate(...))),
     (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))->addFilter(\Flarum\Discussion\Search\DiscussionSearcher::class,Campus\NativeFilter::class),
-    (new Extend\Frontend('forum'))->js(__DIR__.'/js/dist/forum.js')->css(__DIR__.'/resources/campus.less')->css(__DIR__.'/resources/aggregation.less')
+    (new Extend\Frontend('forum'))->js(__DIR__.'/js/dist/forum.js')->css(__DIR__.'/resources/campus.less')->css(__DIR__.'/resources/aggregation.less')->css(__DIR__.'/resources/control.less')
         ->route('/campus', 'campus')->route('/campus/rules', 'campus.rules')->route('/campus/identity','campus.identity')->route('/campus/moderation','campus.moderation')
         ->route('/campus/records','campus.records')->route('/campus/record/{id}','campus.record')->route('/campus/publish','campus.publish'),
     (new Extend\Frontend('forum'))->route('/campus/courses','campus.courses'),
@@ -30,7 +30,8 @@ return [
     (new Extend\Frontend('forum'))->route('/campus/cases','campus.cases'),
     (new Extend\Frontend('forum'))->route('/campus/governance','campus.governance'),
     (new Extend\Frontend('forum'))->route('/campus/tools','campus.toolbox')->route('/campus/tools/{tool}','campus.toolbox.tool'),
-    (new Extend\Frontend('forum'))->route('/campus/aggregation','campus.aggregation')->route('/campus/aggregation/submit','campus.aggregation.submit')->route('/campus/aggregation/review','campus.aggregation.review')->route('/campus/aggregation/sources','campus.aggregation.source.manage'),
+    (new Extend\Frontend('forum'))->route('/campus/aggregation','campus.aggregation')->route('/campus/aggregation/submit','campus.aggregation.submit')->route('/campus/aggregation/review','campus.aggregation.review')->route('/campus/aggregation/sources','campus.aggregation.source.manage')
+        ->route('/campus/control','campus.control'),
     (new Extend\Frontend('admin'))->js(__DIR__.'/js/dist/admin.js')->css(__DIR__.'/resources/campus.less'),
     (new Extend\Routes('api'))->get('/campus/home', 'campus.home', Campus\Controller::class)
         ->get('/campus/rules', 'campus.rules', Campus\Controller::class)
@@ -66,7 +67,9 @@ return [
         ->get('/campus/aggregation/queue','campus.aggregation.queue',Campus\AggregationController::class)
         ->post('/campus/aggregation/candidates/{id}/review','campus.aggregation.review',Campus\AggregationController::class)
         ->get('/campus/aggregation/sources','campus.aggregation.sources',Campus\AggregationController::class)
-        ->post('/campus/aggregation/sources','campus.aggregation.source.create',Campus\AggregationController::class),
+        ->post('/campus/aggregation/sources','campus.aggregation.source.create',Campus\AggregationController::class)
+        ->patch('/campus/aggregation/sources/{id}','campus.aggregation.source.update',Campus\AggregationController::class),
+    (new Extend\Routes('api'))->get('/campus/control','campus.control',Campus\OperationsController::class),
     (new Extend\Routes('api'))->get('/campus/governance','campus.governance',Campus\GovernanceController::class)->post('/campus/governance','campus.governance.publish',Campus\GovernanceController::class),
     (new Extend\Routes('api'))->get('/campus/cases','campus.cases',Campus\CaseController::class)->post('/campus/cases','campus.cases.create',Campus\CaseController::class)
         ->get('/campus/cases/{id}','campus.case',Campus\CaseController::class)->patch('/campus/cases/{id}','campus.case.update',Campus\CaseController::class)

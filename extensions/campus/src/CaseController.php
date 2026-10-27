@@ -21,8 +21,9 @@ class CaseController implements RequestHandlerInterface
         if ($route==='campus.cases') {
             $page=max(1,min(10000,(int)($q['page'] ?? 1))); $query=$this->cases->query($a);
             if (!empty($q['status'])) {
-                if (!in_array($q['status'],['pending','in_progress','needs_info','resolved','rejected','appealed','reviewed'],true)) throw new ValidationException(['status'=>'请选择有效的处理状态']);
-                $query->where('status',$q['status']);
+                if ($q['status']==='open') $query->whereIn('status',['pending','in_progress','needs_info','appealed']);
+                elseif (in_array($q['status'],['pending','in_progress','needs_info','resolved','rejected','appealed','reviewed'],true)) $query->where('status',$q['status']);
+                else throw new ValidationException(['status'=>'请选择有效的处理状态']);
             }
             if (($q['mine'] ?? '')==='1') $query->where('reporter_id',$a->id);
             $total=(clone $query)->count();

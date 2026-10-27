@@ -15,7 +15,7 @@ const tabs = active => m('nav.Aggregation-tabs', { 'aria-label': '信息汇集�
 const sourceLabel = source => source.trust === 'official' ? '官方来源' : '非官方来源';
 const sourceList = entry => m('ul.Aggregation-sources', entry.sources.map((source, index) => m('li', { key: index }, [
   m('span.Aggregation-sourceKind', sourceLabel(source)),
-  source.url ? m('a', { href: source.url, target: '_blank', rel: 'noopener noreferrer nofollow' }, source.name + ' ↗') : m('span', source.name),
+  source.url ? m('a.Aggregation-sourceLink', { href: source.url, target: '_blank', rel: 'noopener noreferrer nofollow' }, [m('span', source.name), symbol('external-link-alt')]) : m('span', source.name),
   source.submitter ? m('span', '投稿：' + source.submitter) : null
 ])));
 
@@ -27,7 +27,10 @@ export class AggregationPage extends DataPage {
   }
   content() {
     return m('div.Aggregation', [
-      pageHeading('信息汇集', '来自校园公开网页和成员线索。每条信息标明来源与核实状态，内容以原发布方为准。', app.session.user ? link('/campus/aggregation/submit', '提交线索', { className: 'Button Button--primary' }) : null),
+      pageHeading('信息汇集', '来自校园公开网页和成员线索。每条信息标明来源与核实状态，内容以原发布方为准。', app.session.user ? link('/campus/aggregation/submit', '提交线索', { className: 'Button Button--primary' }) : m(Button, {
+        className: 'Button Button--primary',
+        onclick: () => app.modal.show(() => import('flarum/forum/components/LogInModal'))
+      }, '登录后提交线索')),
       tabs('feed'),
       m('p.Aggregation-explainer', [symbol('info-circle'), ' “未核实”表示管理员已审核展示，但尚未确认事实；请勿据此直接缴费或报名。']),
       this.data.length ? m('div.Aggregation-list', this.data.map(entry => m('article.Aggregation-entry', { key: entry.id }, [
@@ -150,6 +153,12 @@ export class AggregationSourcesPage extends DataPage {
   async fetch() {
     this.data = (await api('aggregation/sources')).data;
   }
+  toggleSource(source) {
+    const enabled = !source.enabled;
+    this.perform(() => api('aggregation/sources/' + source.id, 'PATCH', { enabled }), {
+      message: enabled ? '来源已恢复，下次定时任务会尝试抓取。' : '来源已暂停抓取。'
+    });
+  }
   content() {
     return m('div.Aggregation', [
       pageHeading('管理信息来源', '先登记要关注的网站和公众号，接入抓取后，新内容会进入管理员审核队列。'),
@@ -184,7 +193,10 @@ export class AggregationSourcesPage extends DataPage {
           m('strong', source.name),
           source.listing_url ? m('a', { href: source.listing_url, target: '_blank', rel: 'noopener noreferrer nofollow' }, '查看来源 ↗') : null,
           m('small', source.last_checked_at ? '上次检查：' + formatTime(source.last_checked_at) : '尚未检查'),
-          source.last_error ? m('small.Aggregation-caution', '抓取报错：' + source.last_error) : null
+          source.last_error ? m('small.Aggregation-caution', '抓取报错：' + source.last_error) : null,
+          source.adapter === 'ucass-notices' ? m(Button, {
+            type: 'button', disabled: this.busy, onclick: () => this.toggleSource(source)
+          }, source.enabled ? '暂停抓取' : '恢复抓取') : null
         ]))) : m('p', '还没有登记来源。')
       ])
     ]);
