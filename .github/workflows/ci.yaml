@@ -53,6 +53,8 @@ jobs:
         run: python tests/campus_smoke.py --backend docker --phase 11
       - name: Aggregation submission and review acceptance
         run: python tests/aggregation_smoke.py --backend docker
+      - name: Authorized course directory import acceptance
+        run: python tests/course_import_smoke.py --backend docker
       - name: Browser workflows and mobile layout
         run: npm run test:browser
       - name: Security audit (no ignored advisories)
