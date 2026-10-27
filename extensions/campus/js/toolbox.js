@@ -2,14 +2,27 @@ import app from 'flarum/forum/app';
 import Page from 'flarum/common/components/Page';
 import { link, pageHeading, shell, symbol } from './ui';
 
-// Keep the navigation and the future content areas in one place. No schedule,
-// menu or guide information is implied until a maintainer adds verified data.
+// Link to source pages without copying their content. Schedules and dates are
+// only shown here once a maintainer has verified a current, reusable source.
 export const tools = [
-  { key: 'calendar', title: '日历', icon: 'calendar-alt', description: '查看校园活动与重要日期。', empty: '活动与日期尚未录入。' },
+  {
+    key: 'calendar', title: '日历', icon: 'calendar-alt', description: '按月浏览日期，并查阅教务处校历栏目。', status: '查看官方栏目',
+    source: { label: '查看教务处学年校历', url: 'https://jw.ucass.edu.cn/xnxl.htm', owner: '中国社会科学院大学教务处', note: '站内尚未录入当前学年日程；请打开原页核对所列校历的适用学年。' }
+  },
   { key: 'dining', title: '食堂菜单', icon: 'utensils', description: '查看食堂餐次、菜品和更新时间。', empty: '食堂菜单尚未录入。' },
-  { key: 'timetable', title: '课程表', icon: 'table', description: '集中查看课程时间与地点。', empty: '课程安排尚未录入。' },
-  { key: 'shuttle', title: '摆渡车时间表', icon: 'bus', description: '查看线路、站点与发车时间。', empty: '摆渡车时刻尚未录入。' },
-  { key: 'new-student', title: '新生导引', icon: 'map-signs', description: '按步骤查找报到与校园生活信息。', empty: '新生导引尚未录入。' }
+  { key: 'timetable', title: '课程表', icon: 'table', description: '先查课程目录；上课时间与地点待核实。', empty: '课程安排尚未录入。' },
+  {
+    key: 'shuttle', title: '摆渡车时间表', icon: 'bus', description: '等待核实当前线路和时刻。', empty: '尚无可核实的当前摆渡车时刻表。', status: '时刻待核实',
+    source: { label: '查看学校迎新交通说明', url: 'https://welcome.ucass.edu.cn/info/1003/1264.htm', owner: '中国社会科学院大学迎新网', note: '这份通知仅说明 2026 级新生报到时的接驳安排，不代表日常班次。出行前请向学校核实。' }
+  },
+  {
+    key: 'new-student', title: '新生导引', icon: 'map-signs', description: '从学校迎新网查找报到与入学通知。', empty: '站内新生导引尚未录入。', status: '查看迎新网',
+    source: { label: '打开学校迎新网', url: 'https://welcome.ucass.edu.cn/', owner: '中国社会科学院大学迎新网', note: '报到时间、手续和校区安排可能按年变化，请以迎新网最新通知为准。' }
+  },
+  {
+    key: 'lecture-index', title: '讲座索引', icon: 'chalkboard-teacher', description: '查看独立维护的社科大讲座汇。', empty: '讲座内容由外部站点维护。', status: '外部索引',
+    source: { label: '打开社科大讲座汇', url: 'https://muxin-ucass.github.io/LECTURE-INDEX/', owner: 'muxin-ucass · 独立站点', note: '在新标签页打开；本站不复制其内容。活动时间和地点请再向原主办方核实。' }
+  }
 ];
 
 const toolForRoute = () => tools.find(tool => tool.key === m.route.param('tool'));
@@ -64,6 +77,15 @@ export default class ToolboxPage extends Page {
     ]);
   }
 
+  source(tool) {
+    if (!tool.source) return null;
+    const { label, url, owner, note } = tool.source;
+    return m('section.Campus-panel.Campus-toolboxSource', { 'aria-label': tool.title + '来源' }, [
+      m('div.Campus-toolboxSourceCopy', [m('h2', owner), m('p', note)]),
+      m('a.Button.Button--primary', { href: url, target: '_blank', rel: 'noopener noreferrer nofollow', 'aria-label': label + '（新标签页）' }, [label, symbol('external-link-alt')])
+    ]);
+  }
+
   view() {
     const selected = toolForRoute();
     if (m.route.param('tool') && !selected) {
@@ -77,8 +99,10 @@ export default class ToolboxPage extends Page {
         selected.key === 'calendar' ? this.calendar() : m('section.Campus-panel.Campus-toolboxEmpty', { 'aria-label': selected.title + '内容' }, [
           symbol(selected.icon),
           m('h2', selected.empty),
-          m('p', '此页正在准备中；请以学校或有关部门的正式通知为准。')
-        ])
+          m('p', selected.source ? '可从下方来源页面继续查找，使用前请核对发布时间和适用范围。' : '此页正在准备中；请以学校或有关部门的正式通知为准。'),
+          selected.key === 'timetable' ? link('/campus/courses', '浏览课程目录', { className: 'Button' }) : null
+        ]),
+        this.source(selected)
       ]));
     }
 
@@ -88,7 +112,7 @@ export default class ToolboxPage extends Page {
         link('/campus/tools/' + tool.key, [
           m('span.Campus-toolboxIcon', symbol(tool.icon)),
           m('span.Campus-toolboxText', [m('strong', tool.title), m('small', tool.description)]),
-          m('span.Campus-toolboxStatus', '内容待录入'),
+          m('span.Campus-toolboxStatus', tool.status || '内容待录入'),
           m('span.Campus-toolboxArrow', symbol('chevron-right'))
         ], { className: 'Campus-toolboxItem', key: tool.key })
       ))

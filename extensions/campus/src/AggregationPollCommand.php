@@ -36,6 +36,30 @@ class AggregationPollCommand extends AbstractCommand
         return $html;
     }
 
+    private function fetchEmploymentJson(Client $client, string $url, ?array $form = null, array $headers = []): string
+    {
+        if (!in_array($url, [UcassEmploymentAdapter::TOKEN_URL, UcassEmploymentAdapter::API_LIST_URL], true)
+            && !preg_match('~^https://jyzd\.ucass\.edu\.cn/f/newsCenter/ajax_view\?id=[a-f0-9]{32}$~D', $url)) {
+            throw new \RuntimeException('就业中心接口网址不在允许列表');
+        }
+        $options = ['stream' => true, 'headers' => ['Accept' => 'application/json'] + $headers];
+        if ($form !== null) $options['form_params'] = $form;
+        $response = $client->request($form === null ? 'GET' : 'POST', $url, $options);
+        if ($response->getStatusCode() !== 200) throw new \RuntimeException('就业中心返回 HTTP '.$response->getStatusCode());
+        if (!str_contains(strtolower($response->getHeaderLine('Content-Type')), 'application/json')) {
+            throw new \RuntimeException('就业中心未返回 JSON');
+        }
+        $body = $response->getBody();
+        $json = '';
+        while (!$body->eof() && strlen($json) <= 2 * 1024 * 1024) {
+            $chunk = $body->read(min(65536, 2 * 1024 * 1024 + 1 - strlen($json)));
+            if ($chunk === '') break;
+            $json .= $chunk;
+        }
+        if (strlen($json) > 2 * 1024 * 1024) throw new \RuntimeException('就业中心响应超过 2 MB');
+        return $json;
+    }
+
     protected function fire(): int
     {
         $db = $this->aggregation->db;
@@ -50,18 +74,49 @@ class AggregationPollCommand extends AbstractCommand
         $failed = false;
         foreach ($sources as $source) {
             try {
-                if ($source->adapter !== 'ucass-notices') throw new \RuntimeException('尚未实现此来源适配器');
                 $host = strtolower(parse_url($source->listing_url, PHP_URL_HOST) ?: '');
-                if ($host !== 'jw.ucass.edu.cn') throw new \RuntimeException('教务处适配器只接受教务处域名');
-                $adapter = new UcassNoticesAdapter();
-                $listing = $adapter->listing($this->fetch($client, $source->listing_url, $host), $source->listing_url, $limit);
+                $employmentToken = null;
+                if ($source->adapter === 'ucass-notices') {
+                    if ($host !== 'jw.ucass.edu.cn') throw new \RuntimeException('教务处适配器只接受教务处域名');
+                    $adapter = new UcassNoticesAdapter();
+                } elseif ($source->adapter === 'ucass-vsb') {
+                    if ($host !== 'ucass.edu.cn' && !str_ends_with($host, '.ucass.edu.cn')) {
+                        throw new \RuntimeException('官网适配器只接受社科大官方域名');
+                    }
+                    $adapter = new UcassVsbAdapter();
+                } elseif ($source->adapter === 'ucass-employment') {
+                    if ($source->listing_url !== UcassEmploymentAdapter::LIST_URL) {
+                        throw new \RuntimeException('就业中心适配器只接受已核对的通知公告栏目');
+                    }
+                    $adapter = new UcassEmploymentAdapter();
+                } else {
+                    throw new \RuntimeException('尚未实现此来源适配器');
+                }
+                if ($source->adapter === 'ucass-employment') {
+                    $employmentToken = $adapter->token($this->fetchEmploymentJson($client, UcassEmploymentAdapter::TOKEN_URL));
+                    $listing = $adapter->listing($this->fetchEmploymentJson($client, UcassEmploymentAdapter::API_LIST_URL,
+                        ['categoryId' => UcassEmploymentAdapter::CATEGORY_ID, 'pageNo' => '1', 'pageSize' => (string) $limit]), $limit);
+                } else {
+                    $listing = $adapter->listing($this->fetch($client, $source->listing_url, $host), $source->listing_url, $limit);
+                }
                 if (!$listing) throw new \RuntimeException('公告列表结构已变化或没有条目');
                 $added = 0; $unavailable = 0;
                 foreach ($listing as $entry) {
                     try {
-                        $entry += $adapter->article($this->fetch($client, $entry['url'], $host));
+                        if ($source->adapter === 'ucass-employment') {
+                            $article = $adapter->article($this->fetchEmploymentJson($client,
+                                UcassEmploymentAdapter::API_DETAIL_URL.'?id='.$entry['id'], null, ['token' => $employmentToken]), $entry['id']);
+                        } else {
+                            $article = $adapter->article($this->fetch($client, $entry['url'], $host));
+                        }
+                        if (isset($article['title']) && ($source->adapter === 'ucass-employment' || preg_match('/(?:\.{3}|…)$/u', $entry['title']))) {
+                            $entry['title'] = $article['title'];
+                        }
+                        $entry += $article;
                         if ($this->aggregation->ingestWeb($source, $entry)) $added++;
+                        usleep(250000);
                     } catch (\Throwable $error) {
+                        if (str_contains($error->getMessage(), 'HTTP 403') || str_contains($error->getMessage(), 'HTTP 429')) throw $error;
                         $unavailable++;
                         $this->comment('跳过不可用公告：'.$entry['url'].'（'.$error->getMessage().'）');
                     }

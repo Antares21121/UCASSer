@@ -35,6 +35,10 @@ jobs:
         run: |
           docker compose config --quiet
           docker compose run --rm --no-deps app sh -c 'find config scripts public extensions tests -name "*.php" -exec php -l {} \;'
+          docker compose run --rm --no-deps app php tests/aggregation_parser.php
+          docker compose run --rm --no-deps app php tests/aggregation_vsb_parser.php
+          docker compose run --rm --no-deps app php tests/aggregation_employment_parser.php
+          docker compose run --rm --no-deps app php tests/course_csv_reader.php
           docker compose run --rm --no-deps app composer validate --strict --no-check-all
           docker compose run --rm --no-deps app composer check-platform-reqs --no-dev
           docker compose up -d --wait

@@ -4,15 +4,41 @@
 
 - 信息流：`/campus/aggregation`；登录成员投稿：`/campus/aggregation/submit`；管理员审核：`/campus/aggregation/review`；管理员登记来源：`/campus/aggregation/sources`。
 - 站点运营总览：`/campus/control`，集中查看待办、内容与采集来源，并暂停或恢复已接入的网页采集。操作范围见[站点控制台](control-console.md)。
-- 已接入一个公开网页来源：中国社会科学院大学教务处通知公告。抓取结果只进入待审队列，管理员确认后才公开；相同网页重复运行不会反复入队，已发布网页的变化重新进入审核。
+- 教务处通知公告已有专用适配器。本轮增加经逐个核对的学校、学院和部门公开通知栏目目录，并为就业指导中心的公开通知接口提供单独适配器；运行 `scripts/aggregation_sources.py` 后登记到来源管理页。网页抓取结果只进入待审队列，管理员确认后才公开。重复运行按原链接去重，已发布网页发生变化时重新进入审核。目录是已核对页面的集合，不保证覆盖学校每一个部门及其所有栏目。
 - 试验性导入了 8 篇经文章页核对发布账号为“社科大社会与民族学院”、且由[学院官网](https://shymzxy.ucass.edu.cn/)收录链接的微信文章；它们只进入管理员待审队列，尚未公开。这是官网可见链接的抽样，不等于公众号最近 8 篇，更不能证明已取得最近 20 篇。
-- 未接入公众号文章列表的自动抓取，也未接入微信群或任意网站的通用抓取。新增网站需要先核对其公开访问方式、页面结构，再登记来源并编写对应适配器。完整边界见 [设计说明](aggregation-design.md)。
+- 公众号只登记了部分能找到官网证据的账号身份，并未自动建立订阅。独立订阅服务在服务器部署、扫码授权并添加目标账号后，才会在定时任务中导入其 RSS。微信群和任意网站没有通用抓取能力。新增网站需要先核对其公开访问方式、页面结构，再登记来源并编写对应适配器。完整边界见 [设计说明](aggregation-design.md)。
+
+### 服务器上启用公开网页采集
+
+以下命令针对当前测试服务器 `/opt/ucasser-test` 和 `.env.test`，在**更新代码、构建前端、备份数据库并完成迁移后**执行；不要重新运行安装向导。它会登记已核对的来源并抓取一次，候选信息仍需在 `/campus/aggregation/review` 审核。来源管理页可暂停单个栏目；再次同步不会恢复已暂停的现有栏目。
+
+```bash
+cd /opt/ucasser-test
+sudo python3 scripts/aggregation_sources.py --env-file .env.test
+sudo python3 scripts/aggregation_refresh.py --env-file .env.test --limit 5
+```
+
+先检查来源管理页中的“最近检查”和错误提示，抽样打开原链接核对标题、日期和正文。每个栏目一次最多读取 5 条，学校及学院官网可能临时不可达；失败的来源保持错误记录，不代表其他来源也失败。新增候选不会自动公开。
+
+确认手动运行正确后，安装仓库的定时器：
+
+```bash
+cd /opt/ucasser-test
+sudo install -m 0644 deploy/systemd/ucasser-aggregation.service /etc/systemd/system/
+sudo install -m 0644 deploy/systemd/ucasser-aggregation.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now ucasser-aggregation.timer
+systemctl list-timers ucasser-aggregation.timer
+sudo journalctl -u ucasser-aggregation.service -n 80 --no-pager
+```
+
+该定时器按北京时间 **09:00 与 21:00** 运行网页采集；若同机存在 `.runtime/we-mp-rss.env` 且独立订阅服务可用，也会尝试导入已订阅公众号。只安装定时器不会安装订阅服务或完成微信授权。订阅服务若仍仅在个人电脑运行，服务器定时器无法连接它。授权过期时维护者需在订阅服务里重新扫码。课程表、校历、食堂菜单、摆渡车班次和外部讲座站点并不包含在此自动更新任务中。
 
 ### 统一来源登记页
 
 管理员可从信息汇集的“来源管理”页登记公开网页通知列表，或用某公众号自行发布的一篇微信原文链接登记该账号。填写名称和 HTTPS 链接后，记录会显示“待接入抓取”；登记操作不会访问该网址，也不会自动建立公众号订阅。现有教务处适配器继续按原计划运行，群聊消息仍通过成员“提交线索”入口人工录入。
 
-接入新网站前，维护者需核对页面结构并配置适配器。接入公众号前，维护者需在本机订阅服务中单独添加账号并按下文扫码授权。使用与登记页**完全相同的公众号名称**导入 RSS 时，待接入记录会转为“由订阅服务导入”；名称不同则会出现两条来源记录，需要维护者核对。订阅服务会将文章送入待审队列，不会自动发布。登记页显示来源最近一次检查时间和错误，便于区分已运行与待接入来源。
+接入新网站前，维护者需核对页面结构并配置适配器。本轮预置的官网栏目已完成这一接入；其他登记仍保持“待接入”。接入公众号前，维护者需在订阅服务中单独添加账号并按下文扫码授权。使用与登记页**完全相同的公众号名称**导入 RSS 时，待接入记录会转为“由订阅服务导入”；名称不同则会出现两条来源记录，需要维护者核对。订阅服务会将文章送入待审队列，不会自动发布。登记页显示来源最近一次检查时间和错误，便于区分已运行与待接入来源。
 
 ## 可选：从独立公众号订阅服务导入待审队列
 
@@ -62,10 +88,11 @@ python scripts/forum.py start
 python scripts/forum.py healthcheck
 python scripts/forum.py backup
 python scripts/campus.py migrate
-python scripts/aggregation.py --limit 5
+python scripts/aggregation_sources.py
+python scripts/aggregation_refresh.py --limit 5
 ```
 
-已有数据升级前先备份；迁移只需在更新代码后执行。日常抓取只需最后一条命令。`--limit` 是每个来源读取的最多文章数，允许 1–10；`--source 1` 可只抓来源编号 1。看到“新增 N 条待审候选”后，用管理员账号打开审核页；若抓取失败，检查来源管理页的错误信息及 `.runtime/last-error.log`。抓取失败不会自动发布错误内容。
+已有数据升级前先备份；迁移只需在更新代码后执行。日常抓取只需最后一条命令，它会再次确认预置来源并保留暂停状态。`--limit` 是每个来源读取的最多文章数，允许 1–10；需要只抓一个来源时可用 `python scripts/aggregation.py --source 1 --limit 5`。看到“新增 N 条待审候选”后，用管理员账号打开审核页；若抓取失败，检查来源管理页的错误信息及 `.runtime/last-error.log`。抓取失败不会自动发布错误内容。
 
 ## 每天自动抓取一次（Windows 开发机）
 
@@ -81,12 +108,12 @@ Register-ScheduledTask -TaskName 'UCASSer-Aggregation-Poll' -Action $action -Tri
 
 这只负责按时运行抓取命令，不会自动审核或发布。电脑关机、未登录或 Docker Desktop 未运行时，任务可能无法完成；到“任务计划程序”查看上次运行结果，再到审核页检查待审候选和来源错误。需要暂停时，在任务计划程序禁用 `UCASSer-Aggregation-Poll`；需要手动触发时运行 `Start-ScheduledTask -TaskName 'UCASSer-Aggregation-Poll'`。不要在多个设备上同时安排同一数据库的抓取。
 
-部署到服务器后，改用服务器的定时器调用同一个 `python scripts/aggregation.py --limit 5` 命令，不依赖个人电脑开机。首次上线先确认来源抓取许可、频率和运营审核人。
+服务器部署使用上文的 systemd 定时器，不依赖个人电脑开机。首次上线先确认来源抓取许可、频率和运营审核人。
 
 ## 微信文章的人工验证窗口（试验）
 
 在 Windows 项目根目录运行 `powershell -File scripts/wechat-login.ps1`；也可用 `-ArticleUrl 'https://mp.weixin.qq.com/s/...'` 指定文章。脚本会打开独立的 Chrome 窗口，让维护者亲自完成微信要求的验证或登录。再次遇到验证时，重新运行同一命令；浏览器状态只留在未纳入 Git 的 `.runtime/wechat-chrome-profile`，不要复制或提交它。若 Chrome 安装在非标准位置且脚本无法找到，可用 `-ChromePath 'D:\Chrome\Application\chrome.exe'` 指定位置。
 
-这个窗口仅用于验证微信文章是否能人工打开。当前定时抓取器仍只处理已登记的教务处公开网页，不会读取 Chrome 的登录状态，也不会自动采集公众号。若后续接入公众号，应在抓取失败时标记“需人工验证”，由维护者打开此窗口处理；不能保证微信验证后能长期自动读取文章列表。
+这个窗口仅用于验证微信文章是否能人工打开。定时任务不会读取 Chrome 的登录状态；公众号导入依赖独立订阅服务本身运行且保持授权。授权失效时需在该服务界面重新扫码，不能保证持续自动获取完整文章列表。
 
 本地试验通过 `php flarum campus:aggregation:import-college-trial .runtime/college-wechat-trial.json` 将已核对发布账号、标题、发布时间和学院官网出处的 JSON 证据导入待审队列。该证据文件留在本机 `.runtime`，不随 Git 提交；重复导入不会重复入队。试验来源默认禁用定时抓取。公众号账号主页在普通浏览器中提示“请在微信客户端打开”，故当前无法证明这 8 篇是该账号最新发布的文章，也没有凑足 20 篇。

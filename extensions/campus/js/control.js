@@ -74,9 +74,9 @@ export default class ControlPage extends DataPage {
             m('div.Campus-controlAsideHead', [m('h2', '采集来源'), link('/campus/aggregation/sources', '查看全部')]),
             m('p.Campus-controlSourceSummary', `${d.sources.total} 个来源 · ${d.sources.active} 个站内抓取已开启 · ${d.sources.errors} 个报错`),
             d.sources.recent.length ? m('ul', d.sources.recent.map(source => m('li', { key: source.id }, [
-              m('div.Campus-controlSourceName', [m('strong', source.name), m('span', source.adapter === 'ucass-notices' ? source.enabled ? '已启用' : '已暂停' : '外部接入')]),
+              m('div.Campus-controlSourceName', [m('strong', source.name), m('span', ['ucass-notices', 'ucass-vsb', 'ucass-employment'].includes(source.adapter) ? source.enabled ? '已启用' : '已暂停' : '外部接入')]),
               source.last_error ? m('small.Campus-controlSourceError', source.last_error) : m('small', source.last_checked_at ? '上次检查 ' + formatTime(source.last_checked_at) : '尚未由本站检查'),
-              source.adapter === 'ucass-notices' ? m(Button, { onclick: () => this.toggleSource(source), disabled: this.busy }, source.enabled ? '暂停抓取' : '恢复抓取') : null
+              ['ucass-notices', 'ucass-vsb', 'ucass-employment'].includes(source.adapter) ? m(Button, { onclick: () => this.toggleSource(source), disabled: this.busy }, source.enabled ? '暂停抓取' : '恢复抓取') : null
             ]))) : m('p', '还没有登记来源。')
           ]),
           m('p.Campus-controlFootnote', '定时运行和外部公众号授权需在部署环境配置；这里不会替代服务器状态监控。')

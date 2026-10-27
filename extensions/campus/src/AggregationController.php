@@ -54,7 +54,7 @@ class AggregationController implements RequestHandlerInterface
             $id = (int) ($query['id'] ?? 0);
             $source = $db->table('campus_aggregation_sources')->where('id', $id)->first();
             if (!$source) throw new ModelNotFoundException;
-            if ($source->adapter !== 'ucass-notices') {
+            if (!in_array($source->adapter, ['ucass-notices', 'ucass-vsb', 'ucass-employment'], true)) {
                 throw new ValidationException(['source' => '此来源尚未接入站内网页采集，请在对应订阅服务中管理']);
             }
             if (!array_key_exists('enabled', $input) || !is_bool($input['enabled'])) {
