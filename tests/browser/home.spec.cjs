@@ -4,6 +4,8 @@ test('visitor home makes the four main tasks reachable on desktop and phone', as
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/campus');
+  await expect(page.locator('.Campus-homeIdentity')).toContainText('非学校官方平台');
+  await expect(page.locator('.Campus-homeArtwork')).toHaveAttribute('aria-hidden', 'true');
   const paths = page.getByRole('navigation', { name: '校园常用入口' });
   await expect(paths.getByRole('link')).toHaveCount(4);
   for (const [name, href] of [

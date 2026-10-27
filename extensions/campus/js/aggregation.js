@@ -15,7 +15,7 @@ const tabs = active => m('nav.Aggregation-tabs', { 'aria-label': '信息汇集�
 const sourceLabel = source => source.trust === 'official' ? '官方来源' : '非官方来源';
 const sourceList = entry => m('ul.Aggregation-sources', entry.sources.map((source, index) => m('li', { key: index }, [
   m('span.Aggregation-sourceKind', sourceLabel(source)),
-  source.url ? m('a', { href: source.url, target: '_blank', rel: 'noopener noreferrer nofollow' }, source.name + ' ↗') : m('span', source.name),
+  source.url ? m('a.Aggregation-sourceLink', { href: source.url, target: '_blank', rel: 'noopener noreferrer nofollow' }, [m('span', source.name), symbol('external-link-alt')]) : m('span', source.name),
   source.submitter ? m('span', '投稿：' + source.submitter) : null
 ])));
 

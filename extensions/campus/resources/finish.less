@@ -1,24 +1,26 @@
 // Semantic colors follow Flarum's theme, including its high contrast variants.
 @campus-font-system:"Segoe UI",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
 :root {
-  --campus-canvas:#f5f7fb;
-  --campus-surface:#fff;
-  --campus-ink:#182238;
-  --campus-muted:#55637a;
-  --campus-divider:#d9e1ed;
+  --campus-canvas:#f8f6f1;
+  --campus-surface:#fffefa;
+  --campus-ink:#1c293b;
+  --campus-muted:#586477;
+  --campus-divider:#dddeda;
   --campus-skeleton:#e2e8f1;
-  --campus-soft:#edf3ff;
+  --campus-soft:#edf2f7;
   --campus-link:@primary-color;
+  --campus-mark:#a04d46;
 }
 :root[data-theme^="dark"] {
-  --campus-canvas:#101827;
-  --campus-surface:#172235;
+  --campus-canvas:#111b28;
+  --campus-surface:#192638;
   --campus-ink:#e4ebf5;
   --campus-muted:#aab8cd;
   --campus-divider:#3a4b65;
   --campus-skeleton:#2b3c55;
   --campus-soft:#203554;
   --campus-link:lighten(@primary-color,22%);
+  --campus-mark:#e0a092;
 }
 :root[data-theme$="-hc"] { --campus-divider:var(--campus-muted); }
 .App {
@@ -34,24 +36,46 @@
 .App-content,.CampusApp .App-content { background:var(--campus-canvas); }
 .Header,.CampusBoardHero,.IndexPage .DiscussionList,
 .IndexPage-nav.sideNav,.Campus-nativeRecord { background:var(--campus-surface); }
+.Header-title a { display:inline-block; padding-left:11px; border-left:3px solid var(--campus-mark); }
+.CampusPage .Campus-pageHeader h1::after,.ResourceDirectory h1::after {
+  content:''; display:block; width:42px; height:2px; margin:11px 0 2px;
+  background:var(--campus-mark);
+}
+.CampusPage .Campus-panel,.Campus-toolboxItem,.Aggregation-entry,.ResourceDirectory-item { border-color:var(--campus-divider); }
+.CampusPage .Campus-panel,.CampusPage .Campus-toolboxItem,.CampusPage .Aggregation-list,
+.CampusPage .ResourceDirectory-tree,.CampusPage .ResourceDirectory-item,
+.CampusPage .ResourceDirectory-form { background:var(--campus-surface); }
+.CampusPage .ResourceDirectory-tree,.CampusPage .ResourceDirectory-item,
+.CampusPage .ResourceDirectory-form { border-color:var(--campus-divider); }
+.CampusPage .ResourceDirectory-navItem.is-active { background:var(--campus-soft); color:var(--campus-link); }
+.CampusPage .Campus-toolboxIcon { background:var(--campus-soft); }
 .Campus-nativeExplore { background:transparent; }
 // Visitor home: task paths sit before the forum feed without replacing it.
 .IndexPage.Campus-feedPage .WelcomeHero {
   color:#f7faff;
-  background:#183158;
-  border-bottom:1px solid #294671;
+  background:#1f2d43;
+  border-bottom:1px solid #33435b;
+  overflow:hidden;
 }
-.IndexPage.Campus-feedPage .WelcomeHero .container { position:relative; padding-top:35px; padding-bottom:35px; }
+.IndexPage.Campus-feedPage .WelcomeHero .container { position:relative; min-height:225px; padding-top:35px; padding-bottom:35px; }
 .IndexPage.Campus-feedPage .WelcomeHero .container::after {
-  content:''; position:absolute; top:18px; right:18px; bottom:18px; width:1px;
-  background:rgba(222,234,255,.27);
+  content:''; position:absolute; left:0; right:0; bottom:16px; height:1px;
+  background:rgba(238,230,217,.28);
 }
 .IndexPage.Campus-feedPage .WelcomeHero .Hero-title {
-  margin-bottom:9px; color:#fff; font-size:clamp(26px,3.2vw,40px);
-  line-height:1.3; letter-spacing:-.02em;
+  position:relative; z-index:1; max-width:630px; margin-bottom:9px; color:#fff;
+  font-size:clamp(26px,3.2vw,39px); line-height:1.3; letter-spacing:-.02em;
 }
-.IndexPage.Campus-feedPage .WelcomeHero .Hero-subtitle { color:#d7e5f8; font-size:14px; line-height:1.75; }
-.IndexPage.Campus-feedPage .WelcomeHero .Hero-close { color:#d7e5f8; }
+.IndexPage.Campus-feedPage .WelcomeHero .Hero-subtitle { position:relative; z-index:1; max-width:52ch; color:#e3e8eb; font-size:14px; line-height:1.75; }
+.IndexPage.Campus-feedPage .WelcomeHero .Hero-close { z-index:3; color:#d7e5f8; }
+.Campus-homeIdentity { position:relative; z-index:1; display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin:11px 0 0; color:#edc4b8; font-size:12px; line-height:1.6; }
+.Campus-homeIdentity span { color:#d9a394; }
+.Campus-homeArtwork { position:absolute; top:3px; right:0; width:365px; height:205px; color:#e9d8c6; opacity:.7; pointer-events:none; }
+.Campus-homeArtwork path { stroke:currentColor; stroke-linecap:round; stroke-linejoin:round; }
+.Campus-artAxis { stroke-width:.7; stroke-dasharray:3 7; opacity:.4; }
+.Campus-artRoof,.Campus-artSteps { stroke-width:1.4; opacity:.85; }
+.Campus-artStructure,.Campus-artColumn { stroke-width:1.1; opacity:.72; }
+.Campus-artBook { stroke:#d79485!important; stroke-width:1.7; }
 .Campus-homeHeroActions { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
 .Campus-homeHeroAction {
   display:inline-flex; align-items:center; gap:9px; min-height:42px; padding:9px 15px;
@@ -59,7 +83,7 @@
   color:#fff!important; font-size:13px; font-weight:650; text-decoration:none!important;
   transition:background .18s,border-color .18s,transform .18s;
 }
-.Campus-homeHeroAction--primary { border-color:#fff; background:#fff; color:#183158!important; }
+.Campus-homeHeroAction--primary { border-color:#fff; background:#fff; color:#1f2d43!important; }
 .Campus-homeHeroAction:hover { background:rgba(255,255,255,.15); border-color:#fff; transform:translateY(-1px); }
 .Campus-homeHeroAction--primary:hover { background:#eaf2ff; }
 .Campus-homeHeroAction:focus-visible { outline:2px solid #fff; outline-offset:3px; }
@@ -70,9 +94,11 @@
 .Campus-homePaths { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:0 20px; border-top:1px solid var(--campus-divider); border-bottom:1px solid var(--campus-divider); }
 .Campus-homePath { display:flex; align-items:center; gap:12px; min-width:0; min-height:76px; padding:13px 4px; color:var(--campus-ink)!important; text-decoration:none!important; border-bottom:1px solid var(--campus-divider); }
 .Campus-homePath:last-child { border-bottom:0; }
-.Campus-homePath--lead { grid-row:span 3; align-items:flex-start; flex-direction:column; justify-content:center; gap:15px; min-height:230px; padding:22px 24px; border-bottom:0; background:var(--campus-soft); }
+.Campus-homePath--lead { grid-row:span 3; align-items:flex-start; flex-direction:column; justify-content:center; gap:15px; min-height:230px; padding:22px 24px; border-bottom:0; background:#f2eae2; }
+:root[data-theme^="dark"] .Campus-homePath--lead { background:#302a33; }
 .Campus-homePathIcon { flex:none; display:grid; place-items:center; width:34px; height:34px; border-radius:8px; background:var(--campus-soft); color:var(--campus-link); font-size:15px; }
 .Campus-homePath--lead .Campus-homePathIcon { width:42px; height:42px; background:var(--campus-surface); font-size:19px; }
+.Campus-homePath--lead .Campus-homePathIcon { color:var(--campus-mark); }
 .Campus-homePathText { display:grid; gap:3px; min-width:0; flex:1; }
 .Campus-homePathText strong { color:var(--campus-ink); font-size:15px; line-height:1.45; }
 .Campus-homePath--lead .Campus-homePathText strong { font-size:21px; }
@@ -85,8 +111,9 @@
 .Campus-nativeExplore .Campus-grid { gap:7px!important; }
 .Campus-nativeExplore .Campus-section { min-height:44px!important; padding:8px 11px!important; border-radius:7px; background:var(--campus-surface); border:1px solid var(--campus-divider); }
 .Campus-nativeExplore .Campus-section:hover { border-color:var(--campus-link); }
+@media(max-width:1120px) { .Campus-homeArtwork { display:none; } }
 @media(max-width:767px) {
-  .IndexPage.Campus-feedPage .WelcomeHero .container { padding-top:26px; padding-bottom:27px; }
+  .IndexPage.Campus-feedPage .WelcomeHero .container { min-height:0; padding-top:26px; padding-bottom:30px; }
   .IndexPage.Campus-feedPage .WelcomeHero .container::after { display:none; }
   .IndexPage.Campus-feedPage .WelcomeHero .Hero-title { font-size:25px; }
   .Campus-homeHeroActions { margin-top:19px; }
@@ -307,7 +334,7 @@
 .Campus-directoryReport { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:16px 0; border-bottom:1px solid var(--campus-divider); }
 @media(max-width:991px) {
   .Campus-directoryLayout { grid-template-columns:minmax(0,1fr); }
-  .Campus-directoryTree { max-height:260px; overflow:auto; overscroll-behavior:contain; }
+  .Campus-directoryTree { max-height:~"min(60dvh, 420px)"; overflow:auto; overscroll-behavior:contain; }
 }
 @media(max-width:767px) {
   .App-drawer { background:var(--campus-surface); max-height:100dvh; overflow-y:auto; overscroll-behavior:contain; }

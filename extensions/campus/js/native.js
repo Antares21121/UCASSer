@@ -42,6 +42,18 @@ const homePaths = [
   ['/t/campus-questions', '提出一个问题', '从已有问答里找经验，或向社区发起讨论。', 'comment-dots'],
   ['/campus/tools', '打开校园工具', '日历、食堂、课程与出行入口集中在这里。', 'th-large']
 ];
+const campusArtwork = () => m('svg.Campus-homeArtwork', {
+  viewBox: '0 0 520 280',
+  fill: 'none',
+  'aria-hidden': 'true'
+}, [
+  m('path.Campus-artAxis', { d: 'M260 10V258M22 214H498' }),
+  m('path.Campus-artRoof', { d: 'M66 90H454M90 76H430L405 53H115L90 76ZM118 53L148 35H372L402 53' }),
+  m('path.Campus-artStructure', { d: 'M79 90V196H441V90M95 110H425M95 184H425M215 184V143C215 118 235 100 260 100C285 100 305 118 305 143V184M225 184V144C225 125 239 111 260 111C281 111 295 125 295 144V184' }),
+  ...[110, 145, 180, 340, 375, 410].map(x => m('path.Campus-artColumn', { d: `M${x} 111V184M${x - 6} 111H${x + 6}M${x - 6} 184H${x + 6}` })),
+  m('path.Campus-artSteps', { d: 'M60 196H460M44 206H476M29 214H491' }),
+  m('path.Campus-artBook', { d: 'M260 241C210 227 162 226 119 236V221C162 211 210 212 260 227C310 212 358 211 401 221V236C358 226 310 227 260 241ZM260 227V241M119 249C164 239 211 241 260 254C309 241 356 239 401 249' })
+]);
 const homeGuide = () => m('section.Campus-homeGuide', { 'aria-labelledby': 'campus-home-guide-title' }, [
   m('div.Campus-homeGuideHeading', [
     m('h2#campus-home-guide-title', '今天从哪里开始？'),
@@ -784,10 +796,14 @@ export function registerNative() {
       items.setContent('title', m('h1.Hero-title', app.forum.attribute('title')));
       items.setContent('subtitle', m('div.Hero-subtitle', app.forum.attribute('description') || '共同维护校园信息，让经验与知识帮助更多同学。'));
     }
+    if (isCampusHome()) items.add('campus-home-identity', m('p.Campus-homeIdentity', [
+      '中国社会科学院大学同学共建', m('span', { 'aria-hidden': 'true' }, '·'), '独立社区，非学校官方平台'
+    ]), -500);
     if (isCampusHome()) items.add('campus-home-actions', m('nav.Campus-homeHeroActions', { 'aria-label': '首页快捷入口' }, [
       link('/campus/aggregation', [symbol('bullhorn'), '看校园信息'], { className: 'Campus-homeHeroAction Campus-homeHeroAction--primary' }),
       link('/resources', [symbol('book-open'), '找学习资料'], { className: 'Campus-homeHeroAction' })
     ]), -1000);
+    if (isCampusHome()) items.add('campus-home-artwork', campusArtwork(), -1100);
   });
   override(GlobalSearchState.prototype, 'params', function (original) {
     const params = original();
