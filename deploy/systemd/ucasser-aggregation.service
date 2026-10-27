@@ -1,0 +1,10 @@
+[Unit]
+Description=UCASSer official information refresh into review queue
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/ucasser-test
+ExecStart=/usr/bin/flock -n /run/lock/ucasser-aggregation.lock /usr/bin/python3 /opt/ucasser-test/scripts/aggregation_refresh.py --env-file /opt/ucasser-test/.env.test --limit 5
+TimeoutStartSec=30min

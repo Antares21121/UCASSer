@@ -56,7 +56,7 @@ export default class CoursesPage extends DataPage {
     }, [m('div.Campus-searchBar', [m('label.Campus-searchInput', [m('span.sr-only', '搜索课程名称'), symbol('search'), m('input.FormControl', {
       name: 'search',
       type: 'search',
-      placeholder: '搜索课程名称',
+      placeholder: '搜索课程名称、代码或学院',
       value: this.filters.search,
       oninput: e => this.filters.search = e.target.value
     })]), m(Button, {
@@ -75,7 +75,7 @@ export default class CoursesPage extends DataPage {
       className: 'Button Button--link Campus-searchReset'
     })])])), m('div.Campus-courseResults', [m('p', {
       role: 'status'
-    }, `共 ${this.meta.total} 门课程`), addCourse]), m('p.Campus-hint.Campus-courseScope', this.definitions.sample), ...this.courses.map(c => m('article.Campus-panel.Campus-courseCard', [m('header.Campus-courseHeading', [m('h2', c.name), m('span.Campus-badge', `${c.samples} 条有效评价`)]), m('p.Campus-meta', [c.type, c.grade, c.semester, c.nature].filter(Boolean).join(' · ')), m('div.Campus-stats', Object.entries(c.scores).map(([k, v]) => m('div.Campus-stat', [m('span', {
+    }, `共 ${this.meta.total} 门课程`), addCourse]), m('p.Campus-hint.Campus-courseScope', this.definitions.sample), ...this.courses.map(c => m('article.Campus-panel.Campus-courseCard', [m('header.Campus-courseHeading', [m('h2', c.name), m('span.Campus-badge', `${c.samples} 条有效评价`)]), m('p.Campus-meta', [c.offer?.college, c.offer?.code ? `课程代码 ${c.offer.code}` : null, c.type, c.grade, c.semester, c.nature].filter(Boolean).join(' · ')), m('div.Campus-stats', Object.entries(c.scores).map(([k, v]) => m('div.Campus-stat', [m('span', {
       title: this.definitions[k]
     }, {
       overall: '总体体验',
@@ -83,7 +83,9 @@ export default class CoursesPage extends DataPage {
       workload: '工作量'
     }[k]), m('strong', v === null ? '—' : Number(v).toFixed(2)), v === null ? null : m('small', ' / 5')]))), c.assessment || c.resources ? m('details.Campus-courseDetails', [m('summary', '考核与相关资源'), c.assessment ? m('p.Campus-text', '考核方式：' + c.assessment) : null, c.resources ? m('p.Campus-text', '资源：' + c.resources) : null]) : null, m('div.Campus-actions', [link('/campus/records?type=review&course_id=' + c.id + (this.filters.review_semester ? '&semester=' + encodeURIComponent(this.filters.review_semester) : ''), '查看评价', {
       className: 'Button'
-    }), app.session.user ? link('/campus/publish?type=review&course_id=' + c.id + '&semester=' + encodeURIComponent(this.filters.review_semester || c.semester), '发布评价', {
+    }), c.offer?.resource_category_id ? link('/resources?category_id=' + c.offer.resource_category_id, '查看资料索引', {
+      className: 'Button'
+    }) : null, app.session.user ? link('/campus/publish?type=review&course_id=' + c.id + '&semester=' + encodeURIComponent(this.filters.review_semester || c.semester), '发布评价', {
       className: 'Button Button--primary'
     }) : null]), this.meta.can_manage ? m(Button, {
       onclick: () => this.form = {

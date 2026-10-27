@@ -23,10 +23,23 @@ class CourseController implements RequestHandlerInterface
                 $this->records->identity->audit($a,'course.save',(string)$id,$reason); return $id;
             }); return new JsonResponse(['data'=>$db->table('campus_courses')->where('id',$id)->first()],$r->getMethod()==='POST'?201:200);
         }
-        $query=$db->table('campus_courses'); if (!empty($q['search'])) $query->where('name','like','%'.addcslashes(mb_substr((string)$q['search'],0,100),'\\%_').'%');
+        $hasOfferings=$db->getSchemaBuilder()->hasTable('campus_course_offerings');
+        $query=$db->table('campus_courses');
+        if (!empty($q['search'])) {
+            $term='%'.addcslashes(mb_substr((string)$q['search'],0,100),'\\%_').'%';
+            $query->where(function ($where) use ($db,$hasOfferings,$term) {
+                $where->where('name','like',$term);
+                if ($hasOfferings) $where->orWhereIn('id',$db->table('campus_course_offerings')->select('course_id')
+                    ->where('code','like',$term)->orWhere('college','like',$term));
+            });
+        }
         foreach (['id','type','semester','grade'] as $key) if (!empty($q[$key])) $query->where($key,$q[$key]);
+        if ($hasOfferings && !empty($q['college'])) $query->whereIn('id',$db->table('campus_course_offerings')->select('course_id')->where('college',$q['college']));
         $total=(clone $query)->count(); $page=max(1,min(10000,(int)($q['page'] ?? 1)));
-        $courses=$query->orderBy('name')->offset(($page-1)*20)->limit(20)->get()->map(function ($course) use ($a,$q) {
+        $pageRows=$query->orderBy('name')->offset(($page-1)*20)->limit(20)->get();
+        $offers=$hasOfferings ? $db->table('campus_course_offerings')->whereIn('course_id',$pageRows->pluck('id'))->get(['course_id','code','college','semester','resource_category_id'])->keyBy('course_id') : collect();
+        $courses=$pageRows->map(function ($course) use ($a,$q,$offers) {
+            $course->offer=$offers->get($course->id);
             $reviews=$this->records->query($a)->where('course_id',$course->id)->where('type','review')->where('status','active')->when(!empty($q['review_semester']),fn($b)=>$b->where('semester',$q['review_semester']));
             $metrics=['COUNT(*) AS samples']; foreach (['overall','difficulty','workload'] as $key) $metrics[]="AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(data, '$.$key')) AS DECIMAL(8,2))) AS $key";
             $stats=$reviews->selectRaw(implode(',',$metrics))->first(); $course->samples=(int)$stats->samples; $course->scores=[];

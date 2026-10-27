@@ -229,7 +229,7 @@
 .Campus-toolboxList { display:grid; gap:10px; }
 .Campus-toolboxItem { display:flex; align-items:center; gap:16px; min-width:0; min-height:88px; padding:16px 20px; border:1px solid var(--campus-border); border-radius:12px; background:var(--body-bg,#fff); color:var(--campus-ink); text-decoration:none!important; transition:border-color .18s,background .18s; }
 .Campus-toolboxItem:hover,.Campus-toolboxItem:focus-visible { border-color:var(--primary-color); background:var(--control-bg,#f4f7fa); color:var(--campus-ink); }
-.Campus-toolboxItem:focus-visible,.Campus-toolboxBack a:focus-visible { outline:2px solid var(--primary-color); outline-offset:3px; }
+.Campus-toolboxItem:focus-visible,.Campus-toolboxBack a:focus-visible,.Campus-toolboxSource a:focus-visible,.Campus-toolboxEmpty a:focus-visible { outline:2px solid var(--primary-color); outline-offset:3px; }
 .Campus-toolboxIcon { display:grid; place-items:center; flex:none; width:48px; height:48px; border-radius:10px; background:var(--control-bg,#eef3f7); color:var(--primary-color); font-size:20px; }
 .Campus-toolboxText { display:grid; gap:4px; min-width:0; flex:1; }
 .Campus-toolboxText strong { font-size:16px; line-height:1.4; }
@@ -253,6 +253,13 @@
 .Campus-toolboxDay:empty { background:transparent; }
 .Campus-toolboxDay.is-today { background:var(--primary-color); color:#fff; font-weight:700; }
 .Campus-toolboxCalendar .Campus-hint { margin:18px 0 0; }
+.Campus-toolboxSource { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-top:16px; }
+.Campus-toolboxSourceCopy { min-width:0; }
+.Campus-toolboxSource h2 { margin:0 0 6px; font-size:17px; }
+.Campus-toolboxSource p { max-width:65ch; margin:0; color:var(--campus-muted); line-height:1.65; }
+.Campus-toolboxSourceActions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+.Campus-toolboxSource .Button { display:inline-flex; align-items:center; justify-content:center; gap:8px; flex:none; white-space:nowrap; }
 @media(max-width:600px) { .Campus-toolboxItem { gap:12px; padding:14px; } .Campus-toolboxIcon { width:40px; height:40px; font-size:17px; } .Campus-toolboxStatus { display:none; } }
 @media(max-width:600px) { .Campus-toolboxWeekday,.Campus-toolboxDay { min-height:36px; } .Campus-toolboxCalendarActions .Button { min-width:38px; } }
+@media(max-width:600px) { .Campus-toolboxSource { align-items:stretch; flex-direction:column; } .Campus-toolboxSourceActions { justify-content:flex-start; } .Campus-toolboxSource .Button { white-space:normal; text-align:left; } }
 @media(prefers-reduced-motion:reduce) { .Campus-toolboxItem { transition:none; } }

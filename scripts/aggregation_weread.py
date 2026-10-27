@@ -21,6 +21,7 @@ def main():
     parser.add_argument('--limit', type=int, default=20, help='Maximum RSS items per account')
     parser.add_argument('--max-feeds', type=int, default=100, help='Maximum subscribed accounts per run')
     parser.add_argument('--backend', choices=['docker', 'native'], default='docker')
+    parser.add_argument('--env-file', default=str(ROOT / '.env'))
     args = parser.parse_args()
     if not 1 <= args.limit <= 20 or not 1 <= args.max_feeds <= 100:
         parser.error('--limit must be 1–20 and --max-feeds must be 1–100')
@@ -91,7 +92,8 @@ def main():
                 }, timeout=180)
                 command = [sys.executable, str(ROOT / 'scripts' / 'aggregation_feed.py'),
                            '--feed-url', f'http://127.0.0.1:8001/rss/{feed_id}',
-                           '--name', name, '--limit', str(args.limit), '--backend', args.backend]
+                           '--name', name, '--limit', str(args.limit), '--backend', args.backend,
+                           '--env-file', args.env_file]
                 result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True,
                                         encoding='utf-8', errors='replace', timeout=180)
                 if result.returncode:

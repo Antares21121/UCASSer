@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh UCASSer sources at 09:00 and 21:00 Beijing time
+
+[Timer]
+OnCalendar=*-*-* 09,21:00:00 Asia/Shanghai
+AccuracySec=1min
+Persistent=true
+Unit=ucasser-aggregation.service
+
+[Install]
+WantedBy=timers.target

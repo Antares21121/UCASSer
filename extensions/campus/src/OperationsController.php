@@ -38,7 +38,7 @@ class OperationsController implements RequestHandlerInterface
             ],
             'sources' => [
                 'total' => $sources->count(),
-                'active' => $sources->filter(fn ($source) => $source->adapter === 'ucass-notices' && $source->enabled)->count(),
+                'active' => $sources->filter(fn ($source) => in_array($source->adapter, ['ucass-notices', 'ucass-vsb', 'ucass-employment'], true) && $source->enabled)->count(),
                 'errors' => $sources->filter(fn ($source) => $source->last_error !== null && $source->last_error !== '')->count(),
                 'recent' => $sources->take(6)->values()->all(),
             ],

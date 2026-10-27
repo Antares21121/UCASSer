@@ -194,7 +194,7 @@ export class AggregationSourcesPage extends DataPage {
           source.listing_url ? m('a', { href: source.listing_url, target: '_blank', rel: 'noopener noreferrer nofollow' }, '查看来源 ↗') : null,
           m('small', source.last_checked_at ? '上次检查：' + formatTime(source.last_checked_at) : '尚未检查'),
           source.last_error ? m('small.Aggregation-caution', '抓取报错：' + source.last_error) : null,
-          source.adapter === 'ucass-notices' ? m(Button, {
+          ['ucass-notices', 'ucass-vsb', 'ucass-employment'].includes(source.adapter) ? m(Button, {
             type: 'button', disabled: this.busy, onclick: () => this.toggleSource(source)
           }, source.enabled ? '暂停抓取' : '恢复抓取') : null
         ]))) : m('p', '还没有登记来源。')

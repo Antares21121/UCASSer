@@ -46,6 +46,10 @@
     var page = this;
     app.request({ url: api('categories') }).then(function (data) {
       page.categories = data.categories;
+      var requested = Number(m.route.param('category_id'));
+      if (Number.isSafeInteger(requested) && requested > 0 && page.categories.some(function (category) { return category.id === requested; })) {
+        page.selected = requested;
+      }
       page.load();
     }).catch(function () {
       page.error = '分类暂时无法加载，请稍后重试。';
