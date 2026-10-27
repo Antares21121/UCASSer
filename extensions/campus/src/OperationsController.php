@@ -19,6 +19,7 @@ class OperationsController implements RequestHandlerInterface
         $sources = $db->table('campus_aggregation_sources')->orderByDesc('id')->get([
             'id', 'name', 'adapter', 'enabled', 'last_checked_at', 'last_error'
         ]);
+        $collectorStatus = json_decode((string) $db->table('settings')->where('key', 'ucasser.aggregation.collector_status')->value('value'), true);
         return new JsonResponse(['data' => [
             'generated_at' => gmdate('Y-m-d H:i:s'),
             'community' => [
@@ -37,6 +38,7 @@ class OperationsController implements RequestHandlerInterface
                 'cases_pending' => $db->table('campus_cases')->whereIn('status', ['pending', 'in_progress', 'needs_info', 'appealed'])->count(),
             ],
             'sources' => [
+                'collector' => is_array($collectorStatus) ? $collectorStatus : ['state' => 'unknown'],
                 'total' => $sources->count(),
                 'active' => $sources->filter(fn ($source) => in_array($source->adapter, ['ucass-notices', 'ucass-vsb', 'ucass-employment'], true) && $source->enabled)->count(),
                 'errors' => $sources->filter(fn ($source) => $source->last_error !== null && $source->last_error !== '')->count(),

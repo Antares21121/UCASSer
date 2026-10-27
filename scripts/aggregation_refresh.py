@@ -26,6 +26,8 @@ def main():
     if (ROOT / '.runtime' / 'we-mp-rss.env').is_file():
         commands.append(['aggregation_weread.py', *common])
     else:
+        from aggregation_weread import record_collector_state
+        record_collector_state(args, 'unconfigured')
         print('公众号订阅服务尚未配置；本次只更新公开网站。', flush=True)
 
     failed = False

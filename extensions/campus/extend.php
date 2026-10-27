@@ -45,6 +45,7 @@ return [
     (new Extend\Console())->command(Campus\CourseImportCommand::class),
     (new Extend\Console())->command(Campus\AggregationPollCommand::class),
     (new Extend\Console())->command(Campus\AggregationSyncSourcesCommand::class),
+    (new Extend\Console())->command(Campus\AggregationCollectorStatusCommand::class),
     (new Extend\Console())->command(Campus\AggregationImportTrialCommand::class),
     (new Extend\Console())->command(Campus\AggregationImportFeedCommand::class),
     (new Extend\Event())->listen(\Flarum\Post\Event\Saving::class,Campus\NativeRevision::class)->listen(\Flarum\Discussion\Event\Saving::class,Campus\NativeRevision::class),

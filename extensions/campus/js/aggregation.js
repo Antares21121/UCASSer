@@ -1,4 +1,5 @@
 import app from 'flarum/forum/app';
+import Modal from 'flarum/common/components/Modal';
 import Button from './button';
 import { DataPage, api, emptyState, field, formatTime, link, pageHeading, symbol } from './ui';
 import { pagination } from './navigation';
@@ -144,14 +145,59 @@ const sourceStatus = source => {
   return source.enabled ? '已启用' : '已停用';
 };
 
+class CollectorAuthorizationModal extends Modal {
+  className() { return 'CampusRecordActionModal'; }
+  title() { return '公众号采集需要重新授权'; }
+  content() {
+    return m('div.Modal-body.Campus', [
+      m('p', '定时采集检测到微信读书授权已失效。公开网页仍可抓取；公众号文章要等你在订阅服务中重新扫码后才能继续进入审核队列。'),
+      m('p', '如果订阅服务运行在你的电脑，直接打开本机授权页；如果运行在云服务器，先建立 SSH 端口转发，再打开同一地址。不要把订阅服务管理端口直接开放到公网。'),
+      m('div.Campus-actions', [
+        m('a.Button.Button--primary', { href: 'http://127.0.0.1:8001/', target: '_blank', rel: 'noopener noreferrer' }, '打开本机授权页 ↗'),
+        m(Button, { type: 'button', onclick: () => this.hide() }, '稍后处理')
+      ])
+    ]);
+  }
+}
+
 export class AggregationSourcesPage extends DataPage {
   requiresLogin = true;
   oninit(vnode) {
     this.form = { kind: 'web', name: '', url: '' };
     super.oninit(vnode);
   }
+  oncreate(vnode) {
+    if (super.oncreate) super.oncreate(vnode);
+    this.collectorTimer = window.setInterval(async () => {
+      try {
+        this.meta = (await api('aggregation/sources?status_only=1')).meta;
+        this.showCollectorAlert();
+        m.redraw();
+      } catch (_) { /* The normal page error handles the initial request. */ }
+    }, 60000);
+    this.showCollectorAlert();
+  }
+  onupdate(vnode) {
+    if (super.onupdate) super.onupdate(vnode);
+    this.showCollectorAlert();
+  }
+  onremove(vnode) {
+    window.clearInterval(this.collectorTimer);
+    super.onremove(vnode);
+  }
+  showCollectorAlert() {
+    const status = this.meta?.collector;
+    if (status?.state !== 'authorization_required') return;
+    const key = `ucasser.collector-auth.${status.checked_at}`;
+    if (this.alertedAt === key || window.sessionStorage.getItem(key)) return;
+    this.alertedAt = key;
+    window.sessionStorage.setItem(key, 'shown');
+    app.modal.show(CollectorAuthorizationModal);
+  }
   async fetch() {
-    this.data = (await api('aggregation/sources')).data;
+    const response = await api('aggregation/sources');
+    this.data = response.data;
+    this.meta = response.meta;
   }
   toggleSource(source) {
     const enabled = !source.enabled;
@@ -163,6 +209,11 @@ export class AggregationSourcesPage extends DataPage {
     return m('div.Aggregation', [
       pageHeading('管理信息来源', '先登记要关注的网站和公众号，接入抓取后，新内容会进入管理员审核队列。'),
       tabs('sources'),
+      this.meta?.collector?.state === 'authorization_required' ? m('div.Campus-notice.is-error', { role: 'alert' }, [
+        '公众号采集授权已失效。', m(Button, { type: 'button', onclick: () => app.modal.show(CollectorAuthorizationModal) }, '查看重新授权方法')
+      ]) : null,
+      this.meta?.collector?.state === 'unavailable' ? m('p.Campus-notice.is-error', { role: 'alert' }, '公众号订阅服务暂时不可用，请检查独立采集工具和日志。') : null,
+      this.meta?.collector?.state === 'unconfigured' ? m('p.Campus-notice', { role: 'status' }, '公众号订阅服务尚未配置，当前定时任务只采集公开网页。') : null,
       m('p.Aggregation-explainer', [symbol('info-circle'), ' 新登记的来源会标记“待接入抓取”，不会立即自动采集。管理员核对来源并配置适配器或公众号订阅后，才会开始抓取。']),
       m('div.Aggregation-submitLayout', [
         m('form.Aggregation-form.Campus-panel', { onsubmit: event => {

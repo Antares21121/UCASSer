@@ -40,6 +40,11 @@ class OfficialSourceCatalog
         ['财务处通知公告', 'https://cwc.ucass.edu.cn/tzgg.htm'],
         ['人事处通知公告', 'https://rsc.ucass.edu.cn/tzgg1.htm'],
         ['人事处人才招聘', 'https://rsc.ucass.edu.cn/rczp1.htm'],
+        ['招投标和采购中心采购意向', 'https://zc.ucass.edu.cn/cgyxgk.htm'],
+        ['招投标和采购中心货物公告', 'https://zc.ucass.edu.cn/cggg/hw.htm'],
+        ['招投标和采购中心服务公告', 'https://zc.ucass.edu.cn/cggg/fw.htm'],
+        ['招投标和采购中心工程公告', 'https://zc.ucass.edu.cn/cggg/gc.htm'],
+        ['税务硕士教育中心通知公告', 'https://mt.ucass.edu.cn/tzgg.htm'],
     ];
 
     // This official notices page is rendered from a public JSON API, not Visual SiteBuilder.
@@ -55,5 +60,21 @@ class OfficialSourceCatalog
         ['社科大社会与民族学院', 'https://xmjh.ucass.edu.cn/info/1036/1389.htm'],
         ['社科大哲学院', 'https://phil.ucass.edu.cn/info/1008/1832.htm'],
         ['平安社科大', 'https://welcome.ucass.edu.cn/info/1003/1261.htm'],
+        ['中国社会科学院大学历史学院', 'https://history.ucass.edu.cn/info/1191/4711.htm'],
+        ['社科大经济学院', 'https://se.ucass.edu.cn/info/1153/3309.htm'],
+        ['社科大商学院', 'https://bs.ucass.edu.cn/info/1213/4206.htm'],
+        ['社科大法学院', 'https://law.ucass.edu.cn/info/1053/4263.htm'],
+        ['社科法硕', 'https://law.ucass.edu.cn/system/_content/download.jsp?owner=1689186152&urltype=news.DownloadAttachUrl&wbfileid=13263429'],
+        ['UCASS LAW', 'https://law.ucass.edu.cn/info/1031/9021.htm'],
+        ['社科大互联网法学', 'https://law.ucass.edu.cn/info/1053/4535.htm'],
+        ['社科大科研处', 'https://law.ucass.edu.cn/info/1053/4535.htm'],
+        ['中国社会科学院大学政府管理学院', 'https://sg.ucass.edu.cn/info/1149/4951.htm'],
+        ['政管MPA', 'https://sg.ucass.edu.cn/info/1149/4951.htm'],
+        ['社科大新闻传播学院', 'https://media.ucass.edu.cn/info/1019/2133.htm'],
+        ['中国社会科学院大学应用经济学院', 'https://fae.ucass.edu.cn/info/1241/3674.htm'],
+        ['中国社科大国际政治经济学院', 'https://xmjh.ucass.edu.cn/info/1036/1401.htm'],
+        ['思创社科', 'https://marxism.ucass.edu.cn/info/1031/1093.htm'],
+        ['中国社科大图书馆', 'https://www.ucass.edu.cn/zhongguoshehuikexueyuandaxue2020-2021xuenianxinxigongkaoniandugongzuobaogao.pdf'],
+        ['社科大就业', 'https://yjsjy.ucass.edu.cn/__local/1/B1/82/1D8D60E752EEB43AE7CAAC8A14A_A981583F_641FAC.pdf'],
     ];
 }

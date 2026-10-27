@@ -37,6 +37,9 @@ export default class ControlPage extends DataPage {
         m(Button, { onclick: () => this.load(), disabled: this.loading || this.busy }, [symbol('sync-alt'), ' 刷新状态'])
       ]),
       m('p.Campus-controlTimestamp', '数据更新于 ' + formatTime(d.generated_at) + ' · 显示的是数据库记录，不代表服务器或外部订阅服务正在运行。'),
+      d.sources.collector?.state === 'authorization_required' ? m('div.Campus-notice.is-error', { role: 'alert' }, [
+        '公众号采集需要重新扫码授权。', link('/campus/aggregation/sources', '前往来源管理查看授权方法')
+      ]) : null,
       m('div.Campus-controlLayout', [
         m('main.Campus-controlMain', [
           m('section.Campus-controlSection', [
