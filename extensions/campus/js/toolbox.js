@@ -7,7 +7,7 @@ import { link, pageHeading, shell, symbol } from './ui';
 export const tools = [
   {
     key: 'calendar', title: '日历', icon: 'calendar-alt', description: '按月浏览日期，并查阅学校校历。', status: '查看官方来源',
-    source: { label: '查看历史校历栏目', url: 'https://jw.ucass.edu.cn/xnxl.htm', owner: '中国社会科学院大学教务处', note: '公开栏目仅列旧学年。现行电子校历请本人登录校园门户，在“学年校历”微应用中查询。', secondary: { label: '登录校园门户', url: 'https://info.ucass.edu.cn/' } }
+    source: { label: '查看现行校历（校园门户）', url: 'https://info.ucass.edu.cn/', owner: '中国社会科学院大学教务处', note: '请本人登录校园门户，在“学年校历”微应用中查询现行电子校历；公开栏目仅列旧学年。', secondary: { label: '查看历史校历', url: 'https://jw.ucass.edu.cn/xnxl.htm' } }
   },
   { key: 'dining', title: '食堂菜单', icon: 'utensils', description: '查看食堂餐次、菜品和更新时间。', empty: '食堂菜单尚未录入。' },
   { key: 'timetable', title: '课程表', icon: 'table', description: '先查课程目录；上课时间与地点待核实。', empty: '课程安排尚未录入。' },
