@@ -6,8 +6,8 @@ import { link, pageHeading, shell, symbol } from './ui';
 // only shown here once a maintainer has verified a current, reusable source.
 export const tools = [
   {
-    key: 'calendar', title: '日历', icon: 'calendar-alt', description: '按月浏览日期，并查阅教务处校历栏目。', status: '查看官方栏目',
-    source: { label: '查看教务处学年校历', url: 'https://jw.ucass.edu.cn/xnxl.htm', owner: '中国社会科学院大学教务处', note: '站内尚未录入当前学年日程；请打开原页核对所列校历的适用学年。' }
+    key: 'calendar', title: '日历', icon: 'calendar-alt', description: '按月浏览日期，并查阅学校校历。', status: '查看官方来源',
+    source: { label: '查看历史校历栏目', url: 'https://jw.ucass.edu.cn/xnxl.htm', owner: '中国社会科学院大学教务处', note: '公开栏目仅列旧学年。现行电子校历请本人登录校园门户，在“学年校历”微应用中查询。', secondary: { label: '登录校园门户', url: 'https://info.ucass.edu.cn/' } }
   },
   { key: 'dining', title: '食堂菜单', icon: 'utensils', description: '查看食堂餐次、菜品和更新时间。', empty: '食堂菜单尚未录入。' },
   { key: 'timetable', title: '课程表', icon: 'table', description: '先查课程目录；上课时间与地点待核实。', empty: '课程安排尚未录入。' },
@@ -79,10 +79,13 @@ export default class ToolboxPage extends Page {
 
   source(tool) {
     if (!tool.source) return null;
-    const { label, url, owner, note } = tool.source;
+    const { label, url, owner, note, secondary } = tool.source;
     return m('section.Campus-panel.Campus-toolboxSource', { 'aria-label': tool.title + '来源' }, [
       m('div.Campus-toolboxSourceCopy', [m('h2', owner), m('p', note)]),
-      m('a.Button.Button--primary', { href: url, target: '_blank', rel: 'noopener noreferrer nofollow', 'aria-label': label + '（新标签页）' }, [label, symbol('external-link-alt')])
+      m('div.Campus-toolboxSourceActions', [
+        m('a.Button.Button--primary', { href: url, target: '_blank', rel: 'noopener noreferrer nofollow', 'aria-label': label + '（新标签页）' }, [label, symbol('external-link-alt')]),
+        secondary ? m('a.Button', { href: secondary.url, target: '_blank', rel: 'noopener noreferrer nofollow', 'aria-label': secondary.label + '（新标签页）' }, [secondary.label, symbol('external-link-alt')]) : null
+      ])
     ]);
   }
 

@@ -4,7 +4,7 @@
 
 | 工具 | 地址 | 后续内容 |
 | --- | --- | --- |
-| 日历 | `/campus/tools/calendar` | 月历和[教务处学年校历栏目](https://jw.ucass.edu.cn/xnxl.htm)；打开原页核对适用学年，不能把旧校历当成现行安排 |
+| 日历 | `/campus/tools/calendar` | 月历、[教务处历史校历栏目](https://jw.ucass.edu.cn/xnxl.htm)和[校园门户](https://info.ucass.edu.cn/)；现行电子校历需本人登录门户的“学年校历”微应用，不能把旧校历当成现行安排 |
 | 食堂菜单 | `/campus/tools/dining` | 餐次、菜品、适用日期和更新来源 |
 | 课程表 | `/campus/tools/timetable` | 可进入 `/campus/courses` 查看课程目录；星期、节次、地点需取得获授权的课次数据后再录入 |
 | 摆渡车时间表 | `/campus/tools/shuttle` | 尚无已核实的当前时刻表；[学校迎新交通通知](https://welcome.ucass.edu.cn/info/1003/1264.htm)仅作有日期的历史来源，不能作为日常班次依据 |
