@@ -48,7 +48,14 @@ class AggregationController implements RequestHandlerInterface
             return new JsonResponse(['data' => $this->aggregation->review($actor, (int) ($query['id'] ?? 0), $input)]);
         }
         if ($route === 'campus.aggregation.sources') {
-            return new JsonResponse(['data' => $db->table('campus_aggregation_sources')->orderByDesc('id')->get()->all()]);
+            $status = json_decode((string) $db->table('settings')->where('key', 'ucasser.aggregation.collector_status')->value('value'), true);
+            if (($query['status_only'] ?? '') === '1') {
+                return new JsonResponse(['meta' => ['collector' => is_array($status) ? $status : ['state' => 'unknown']]]);
+            }
+            return new JsonResponse([
+                'data' => $db->table('campus_aggregation_sources')->orderByDesc('id')->get()->all(),
+                'meta' => ['collector' => is_array($status) ? $status : ['state' => 'unknown']],
+            ]);
         }
         if ($route === 'campus.aggregation.source.update') {
             $id = (int) ($query['id'] ?? 0);

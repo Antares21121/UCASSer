@@ -11,9 +11,25 @@ import sys
 from urllib.parse import urlencode
 from urllib.request import ProxyHandler, Request, build_opener
 
-from forum import ROOT
+from forum import Forum, ROOT
 
 API = 'http://127.0.0.1:8001/api/v1/wx'
+AUTH_CODES = {'-2012', '-2041', '-2010'}
+
+
+class CollectorAuthorizationRequired(RuntimeError):
+    pass
+
+
+def record_collector_state(args, state):
+    """Make scheduled failures visible to admins without exposing collector secrets."""
+    try:
+        args.profile = 'development'
+        forum = Forum(args)
+        forum.validate()
+        forum.php('flarum', 'campus:aggregation:collector-status', state)
+    except Exception as exc:
+        print(f'无法记录公众号授权状态：{exc}', file=sys.stderr)
 
 
 def main():
@@ -28,9 +44,11 @@ def main():
 
     settings_path = ROOT / '.runtime' / 'we-mp-rss.env'
     if not settings_path.is_file():
+        record_collector_state(args, 'unconfigured')
         parser.error('缺少本机订阅服务凭据 .runtime/we-mp-rss.env')
     settings = dict(line.split('=', 1) for line in settings_path.read_text(encoding='utf-8').splitlines() if '=' in line)
     if not settings.get('USERNAME') or not settings.get('PASSWORD'):
+        record_collector_state(args, 'unconfigured')
         parser.error('订阅服务凭据缺少 USERNAME 或 PASSWORD')
 
     opener = build_opener(ProxyHandler({}))
@@ -45,20 +63,37 @@ def main():
         with opener.open(Request(API + path, data=payload, headers=headers), timeout=timeout) as response:
             result = json.load(response)
         if result.get('code') != 0:
-            raise RuntimeError(f'订阅服务返回错误代码 {result.get("code")}')
+            code = str(result.get('code'))
+            if code in AUTH_CODES:
+                record_collector_state(args, 'authorization_required')
+                raise CollectorAuthorizationRequired(f'订阅服务认证或风控错误代码 {code}')
+            raise RuntimeError(f'订阅服务返回错误代码 {code}')
         return result.get('data') or {}
 
     form = urlencode({'username': settings['USERNAME'], 'password': settings['PASSWORD']}).encode()
-    with opener.open(Request(API + '/auth/login', data=form,
-                             headers={'Content-Type': 'application/x-www-form-urlencoded'}), timeout=15) as response:
-        login = json.load(response)
+    try:
+        with opener.open(Request(API + '/auth/login', data=form,
+                                 headers={'Content-Type': 'application/x-www-form-urlencoded'}), timeout=15) as response:
+            login = json.load(response)
+    except Exception:
+        record_collector_state(args, 'unavailable')
+        raise
     token = (login.get('data') or {}).get('access_token')
     if not token:
+        record_collector_state(args, 'unavailable')
         raise RuntimeError('订阅服务登录失败，请在本机服务界面核对账号')
 
-    status = request('/weread', token)
+    try:
+        status = request('/weread', token)
+    except CollectorAuthorizationRequired:
+        raise
+    except Exception:
+        record_collector_state(args, 'unavailable')
+        raise
     if not status.get('mp_configured'):
+        record_collector_state(args, 'authorization_required')
         raise RuntimeError('微信读书未授权，请在本机订阅服务重新扫码')
+    record_collector_state(args, 'ready')
 
     feeds = []
     offset = 0
@@ -102,6 +137,9 @@ def main():
             except Exception as exc:
                 failures += 1
                 report(f'{name}：失败（{type(exc).__name__}：{exc}）')
+                if isinstance(exc, CollectorAuthorizationRequired):
+                    report('认证或风控异常，停止本轮公众号采集，等待人工检查授权')
+                    break
         report(f'结束，失败 {failures} 个；文章仅进入待审队列')
     return 1 if failures else 0
 
