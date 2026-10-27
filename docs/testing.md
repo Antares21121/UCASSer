@@ -26,6 +26,7 @@ Windows 上述 Python 命令加 `--backend native`。种子重复执行只补齐
 ```console
 python tests/smoke.py --backend docker
 python tests/campus_smoke.py --backend docker --phase 11
+python tests/aggregation_smoke.py --backend docker
 npx playwright install chromium
 npm run test:browser
 ```
@@ -40,6 +41,7 @@ npm run test:browser
 | 阶段 3–6 | 信息、资料、问答、课程评分与真实 SQL 样本、关联、版本冲突、反馈、评价撤回恢复 |
 | 阶段 7–8 | 真实回复邮件、采纳和反馈通知、已读、个人隔离、受限通知过滤、23 条检索分页与特殊输入 |
 | 阶段 9–11 | 私有举报、补充、分区处理、独立申诉、治理版本、CSRF、封禁/解封、重复发布、登录限流、危险 URL |
+| 信息汇集 | 投稿与审核、同源合并和更新、未核实链接隐藏、会员线索隔离、投稿拒绝及来源登记权限 |
 | 15 项原生浏览器场景 | 十板块与中文/深色主题、硬刷新摘要、板块筛选及发布默认值、503 后草稿重试、北京时间存储；真实发布/预览/编辑/评论/收藏；课程维护与评价、资料、回答采纳、搜索、个人中心、治理和后台；首页返回与背景、分页刷新、连续切换请求竞态；目录修订与反馈、DPR 2、文字对比度及强制颜色模式；自建十板块与二手／出行详情，展开后排除不相关活动字段、访客闲聊直接阅读正文和登录后真实收藏 |
 | 隔离恢复 | 真 SQL/文件备份、新工作区/新数据库恢复、扩展源码校验、业务分区可用、原实例保留、重复恢复拒绝 |
 

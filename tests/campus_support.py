@@ -17,7 +17,7 @@ from forum import Forum
 class Api:
     def __init__(self, url, token=None):
         self.url, self.token = url.rstrip('/'), token
-        self.opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
         self.csrf = None
     def call(self, path, method='GET', data=None, expected=200):
         headers = {'Content-Type': 'application/json'}

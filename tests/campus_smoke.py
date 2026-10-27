@@ -90,7 +90,7 @@ def phase2(f, guest, admin):
             # Native password reset with cookie session and CSRF, never log tokens or password.
             guest.call('/api/forgot','POST',{'email':first['name']+'@example.invalid'},expected=204)
             reset=fixture(f,{'action':'tokens','user_id':uid})['reset']; assert reset
-            browser=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+            browser=urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
             html=browser.open(guest.url+'/reset/'+reset).read().decode()
             csrf=re.search(r'name="csrfToken" value="([^"]+)"',html)
             assert csrf, 'Reset form must carry a CSRF token'

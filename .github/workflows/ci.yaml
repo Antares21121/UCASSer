@@ -47,6 +47,8 @@ jobs:
           python tests/resource_smoke.py --url http://127.0.0.1:8080 --admin-user phase0_admin --password-file .runtime/admin-initial-password.txt
       - name: Real campus acceptance phases 1 through 11
         run: python tests/campus_smoke.py --backend docker --phase 11
+      - name: Aggregation submission and review acceptance
+        run: python tests/aggregation_smoke.py --backend docker
       - name: Browser workflows and mobile layout
         run: npm run test:browser
       - name: Security audit (no ignored advisories)

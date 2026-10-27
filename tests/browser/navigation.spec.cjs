@@ -1,5 +1,33 @@
 const {test,expect}=require('@playwright/test');
 
+function renderedContrast(node) {
+  // Chromium can return CSS system color names (CanvasText, Canvas) in high contrast mode.
+  // Paint a pixel to resolve those colors exactly as the browser renders them.
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
+  const context=canvas.getContext('2d');
+  const color=value=>{
+    context.clearRect(0,0,1,1);
+    context.fillStyle=value;
+    context.fillRect(0,0,1,1);
+    return Array.from(context.getImageData(0,0,1,1).data);
+  };
+  const background=element=>{
+    if(!element)return [255,255,255];
+    const base=background(element.parentElement),rgba=color(getComputedStyle(element).backgroundColor);
+    const alpha=rgba[3]/255;
+    return rgba.slice(0,3).map((channel,index)=>channel*alpha+base[index]*(1-alpha));
+  };
+  const luminance=rgb=>{
+    const channels=rgb.map(value=>{const n=value/255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});
+    return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722;
+  };
+  const bg=background(node),fg=color(getComputedStyle(node).color);
+  const alpha=fg[3]/255;
+  const visible=fg.slice(0,3).map((channel,index)=>channel*alpha+bg[index]*(1-alpha));
+  const a=luminance(visible),b=luminance(bg);
+  return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+}
+
 test('numbered native pages remain distinct through reload and preserve filters',async({page})=>{
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/?sort=newest');
@@ -80,19 +108,7 @@ test('directory and native pages keep readable theme colors and reflow at high D
     await expect(page.locator('.Campus-directoryCard a[href="https://ncre.neea.edu.cn/"]').first()).toBeVisible();
     for(const theme of ['light','dark','light-hc','dark-hc']) {
       await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
-      const contrast=await page.locator('.Campus-directoryDescription').first().evaluate(node=>{
-        const channels=value=>value.match(/[\d.]+/g)?.map(Number) || [];
-        const luminance=rgb=>{const c=rgb.slice(0,3).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
-        const background=element=>{
-          if(!element)return [255,255,255];
-          const base=background(element.parentElement),color=channels(getComputedStyle(element).backgroundColor);
-          if(color.length<3)return base;
-          const alpha=color.length>3?color[3]:1;
-          return color.slice(0,3).map((channel,index)=>channel*alpha+base[index]*(1-alpha));
-        };
-        const a=luminance(channels(getComputedStyle(node).color)),b=luminance(background(node));
-        return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
-      });
+      const contrast=await page.locator('.Campus-directoryDescription').first().evaluate(renderedContrast);
       expect(contrast,theme+' text contrast').toBeGreaterThanOrEqual(4.5);
     }
     for(const width of [720,390,320]) {
@@ -107,18 +123,10 @@ test('directory and native pages keep readable theme colors and reflow at high D
     await page.emulateMedia({forcedColors:'none'});
     for (const theme of ['light','dark','light-hc','dark-hc']) {
       await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
-      const contrast=await page.locator('.Campus-feedTags .TagLabel-text').first().evaluate(node=>{
-        const luminance=value=>{const c=value.match(/\d+(\.\d+)?/g).slice(0,3).map(Number).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
-        const a=luminance(getComputedStyle(node).color),b=luminance(getComputedStyle(node.closest('.TagLabel')).backgroundColor);
-        return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
-      });
+      const contrast=await page.locator('.Campus-feedTags .TagLabel-text').first().evaluate(renderedContrast);
       expect(contrast,theme+' tag contrast').toBeGreaterThanOrEqual(4.5);
       for (const selector of ['.Header-primary .Button-label','.Header-secondary .Button-label','.Campus-listMetadata']) {
-        const ratio=await page.locator(selector).first().evaluate(node=>{
-          const parse=value=>value.match(/[\d.]+/g).map(Number),lum=rgb=>{const c=rgb.slice(0,3).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
-          const bg=node=>{if(!node)return[255,255,255];const c=parse(getComputedStyle(node).backgroundColor),base=bg(node.parentElement),a=c.length>3?c[3]:1;return c.slice(0,3).map((v,i)=>v*a+base[i]*(1-a));};
-          const a=lum(parse(getComputedStyle(node).color)),b=lum(bg(node));return(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
-        });
+        const ratio=await page.locator(selector).first().evaluate(renderedContrast);
         expect(ratio,theme+' '+selector+' contrast').toBeGreaterThanOrEqual(4.5);
       }
     }
@@ -132,11 +140,7 @@ test('directory and native pages keep readable theme colors and reflow at high D
     await page.emulateMedia({forcedColors:'none'});
     for (const theme of ['light','dark','light-hc','dark-hc']) {
       await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
-      const contrast=await page.locator('.DiscussionHero-title').evaluate(node=>{
-        const luminance=value=>{const c=value.match(/\d+(\.\d+)?/g).slice(0,3).map(Number).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
-        const a=luminance(getComputedStyle(node).color),b=luminance(getComputedStyle(node.closest('.DiscussionHero')).backgroundColor);
-        return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
-      });
+      const contrast=await page.locator('.DiscussionHero-title').evaluate(renderedContrast);
       expect(contrast,theme+' discussion heading contrast').toBeGreaterThanOrEqual(4.5);
     }
     await page.emulateMedia({forcedColors:'active'});
