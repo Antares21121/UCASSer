@@ -56,6 +56,7 @@ class OfficialSourceCatalog
     public const WECHAT = [
         ['中国社会科学院大学', 'https://www.ucass.edu.cn/'],
         ['青春社科大', 'https://youth.ucass.edu.cn/info/1006/3154.htm'],
+        ['UCASSInternational', 'https://jw.ucass.edu.cn/__local/1/A0/45/BF3AE6E5714AEDFB203961A4CC4_0C4B7FAF_7BFC12.pdf'],
         ['中国社会科学院大学文学院', 'https://wenxue.ucass.edu.cn/info/1029/2068.htm'],
         ['社科大社会与民族学院', 'https://xmjh.ucass.edu.cn/info/1036/1389.htm'],
         ['社科大哲学院', 'https://phil.ucass.edu.cn/info/1008/1832.htm'],
@@ -78,3 +79,4 @@ class OfficialSourceCatalog
         ['社科大就业', 'https://yjsjy.ucass.edu.cn/__local/1/B1/82/1D8D60E752EEB43AE7CAAC8A14A_A981583F_641FAC.pdf'],
     ];
 }
+
