@@ -12,7 +12,7 @@ class RecordPolicy extends AbstractPolicy
         $d=$model instanceof Post?$model->discussion:$model;
         if (!$d) return null;
         if ($d->hidden_at && $d->hidden_user_id!==$a->id && !$a->isAdmin()) return null;
-        $own=$d->user_id===$a->id && !$a->isGuest();
+        $own=$d->user_id===$a->id && AccountAccess::isConfirmed($a);
         $relevant=$model instanceof Post?($ability==='edit' && $model->number===1 && !$model->hidden_at):in_array($ability,['rename','tag'],true);
         if ($own && $relevant && $this->db->table('campus_records')->where('discussion_id',$d->id)->exists() && $a->can('reply',$d)) return $this->allow();
         return null;

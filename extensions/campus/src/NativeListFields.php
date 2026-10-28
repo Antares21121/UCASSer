@@ -21,9 +21,9 @@ class NativeListFields
         }
         $sections = $records->db->table('campus_sections')->whereIn('id', $rows->pluck('section_id'))->pluck('key', 'id');
         $courses = $records->db->table('campus_courses')->whereIn('id', $rows->pluck('course_id')->filter())->pluck('name', 'id');
-        $moderated = $actor->isGuest() || $actor->isAdmin() ? [] : $records->db->table('campus_moderators')->where('user_id', $actor->id)->pluck('section_id')->all();
+        $moderated = !AccountAccess::isConfirmed($actor) || $actor->isAdmin() ? [] : $records->db->table('campus_moderators')->where('user_id', $actor->id)->pluck('section_id')->all();
         $votes = $records->db->table('campus_votes')->whereIn('record_id', $rows->pluck('id'))->selectRaw('record_id, COUNT(*) as total')->groupBy('record_id')->pluck('total', 'record_id');
-        $voted = $actor->isGuest() ? [] : $records->db->table('campus_votes')->where('user_id', $actor->id)->whereIn('record_id', $rows->pluck('id'))->pluck('record_id')->all();
+        $voted = !AccountAccess::isConfirmed($actor) ? [] : $records->db->table('campus_votes')->where('user_id', $actor->id)->whereIn('record_id', $rows->pluck('id'))->pluck('record_id')->all();
         $accepted = Post::query()->whereVisibleTo($actor)->whereNull('hidden_at')->whereIn('id', $rows->pluck('accepted_post_id')->filter())->pluck('id')->all();
         $payloads = $rows->map(fn($row) => json_decode($row->data, true, 512, JSON_THROW_ON_ERROR));
         $relatedIds = $payloads->flatMap(fn($payload) => $payload['related'] ?? [])->unique();
@@ -37,7 +37,7 @@ class NativeListFields
             $expiry = $row->deadline ?: (!empty($payload['ends_at']) ? str_replace('T', ' ', $payload['ends_at']).':00' : null);
             $status = $row->type === 'information' && $row->status === 'active' && $expiry && $expiry < gmdate('Y-m-d H:i:s') ? 'expired' : $row->status;
             $moderator = $actor->isAdmin() || in_array($row->section_id, $moderated);
-            $canEdit = !$actor->isGuest() && ((int)$row->user_id === $actor->id || $moderator);
+            $canEdit = AccountAccess::isConfirmed($actor) && ((int)$row->user_id === $actor->id || $moderator);
             if ($discussion->hidden_at && $discussion->hidden_user_id !== $actor->id && !$actor->isAdmin()) $canEdit = false;
             $discussion->setRelation('campusPreview', [
                 'id' => $row->id, 'type' => $row->type, 'category' => $row->category, 'status' => $status,

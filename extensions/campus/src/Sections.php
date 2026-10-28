@@ -45,11 +45,11 @@ class Sections
     public function allowed(User $actor, object $section): bool
     {
         if ($actor->isAdmin()) return true;
-        if (!$actor->isGuest() && $this->db->getSchemaBuilder()->hasTable('campus_moderators') && $this->db->table('campus_moderators')->where('user_id',$actor->id)->where('section_id',$section->id)->exists()) return true;
+        if (AccountAccess::isConfirmed($actor) && $this->db->getSchemaBuilder()->hasTable('campus_moderators') && $this->db->table('campus_moderators')->where('user_id',$actor->id)->where('section_id',$section->id)->exists()) return true;
         if (!$section->is_open) return false;
         return match ($section->visibility) {
             'public' => true,
-            'members' => !$actor->isGuest(),
+            'members' => AccountAccess::isConfirmed($actor),
             'verified' => $actor->hasPermission('campus.verified'),
             default => false,
         };

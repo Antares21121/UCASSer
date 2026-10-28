@@ -17,7 +17,7 @@ class CaseController implements RequestHandlerInterface
     private function event(int $id,User $a,string $action,string $message): void { $this->cases->records->db->table('campus_case_events')->insert(['case_id'=>$id,'actor_id'=>$a->id,'action'=>$action,'message'=>$message,'created_at'=>gmdate('Y-m-d H:i:s')]); }
     private function notify(object $row,string $action): void { foreach (array_unique([$row->reporter_id,$row->subject_user_id]) as $id) if ($id && ($u=User::query()->find($id))) $this->notices->sync(new AccountNotice($u,$action,$row->id),[$u]); }
     public function handle(Request $r): ResponseInterface {
-        $a=RequestUtil::getActor($r); $a->assertRegistered(); $q=$r->getQueryParams(); $d=$r->getParsedBody() ?? []; $route=$r->getAttribute('routeName'); $records=$this->cases->records; $db=$records->db;
+        $a=RequestUtil::getActor($r); AccountAccess::assertConfirmed($a); $q=$r->getQueryParams(); $d=$r->getParsedBody() ?? []; $route=$r->getAttribute('routeName'); $records=$this->cases->records; $db=$records->db;
         if ($route==='campus.cases') {
             $page=max(1,min(10000,(int)($q['page'] ?? 1))); $query=$this->cases->query($a);
             if (!empty($q['status'])) {

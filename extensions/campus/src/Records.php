@@ -36,7 +36,7 @@ class Records
     public function canEdit(User $actor,object $row): bool {
         $d=Discussion::query()->findOrFail($row->discussion_id);
         if ($d->hidden_at && $d->hidden_user_id!==$actor->id && !$actor->isAdmin()) return false;
-        return !$actor->isGuest() && ((int)$row->user_id===$actor->id || $this->identity->moderator($actor,$row->section_id));
+        return AccountAccess::isConfirmed($actor) && ((int)$row->user_id===$actor->id || $this->identity->moderator($actor,$row->section_id));
     }
     public function text(array $d,string $key,int $min=0,int $max=2000): string {
         $v=$d[$key] ?? ''; if (!is_string($v) || mb_strlen(trim($v))<$min || mb_strlen($v)>$max) throw new ValidationException([$key=>"请填写 $min–$max 字"]); return trim($v);
@@ -87,7 +87,7 @@ class Records
         $expiry=$row->deadline ?: (!empty($payload['ends_at'])?str_replace('T',' ',$payload['ends_at']).':00':null);
         $expired=$row->type==='information' && $row->status==='active' && $expiry && $expiry<gmdate('Y-m-d H:i:s');
         $accepted=$row->accepted_post_id && Post::query()->whereVisibleTo($actor)->whereNull('hidden_at')->where('id',$row->accepted_post_id)->exists()?$row->accepted_post_id:null;
-        $bookmark=$actor->isGuest()?null:$this->db->table('campus_bookmarks')->where('user_id',$actor->id)->where('record_id',$row->id)->first();
+        $bookmark=AccountAccess::isConfirmed($actor)?$this->db->table('campus_bookmarks')->where('user_id',$actor->id)->where('record_id',$row->id)->first():null;
         $out=['section_key'=>$this->sections->byId((int)$row->section_id)->key,'course_name'=>$row->course_id?$this->db->table('campus_courses')->where('id',$row->course_id)->value('name'):null,'id'=>$row->id,'discussion_id'=>$d->id,'title'=>$d->title,'type'=>$row->type,'category'=>$row->category,'status'=>$expired?'expired':$row->status,'stored_status'=>$row->status,'section_id'=>$row->section_id,'course_id'=>$row->course_id,'semester'=>$row->semester,'version'=>$row->version,'featured'=>(bool)$row->featured,'author'=>$d->user?->display_name ?? '已删除账号','author_id'=>$row->user_id,'created_at'=>$row->created_at,'updated_at'=>$row->updated_at,'comments'=>$d->comment_count,'fields'=>$payload,'can_edit'=>$this->canEdit($actor,$row),'can_moderate'=>$this->identity->moderator($actor,$row->section_id),'accepted_post_id'=>$row->accepted_post_id,'bookmarked'=>(bool)$bookmark,'following'=>(bool)($bookmark?->following ?? false)];
         if ($detail) {
             $out['body']=Post::query()->whereVisibleTo($actor)->where('discussion_id',$d->id)->where('number',1)->first()?->content;
@@ -98,8 +98,8 @@ class Records
         $out['useful']=$this->db->table('campus_votes')->where('record_id',$row->id)->count();
         $out['accepted_post_id']=$accepted;
         $out['can_reply']=$actor->can('reply',$d);
-        $out['voted']=!$actor->isGuest() && $this->db->table('campus_votes')->where('record_id',$row->id)->where('user_id',$actor->id)->exists();
-        $out['following']=!$actor->isGuest() && $d->stateFor($actor)->subscription==='follow';
+        $out['voted']=AccountAccess::isConfirmed($actor) && $this->db->table('campus_votes')->where('record_id',$row->id)->where('user_id',$actor->id)->exists();
+        $out['following']=AccountAccess::isConfirmed($actor) && $d->stateFor($actor)->subscription==='follow';
         return $out;
     }
     public function revision(object $row,User $actor,string $reason): void {

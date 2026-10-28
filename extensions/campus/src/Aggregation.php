@@ -40,7 +40,7 @@ class Aggregation
 
     public function submit(User $actor, array $input): int
     {
-        $actor->assertRegistered();
+        AccountAccess::assertConfirmed($actor);
         $origin = $input['origin'] ?? '';
         if (!in_array($origin, ['public_web', 'private_tip'], true)) throw new ValidationException(['origin' => '请选择公开网页或非公开线索']);
         $url = $this->cleanUrl($this->text($input, 'source_url', 0, 1024));
@@ -91,7 +91,7 @@ class Aggregation
     {
         $page = max(1, min(10000, $page));
         $query = $this->db->table('campus_aggregation_items');
-        if ($actor->isGuest()) $query->where('visibility', 'public');
+        if (!AccountAccess::isConfirmed($actor)) $query->where('visibility', 'public');
         $total = (clone $query)->count();
         $rows = $query->orderByDesc('id')->offset(($page - 1) * 20)->limit(20)->get();
         return ['data' => $rows->map(fn ($item) => $this->serializeItem($actor, $item))->all(), 'meta' => ['total' => $total, 'page' => $page, 'page_size' => 20]];
@@ -99,9 +99,9 @@ class Aggregation
 
     public function serializeItem(User $actor, object $item): array
     {
-        if ($actor->isGuest() && $item->visibility !== 'public') throw new \Illuminate\Database\Eloquent\ModelNotFoundException;
+        if (!AccountAccess::isConfirmed($actor) && $item->visibility !== 'public') throw new \Illuminate\Database\Eloquent\ModelNotFoundException;
         $sources = $this->db->table('campus_aggregation_candidates')->where('item_id', $item->id)->where('status', 'published');
-        if ($actor->isGuest()) $sources->where('visibility', 'public');
+        if (!AccountAccess::isConfirmed($actor)) $sources->where('visibility', 'public');
         $rows = $sources->orderBy('id')->get(['source_name', 'source_url', 'url_hash', 'trust', 'origin', 'show_submitter', 'submitter_id']);
         $sources = [];
         foreach ($rows as $row) {

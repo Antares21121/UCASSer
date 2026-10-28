@@ -31,7 +31,7 @@ class AggregationController implements RequestHandlerInterface
             return new JsonResponse(['data' => ['id' => $id, 'status' => 'pending']], 201);
         }
         if ($route === 'campus.aggregation.mine') {
-            $actor->assertRegistered();
+            AccountAccess::assertConfirmed($actor);
             $rows = $db->table('campus_aggregation_candidates')->where('submitter_id', $actor->id)->orderByDesc('id')->limit(50)
                 ->get(['id', 'title', 'status', 'item_id', 'review_reason', 'created_at']);
             return new JsonResponse(['data' => $rows->all()]);

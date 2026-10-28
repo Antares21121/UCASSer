@@ -20,7 +20,7 @@ class IdentityController implements RequestHandlerInterface
     }
     public function handle(Request $r): ResponseInterface
     {
-        $a = RequestUtil::getActor($r); $a->assertRegistered();
+        $a = RequestUtil::getActor($r); AccountAccess::assertConfirmed($a);
         $route = $r->getAttribute('routeName'); $db = $this->identity->db; $data = $r->getParsedBody() ?? [];
         if ($route === 'campus.identity') {
             $rows = $db->table('campus_verifications')->where('user_id',$a->id)->orderByDesc('id')->get(['id','status','reason','created_at','reviewed_at'])->all();
