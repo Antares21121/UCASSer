@@ -76,12 +76,19 @@ def main():
     parser.add_argument('--feed-url', required=True, help='Local RSS URL from the separately running collector')
     parser.add_argument('--name', required=True, help='Publisher name shown in review')
     parser.add_argument('--limit', type=int, default=20)
+    parser.add_argument('--export-only', action='store_true', help='Save a local snapshot without running the forum')
     parser.add_argument('--backend', choices=['docker', 'native'], default='docker')
     parser.add_argument('--env-file', default=str(ROOT / '.env'))
     args = parser.parse_args()
     if not 1 <= args.limit <= 20:
         parser.error('--limit must be 1–20')
     rows = read_feed(args.feed_url, args.limit)
+    if args.export_only:
+        snapshot = Path(ROOT / '.runtime' / 'aggregation-feed-import.json')
+        snapshot.parent.mkdir(exist_ok=True)
+        snapshot.write_text(json.dumps(rows, ensure_ascii=False), encoding='utf-8')
+        print(f'已导出 {len(rows)} 篇到 {snapshot}；未连接论坛或自动发布')
+        return
     if not rows:
         print('订阅源中没有可用的微信原文链接；未导入')
         return

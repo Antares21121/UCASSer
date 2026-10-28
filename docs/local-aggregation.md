@@ -35,3 +35,21 @@ sudo python3 scripts/aggregation_import_local.py --env-file .env.test
 Workbench 一键登录的 `admin` 用户通常可以向 `/home/admin` 上传，但不能直接写入 `/opt`；上述 `sudo install` 只复制这份已生成的快照。[阿里云 Workbench 文件传输说明](https://help.aliyun.com/zh/simple-application-server/user-guide/use-workbench-to-transfer-files-to-a-linux-server)。
 
 本地采集和人工上传是当前网络故障下的验证流程。自动 09:00／21:00 采集仍由服务器定时器负责；它目前无法连通部分社科大官网。若要把本地采集结果自动送到服务器，需先恢复一条可验证的加密传输通道；不要通过明文 HTTP 发送站点凭据或采集器口令。
+
+## 本地公众号采集器的待审快照
+
+若本地独立公众号采集器已完成微信读书扫码授权并订阅公众号，可只导出它的 RSS，不启动本地论坛：
+
+```powershell
+python scripts/aggregation_feed.py --feed-url http://127.0.0.1:8001/rss/MP_WXS_3876517368 --name 社科大社会与民族学院 --limit 20 --export-only
+```
+
+上面的订阅 ID 只对应试点账号；其他账号应使用采集器界面显示的 RSS 地址。生成 `.runtime/aggregation-feed-import.json` 后，通过 Workbench 文件管理上传至服务器 `/home/admin/aggregation-feed-import.json`，再执行：
+
+```bash
+cd /opt/ucasser-test
+sudo install -m 0640 -o root -g www-data /home/admin/aggregation-feed-import.json .runtime/aggregation-feed-import.json
+sudo python3 scripts/aggregation_import_feed_snapshot.py --env-file .env.test --name '社科大社会与民族学院'
+```
+
+服务器只导入 `mp.weixin.qq.com` 原文链接，仍需管理员逐条核对发布账号、标题和内容。本地采集器的登录状态、Cookie、数据库和管理密码都不上传。微信读书模式每次可能只发现最新一篇，RSS 中已有的其他文章可以一起导入，但不能把 `--limit 20` 理解为保证获得最近 20 篇。
