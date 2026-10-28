@@ -20,18 +20,19 @@ class AggregationSyncSourcesCommand extends AbstractCommand
         $now = gmdate('Y-m-d H:i:s');
         $createdWeb = 0; $connectedWeb = 0; $createdWechat = 0;
         foreach (OfficialSourceCatalog::WEB as [$name, $url]) {
+            $adapter = parse_url($url, PHP_URL_HOST) === 'jw.ucass.edu.cn' ? 'ucass-notices' : 'ucass-vsb';
             $existing = $db->table('campus_aggregation_sources')->where('listing_url', $url)->first();
             if ($existing) {
                 if ($existing->adapter === 'pending-web') {
                     $db->table('campus_aggregation_sources')->where('id', $existing->id)->update([
-                        'adapter' => 'ucass-vsb', 'trust' => 'official', 'enabled' => true, 'updated_at' => $now,
+                        'adapter' => $adapter, 'trust' => 'official', 'enabled' => true, 'updated_at' => $now,
                     ]);
                     $connectedWeb++;
                 }
                 continue; // Preserve explicitly paused and previously configured sources.
             }
             $db->table('campus_aggregation_sources')->insert([
-                'name' => $name, 'listing_url' => $url, 'adapter' => 'ucass-vsb',
+                'name' => $name, 'listing_url' => $url, 'adapter' => $adapter,
                 'trust' => 'official', 'visibility' => 'public', 'enabled' => true,
                 'created_at' => $now, 'updated_at' => $now,
             ]);

@@ -48,6 +48,7 @@ return [
     (new Extend\Console())->command(Campus\AggregationCollectorStatusCommand::class),
     (new Extend\Console())->command(Campus\AggregationImportTrialCommand::class),
     (new Extend\Console())->command(Campus\AggregationImportFeedCommand::class),
+    (new Extend\Console())->command(Campus\AggregationImportWebLocalCommand::class),
     (new Extend\Event())->listen(\Flarum\Post\Event\Saving::class,Campus\NativeRevision::class)->listen(\Flarum\Discussion\Event\Saving::class,Campus\NativeRevision::class),
     (new Extend\Routes('api'))->get('/campus/catalog','campus.catalog',Campus\RecordController::class)
         ->get('/campus/records','campus.records',Campus\RecordController::class)->post('/campus/records','campus.records.create',Campus\RecordController::class)
