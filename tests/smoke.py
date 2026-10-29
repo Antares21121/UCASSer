@@ -99,6 +99,9 @@ def main():
 
     verify(original)
     print('PASS: database and asset survive a real restart; private paths denied', flush=True)
+    # Cover the installed-site order where resource metadata exists before the
+    # campus migration adds the same shared columns and index.
+    original.php('flarum', 'extension:enable', 'ucasser-resources')
     original.php('scripts/campus.php','enable')
     original.php('flarum','migrate')
     original.php('flarum','campus:setup')

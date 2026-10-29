@@ -99,10 +99,12 @@ class BoardMigrator
     {
         $sections = $this->db->table('campus_sections')->get()->keyBy('key');
         $rows = [];
+        $seen = [];
         foreach ($this->retiredTagIds() as $tagId) {
             $ids = $this->db->table('discussion_tag')->where('tag_id', $tagId)->pluck('discussion_id')->all();
             foreach ($ids as $discussionId) {
-                if ($this->table()->where('discussion_id', $discussionId)->exists()) continue;
+                if (isset($seen[$discussionId]) || $this->table()->where('discussion_id', $discussionId)->exists()) continue;
+                $seen[$discussionId] = true;
                 [$sectionKey, $note] = $this->classify($discussionId);
                 $section = $sections->get($sectionKey);
                 $rows[] = [
@@ -124,18 +126,16 @@ class BoardMigrator
         $sections = $this->db->table('campus_sections')->get()->keyBy('key');
         $applied = 0;
         $now = gmdate('Y-m-d H:i:s');
-        $this->db->transaction(function () use (&$applied, $sections, $now) {
+        $retiredTagIds = $this->retiredTagIds();
+        $this->db->transaction(function () use (&$applied, $sections, $now, $retiredTagIds) {
             foreach ($this->plan() as $row) {
                 $discussionId = $row['discussion_id'];
                 $sourceTagId = $row['source_tag_id'];
                 $targetSection = $sections->get($row['section_key']);
                 if (!$targetSection || !$targetSection->tag_id) throw new \RuntimeException('迁移目标板块缺失：'.$row['section_key']);
-                $this->db->table('discussion_tag')->where('discussion_id', $discussionId)->where('tag_id', $sourceTagId)->delete();
+                $this->db->table('discussion_tag')->where('discussion_id', $discussionId)->whereIn('tag_id', $retiredTagIds)->delete();
                 if (!$this->db->table('discussion_tag')->where('discussion_id', $discussionId)->where('tag_id', $targetSection->tag_id)->exists()) {
-                    // Primary tag first: insert before existing secondary tags.
-                    $positions = $this->db->table('discussion_tag')->where('discussion_id', $discussionId)->pluck('position')->all();
-                    $position = $positions ? max(0, min($positions) - 1) : 0;
-                    $this->db->table('discussion_tag')->insert(['discussion_id' => $discussionId, 'tag_id' => $targetSection->tag_id, 'position' => $position]);
+                    $this->db->table('discussion_tag')->insert(['discussion_id' => $discussionId, 'tag_id' => $targetSection->tag_id]);
                 }
                 $this->db->table('campus_records')->where('discussion_id', $discussionId)->update(['section_id' => $targetSection->id]);
                 $this->table()->insert([
