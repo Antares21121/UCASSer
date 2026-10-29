@@ -1,49 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="书桌上展开的书、笔记与咖啡杯，背景是抽象的校园建筑轮廓">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="书桌上摊开的书、笔记与咖啡杯，背后是淡淡的校园建筑轮廓">
   <rect width="640" height="400" fill="#F7F4EE"/>
-  <g opacity="0.5">
-    <path d="M60 168h64v-52c0-6 5-11 11-11h42c6 0 11 5 11 11v52h30v-32c0-6 5-11 11-11h40c6 0 11 5 11 11v32h20v-70c0-6 5-11 11-11h30c6 0 11 5 11 11v70h22v-44c0-6 5-11 11-11h28c6 0 11 5 11 11v44h18V168" fill="#DFEAF2"/>
-    <path d="M60 168h508v14H60z" fill="#C8DBE8"/>
-    <rect x="96" y="52" width="16" height="14" fill="#C8DBE8"/>
-    <rect x="236" y="88" width="16" height="12" fill="#C8DBE8"/>
-    <rect x="394" y="44" width="16" height="12" fill="#C8DBE8"/>
+  <!-- 背景：低对比的校园建筑轮廓 -->
+  <g fill="#DFEAF2">
+    <path d="M0 210h84v-58h44v58h26v-34h56v34h30v-78h52v78h34v-46h44v46h28v-26h40v26h38v-62h48v62h22v22H0z" opacity="0.75"/>
+    <rect x="96" y="128" width="10" height="24" opacity="0.55"/>
+    <rect x="228" y="106" width="10" height="26" opacity="0.55"/>
+    <rect x="420" y="118" width="10" height="24" opacity="0.55"/>
   </g>
-  <g transform="translate(56 128)">
-    <rect x="0" y="0" width="480" height="18" rx="9" fill="#8E6B4F"/>
-    <rect x="26" y="18" width="14" height="150" fill="#8E6B4F"/>
-    <rect x="446" y="18" width="14" height="150" fill="#8E6B4F"/>
-    <path d="M26 168h434v8H26z" fill="#7A5B43"/>
+  <rect y="232" width="640" height="168" fill="#F2ECE0" opacity="0.6"/>
+  <!-- 桌面 -->
+  <rect x="0" y="316" width="640" height="10" fill="#E6DFD1"/>
+  <rect x="0" y="326" width="640" height="6" fill="#EFE6D6"/>
+  <!-- 摊开的书：左右两页 + 书脊 + 红色书签 -->
+  <g>
+    <path d="M148 262c52-16 92-10 128 6v58c-36-16-76-22-128-6z" fill="#FFFFFF" stroke="#E6DFD1" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M276 268c36-16 76-22 128-6v58c-52-16-92-10-128 6z" fill="#FFFDF8" stroke="#E6DFD1" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M276 266v62" stroke="#E6DFD1" stroke-width="3" stroke-linecap="round"/>
+    <g stroke="#DFEAF2" stroke-width="5" stroke-linecap="round">
+      <path d="M170 276h84M170 290h84M170 304h62"/>
+    </g>
+    <g stroke="#EFE6D6" stroke-width="5" stroke-linecap="round">
+      <path d="M300 282h84M300 296h84M300 310h58"/>
+    </g>
+    <path d="M386 262l14-46 14 4-12 44z" fill="#C22A49"/>
+    <path d="M148 262c52-16 92-10 128 6" fill="none" stroke="#C22A49" stroke-width="2.5" stroke-linecap="round"/>
   </g>
-  <g transform="translate(150 196)">
-    <path d="M0 14C22-6 60-6 96 4c26 8 52 6 76 4v10c-24 2-50 4-76-4C66 8 28 8 0 26z" fill="#FFFFFF"/>
-    <path d="M0 14C22-6 60-6 96 4c26 8 52 6 76 4" fill="none" stroke="#C22A49" stroke-width="2"/>
-    <path d="M86 0v18" stroke="#1C3042" stroke-width="2" opacity="0.6"/>
-    <path d="M12 24c10-4 22-4 34 0 12 4 24 4 36 0 12-4 24-4 34 0 12 4 24 4 34 0" fill="none" stroke="#1C3042" stroke-width="2" opacity="0.35"/>
-    <path d="M12 32c10-4 22-4 34 0 12 4 24 4 36 0 12-4 24-4 34 0 12 4 24 4 34 0" fill="none" stroke="#C22A49" stroke-width="2" opacity="0.5"/>
+  <!-- 咖啡杯 -->
+  <g>
+    <path d="M468 268h56v34c0 12-10 20-28 20s-28-8-28-20z" fill="#FFFFFF" stroke="#E6DFD1" stroke-width="2"/>
+    <path d="M524 276c14 0 22 8 22 18s-8 18-22 18" fill="none" stroke="#C8DBE8" stroke-width="5" stroke-linecap="round"/>
+    <rect x="462" y="318" width="70" height="7" rx="3.5" fill="#E6DFD1"/>
+    <g stroke="#C22A49" stroke-width="3" stroke-linecap="round" opacity="0.8">
+      <path d="M484 254c4-7 4-12 0-19M500 252c4-7 4-12 0-19"/>
+    </g>
   </g>
-  <g transform="translate(412 216)">
-    <rect x="0" y="0" width="118" height="80" rx="8" fill="#FFFFFF" stroke="#C8DBE8"/>
-    <rect x="8" y="8" width="40" height="26" rx="3" fill="#C22A49"/>
-    <rect x="56" y="8" width="54" height="26" rx="3" fill="#DFEAF2"/>
-    <rect x="8" y="44" width="102" height="6" rx="3" fill="#E6DFD1"/>
-    <rect x="8" y="58" width="76" height="6" rx="3" fill="#E6DFD1"/>
+  <!-- 便签与铅笔 -->
+  <g>
+    <rect x="92" y="204" width="66" height="66" rx="6" fill="#DFEAF2" transform="rotate(-7 92 204)"/>
+    <rect x="104" y="214" width="62" height="62" rx="6" fill="#FFFFFF" stroke="#E6DFD1" stroke-width="2" transform="rotate(6 104 214)"/>
+    <g stroke="#E6DFD1" stroke-width="4" stroke-linecap="round" transform="rotate(6 104 214)">
+      <path d="M116 234h38M116 248h30M116 262h34"/>
+    </g>
+    <circle cx="132" cy="216" r="5" fill="#A71937"/>
+    <g transform="rotate(-24 560 300)">
+      <rect x="540" y="292" width="74" height="10" rx="3" fill="#C22A49"/>
+      <path d="M614 292l16 5-16 5z" fill="#1C3042"/>
+      <rect x="536" y="292" width="8" height="10" rx="3" fill="#DFEAF2"/>
+    </g>
   </g>
-  <g transform="translate(332 258)">
-    <path d="M0 46C14 38 28 38 42 46c14 8 28 8 42 0v8c-14 8-28 8-42 0-14-8-28-8-42 0z" fill="#FFFFFF"/>
-    <path d="M0 46c14-8 28-8 42 0 14 8 28 8 42 0" fill="none" stroke="#1C3042" stroke-width="2"/>
-    <path d="M42 0c-4 6-4 10 0 14" fill="none" stroke="#C22A49" stroke-width="2"/>
-    <path d="M8 34h26" stroke="#C22A49" stroke-width="2" opacity="0.55"/>
-  </g>
-  <g transform="translate(118 300)">
-    <rect x="0" y="0" width="46" height="40" rx="6" fill="#FFFFFF" stroke="#E6DFD1"/>
-    <rect x="6" y="6" width="34" height="28" rx="3" fill="#C22A49"/>
-    <path d="M18 10c6 0 8 3 8 8 0 8-8 14-8 18 0-4-8-10-8-18 0-5 2-8 8-8z" fill="#F7F4EE" opacity="0.9"/>
-    <rect x="48" y="16" width="58" height="10" rx="5" fill="#DFEAF2"/>
-    <rect x="48" y="32" width="40" height="8" rx="4" fill="#E6DFD1"/>
-  </g>
-  <g transform="translate(470 330)">
-    <rect x="0" y="6" width="86" height="46" rx="8" fill="#A71937"/>
-    <rect x="6" y="0" width="74" height="30" rx="6" fill="#C22A49"/>
-    <path d="M20 18c8-10 16-10 24 0s16 10 24 0" fill="none" stroke="#F7F4EE" stroke-width="3" opacity="0.85"/>
-    <rect x="10" y="40" width="66" height="6" rx="3" fill="#8E1430"/>
-  </g>
+  <!-- 细红线点缀 -->
+  <path d="M60 348h520" stroke="#C22A49" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+  <circle cx="596" cy="72" r="6" fill="#C22A49" opacity="0.85"/>
 </svg>

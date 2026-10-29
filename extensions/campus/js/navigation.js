@@ -171,6 +171,20 @@ export function registerNavigation() {
   // Keep original tag navigation and responsive SelectDropdown. Headings sit
   // inside its item list so they travel with the phone dropdown as well.
   extend(IndexSidebar.prototype, 'navItems', items => {
+    // The old "全部板块" tag dropdown is retired together with the discussion
+    // boards it listed; hidden tags (general, the review archive) must not
+    // leak into the sidebar either. The theme shortcuts below and the home
+    // board grid are the navigation entries.
+    items.remove('tags');
+    const hidden = new Set((app.store.all('tags') || []).filter(tag => tag.isHidden?.()).map(tag => tag.slug()));
+    for (const item of items.toArray()) {
+      const tagModel = item.content?.attrs?.tag;
+      const slugFromTag = typeof tagModel?.slug === 'function' ? tagModel.slug() : tagModel?.slug;
+      const href = item.content?.attrs?.href || '';
+      const match = /^\/t\/([^/?#]+)$/.exec(String(href));
+      const slug = slugFromTag || match?.[1];
+      if (slug && hidden.has(slug)) items.remove(item.itemName);
+    }
     const heading = (key, text, priority) => items.add(key, m('span.Campus-sidebarHeading', {
       role: 'presentation'
     }, text), priority);
@@ -197,5 +211,12 @@ export function registerNavigation() {
       icon: 'fas fa-tachometer-alt',
       active: m.route.get().split('?')[0] === '/campus/control'
     }, '运营控制台'), -23);
+  });
+  // Hidden tags (general, the review archive) must not leak into the sidebar
+  // even when the tag extension rebuilds its list after our item filter.
+  extend(IndexSidebar.prototype, 'onupdate', function () {
+    const nav = this.element;
+    if (!nav) return;
+    nav.querySelectorAll('.IndexPage-nav a[href="/t/general"], .IndexPage-nav a[href="/t/campus-archive"]').forEach(anchor => anchor.closest('li')?.remove());
   });
 }
