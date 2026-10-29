@@ -72,7 +72,24 @@ def main():
         # Same display name stays allowed; the suffixes distinguish them.
         for uid in (first['id'], second['id']):
             admin.call('/api/users/' + str(uid), 'PATCH', {'data': {'type': 'users', 'id': str(uid), 'attributes': {'nickname': '晓明'}}})
-        # 6. Public reply images: accepted, owner-readable, private until posted.
+        # 6. WeChat collector hand-off: operator-only state, QR relay and identity checks.
+        collector = operator['api'].call('/api/campus/control/collector')['data']
+        assert collector['state'] in ('ready', 'authorization_required', 'unavailable', 'unconfigured'), collector
+        assert len(collector['accounts']) == 23 and all('name' in a and 'subscribed' in a for a in collector['accounts'])
+        guest.call('/api/campus/control/collector', expected=(401, 403))
+        outsider['api'].call('/api/campus/control/collector', expected=(401, 403))
+        qr = operator['api'].call('/api/campus/control/collector/qr', 'POST', {}, expected=(200, 422))
+        if 'data' in qr:
+            assert qr['data']['image'].endswith('.png') and qr['data']['uid'], qr
+        bad = operator['api'].call('/api/campus/control/collector/subscribe', 'POST',
+            {'name': '中国社会科学院大学', 'article_url': 'https://example.com/not-weixin'}, expected=422)
+        assert 'https://mp.weixin.qq.com' in bad['errors'][0]['detail'], bad
+        unknown = operator['api'].call('/api/campus/control/collector/subscribe', 'POST',
+            {'name': '不存在的公众号', 'article_url': 'https://mp.weixin.qq.com/s/x'}, expected=422)
+        assert '已登记' in unknown['errors'][0]['detail'], unknown
+        print('PASS collector hand-off: operator-only state, QR relay and identity validation')
+
+        # 7. Public reply images: accepted, owner-readable, private until posted.
         upload = outsider['api'].call('/api/campus/post-images', 'POST', {'data': tiny_png()}, expected=201)['data']
         assert upload['url'].startswith('/api/campus/post-images/')
         outsider['api'].call(upload['url'])

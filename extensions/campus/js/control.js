@@ -1,6 +1,7 @@
 import app from 'flarum/forum/app';
 import PageStructure from 'flarum/forum/components/PageStructure';
 import Button from './button';
+import Modal from 'flarum/common/components/Modal';
 import { DataPage, api, field, formatTime, link, symbol, errorMessage, loginPrompt, emptyState } from './ui';
 
 const jobNames = { queued: '等待执行', running: '正在采集', succeeded: '已完成', failed: '部分或全部失败' };
@@ -73,6 +74,111 @@ const catalogKinds = {
   }
 };
 
+class CollectorQrModal extends Modal {
+  className() { return 'CampusRecordActionModal CampusCollectorModal'; }
+  title() { return '扫码授权公众号采集'; }
+  oninit(vnode) {
+    super.oninit(vnode);
+    this.state = null;
+    this.timer = window.setInterval(async () => {
+      try {
+        this.state = (await api('control/collector')).data;
+        if (this.state.state === 'ready' && this.timer) {
+          window.clearInterval(this.timer);
+          this.timer = null;
+          this.attrs.after?.();
+        }
+        m.redraw();
+      } catch (_) { /* keep the modal open; the QR can still be scanned */ }
+    }, 3000);
+  }
+  onremove(vnode) {
+    if (this.timer) window.clearInterval(this.timer);
+    super.onremove(vnode);
+  }
+  content() {
+    const ready = this.state?.state === 'ready';
+    return m('div.Modal-body.Campus', [
+      ready
+        ? m('p.Campus-collectorState', [symbol('check-circle'), ' 授权成功，可以关闭此窗口并订阅公众号。'])
+        : m('p', '用手机微信扫描下方二维码完成「微信读书」授权；二维码由本机订阅服务生成，本站不保存任何微信凭据。'),
+      m('div.Campus-collectorQr', [
+        m('img', { src: this.attrs.image + (this.attrs.uid ? '?v=' + encodeURIComponent(this.attrs.uid) : ''), alt: '微信读书授权二维码', width: 220, height: 220 }),
+        m('small', ready ? '' : '二维码有有效期；过期后点「刷新二维码」重新获取。')
+      ]),
+      this.state ? m('p.Campus-hint', '当前状态：' + ({ ready: '已授权', authorization_required: '等待扫码', unavailable: '订阅服务不可用', unconfigured: '未配置' }[this.state.state] || this.state.state)) : null,
+      m('div.Campus-actions', [
+        m(Button, { onclick: async () => {
+          try {
+            const { data } = await api('control/collector/qr', 'POST', {});
+            this.attrs.image = data.image;
+            this.attrs.uid = data.uid;
+          } catch (error) {
+            app.alerts.show({ type: 'error' }, errorMessage(error, '刷新二维码失败'));
+          }
+        } }, '刷新二维码'),
+        m('a.Button', { href: 'http://127.0.0.1:8001/', target: '_blank', rel: 'noopener noreferrer' }, '打开订阅服务页面 ↗'),
+        m(Button, { type: 'button', onclick: () => this.hide() }, '关闭')
+      ])
+    ]);
+  }
+}
+
+class CollectorSubscribeModal extends Modal {
+  className() { return 'CampusRecordActionModal CampusCollectorModal CampusCollectorSubscribe'; }
+  title() { return '订阅登记过的公众号'; }
+  oninit(vnode) {
+    super.oninit(vnode);
+    this.urls = {};
+    this.errors = {};
+    this.busy = null;
+    this.done = new Set(vnode.attrs.accounts.filter(account => account.subscribed).map(account => account.name));
+  }
+  async subscribe(account) {
+    const url = (this.urls[account.name] || '').trim();
+    if (!url) { this.errors[account.name] = '请粘贴该公众号一篇原文链接'; return; }
+    this.busy = account.name;
+    this.errors[account.name] = '';
+    try {
+      await api('control/collector/subscribe', 'POST', { name: account.name, article_url: url });
+      this.done.add(account.name);
+      this.urls[account.name] = '';
+      app.alerts.show({ type: 'success' }, account.name + ' 已订阅');
+      this.attrs.after?.();
+    } catch (error) {
+      this.errors[account.name] = errorMessage(error, '订阅失败，请核对链接');
+    } finally {
+      this.busy = null;
+    }
+  }
+  content() {
+    const accounts = this.attrs.accounts || [];
+    return m('div.Modal-body.Campus', [
+      m('p', '订阅会写入本机订阅服务的公众号列表。为确认身份，每行需要粘贴该号自己发布的一篇 ',
+        m('code', 'https://mp.weixin.qq.com/s/...'),
+        ' 原文链接；名称不一致会拒绝订阅。'),
+      m('div.Campus-collectorAccounts', accounts.map(account => m('div.Campus-collectorAccount', { key: account.name }, [
+        m('div.Campus-collectorAccountHead', [
+          m('strong', account.name),
+          this.done.has(account.name) ? m('span.Campus-collectorSubscribed', [symbol('check'), ' 已订阅']) : null
+        ]),
+        this.done.has(account.name)
+          ? null
+          : m('div.Campus-collectorAccountForm', [
+            m('input.FormControl', {
+              type: 'url', placeholder: 'https://mp.weixin.qq.com/s/…', value: this.urls[account.name] || '',
+              oninput: e => { this.urls[account.name] = e.target.value; }
+            }),
+            m(Button, { loading: this.busy === account.name, disabled: Boolean(this.busy), onclick: () => this.subscribe(account) }, '校验并订阅')
+          ]),
+        this.errors[account.name] ? m('p.Campus-controlSourceError', this.errors[account.name]) : null
+      ]))),
+      m('p.Campus-hint', '订阅完成后运行 python scripts/aggregation_weread.py --backend docker 拉取文章；内容仍会先进入「信息审核」。'),
+      m('div.Campus-actions', [m(Button, { type: 'button', onclick: () => this.hide() }, '完成')])
+    ]);
+  }
+}
+
 export default class ControlPage extends DataPage {
   requiresLogin = true;
   bodyClass = 'CampusApp CampusOperations';
@@ -88,11 +194,14 @@ export default class ControlPage extends DataPage {
     this.catalogForm = null;
     this.catalogImport = null;
     this.catalogOptions = null;
+    this.collector = null;
+    this.collectorBusy = false;
     super.oninit(vnode);
   }
 
   async fetch() {
     this.tab = tabs.some(([name]) => name === this.params.tab) ? this.params.tab : 'overview';
+    if (this.tab === 'sources') await this.loadCollector();
     this.page = Math.max(1, Math.min(10000, Number.parseInt(this.params.page, 10) || 1));
     const path = {
       review: `aggregation/queue?page=${this.page}`, sources: 'aggregation/sources',
@@ -233,6 +342,7 @@ export default class ControlPage extends DataPage {
 
   sourcesPanel() {
     return m('section.Campus-controlSection', [
+      this.collectorPanel(),
       m('div.Campus-controlSectionHead', [m('h2', '来源管理'), m('span', `${this.data.sources.total} 个已登记来源`)]),
       m('form.Campus-controlSourceForm', { onsubmit: e => this.addSource(e) }, [
         m('label.Campus-field', [m('span.Campus-fieldLabel', '来源类型'), m('select.FormControl', {
@@ -254,6 +364,50 @@ export default class ControlPage extends DataPage {
           m(Button, { disabled: !source.enabled, onclick: () => this.collect(source.id) }, '采集此来源')
         ]) : null
       ]))) : emptyState('尚未登记来源', '可以在上方添加官网通知列表或公众号原文链接。')
+    ]);
+  }
+
+  async loadCollector() {
+    try {
+      this.collector = (await api('control/collector')).data;
+    } catch (error) {
+      this.collector = { state: 'unavailable', message: errorMessage(error, '无法读取公众号授权状态'), accounts: [], subscribed_total: 0 };
+    }
+  }
+
+  async showCollectorQr() {
+    this.collectorBusy = true;
+    try {
+      const { data } = await api('control/collector/qr', 'POST', {});
+      app.modal.show(CollectorQrModal, { image: data.image, uid: data.uid });
+    } catch (error) {
+      app.alerts.show({ type: 'error' }, errorMessage(error, '无法获取二维码：请确认订阅服务正在本机运行'));
+    } finally {
+      this.collectorBusy = false;
+    }
+  }
+
+  showCollectorSubscribe() {
+    app.modal.show(CollectorSubscribeModal, { accounts: this.collector?.accounts || [], after: () => this.loadCollector() });
+  }
+
+  collectorPanel() {
+    const state = this.collector;
+    if (!state) return null;
+    const labels = { ready: '已授权', authorization_required: '未授权', unavailable: '订阅服务不可用', unconfigured: '未配置' };
+    return m('section.Campus-controlCollector', [
+      m('div.Campus-controlSectionHead', [m('h2', '公众号授权与订阅'), m('span', labels[state.state] || state.state)]),
+      m('p.Campus-hint', [
+        state.message,
+        state.state === 'ready' ? '；已订阅 ' + state.subscribed_total + ' 个账号' : '',
+        m('br'),
+        '扫码必须在运行订阅服务的电脑上用微信完成；订阅时用该号一篇原文校验身份，名称不一致会被拒绝。'
+      ]),
+      m('div.Campus-actions', [
+        m(Button, { className: 'Button Button--primary', disabled: this.collectorBusy, onclick: () => this.showCollectorQr() }, '扫码授权'),
+        m(Button, { disabled: state.state !== 'ready', onclick: () => this.showCollectorSubscribe() }, '订阅公众号'),
+        m(Button, { onclick: () => this.loadCollector() }, '刷新状态')
+      ])
     ]);
   }
 

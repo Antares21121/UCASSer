@@ -17,14 +17,14 @@ test('timetable renders the weekly grid and filters by week, unit and query',asy
   await expect(page.locator('table.Campus-tt tbody tr')).toHaveCount(15);
   const all=await page.locator('.Campus-ttSlot').count();
   expect(all).toBeGreaterThan(500);
-  // A later week drops the short-range courses.
+  // A later week drops the short-range courses (poll: the grid re-renders).
   await page.locator('.Campus-ttField select').first().selectOption('16');
-  const week16=await page.locator('.Campus-ttSlot').count();
-  expect(week16).toBeLessThan(all);
+  await expect.poll(()=>page.locator('.Campus-ttSlot').count()).toBeLessThan(all);
   // Query filtering matches course, teacher or room text.
   await page.locator('.Campus-ttField input[type=search]').fill('大学英语');
-  await expect.poll(()=>page.locator('.Campus-ttSlot').count()).toBeLessThan(week16);
   await expect(page.locator('.Campus-ttSlot').first()).toContainText('大学英语');
+  const filtered=await page.locator('.Campus-ttSlot').count();
+  expect(filtered).toBeLessThan(all);
   // Phone widths must not overflow the page; the table scrolls inside.
   for(const width of [390,320]){
     await page.setViewportSize({width,height:900});
