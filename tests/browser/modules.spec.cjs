@@ -7,6 +7,7 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
   page
 }) => {
   test.setTimeout(120000);
+  page.setDefaultTimeout(15000);
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await require('./helpers.cjs').login(page,'phase0_admin',fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim());
@@ -26,9 +27,9 @@ test('course, normal-account review, resource, Q&A, search, personal center and 
   await expect(page.locator('.Campus-courseCard h2').first()).toContainText(originalName);
   await page.getByRole('link',{name:'清空筛选',exact:true}).click();
   await expect(page.getByLabel('搜索课程名称',{exact:true})).toHaveValue('');
-  await page.getByLabel('课程类型',{exact:true}).fill('基础课程');
+  await page.getByRole('combobox',{name:'课程类别',exact:true}).selectOption({label:'基础课程'});
   await page.getByRole('button',{name:'查询课程',exact:true}).click();
-  await page.locator('.IndexPage-newDiscussion').click();
+  await page.locator('.Campus-courseCard').first().getByRole('link',{name:'发布评价',exact:true}).click();
   await expect(page.locator('#composer').getByLabel('关联课程')).toBeVisible();
   await page.locator('#composer').getByRole('button',{name:'关闭编辑器',exact:true}).click();
   await page.goto('/campus/courses');

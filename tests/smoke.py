@@ -99,6 +99,9 @@ def main():
 
     verify(original)
     print('PASS: database and asset survive a real restart; private paths denied', flush=True)
+    # Cover the installed-site order where resource metadata exists before the
+    # campus migration adds the same shared columns and index.
+    original.php('flarum', 'extension:enable', 'ucasser-resources')
     original.php('scripts/campus.php','enable')
     original.php('flarum','migrate')
     original.php('flarum','campus:setup')
@@ -108,7 +111,8 @@ def main():
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         with opener.open(instance.values['APP_URL']+'/api/campus/home',timeout=15) as response:
             home=json.load(response)['data']
-        assert len(home['sections'])==10 and home['latest'], 'Business extension missing after restore'
+        expected_sections = {'careers', 'life', 'secondhand', 'travel', 'resources', 'questions'}
+        assert {section['key'] for section in home['sections']} == expected_sections and home['latest'], 'Business extension missing after restore'
         with opener.open(instance.values['APP_URL']+'/api/campus/governance',timeout=15) as response:
             stats=json.load(response)['data']['statistics']
         return {'sections':[(s['id'],s['key']) for s in home['sections']], 'statistics':stats}

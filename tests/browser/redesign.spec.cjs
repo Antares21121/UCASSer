@@ -54,15 +54,9 @@ test('the public reply bar keeps only image upload, mention and submit',async({p
   await expect(page.locator('#composer .TextEditor-editorContainer textarea')).toBeVisible();
 });
 
-test('profile pages show the permanent suffix and the Lv.1 baseline',async({page,request})=>{
+test('profile pages show the permanent suffix and the Lv.1 baseline',async({page})=>{
   await login(page,'phase0_admin',fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim());
-  const password=fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim();
-  const tokenResponse=await request.post('/api/token',{data:{identification:'phase0_admin',password}});
-  expect(tokenResponse.ok()).toBeTruthy();
-  const token=(await tokenResponse.json()).token;
-  const me=await request.get('/api/users',{headers:{Authorization:'Token '+token},params:{'filter[q]':'phase0_admin'}});
-  const user=(await me.json()).data[0];
-  await page.goto('/u/'+user.attributes.username);
+  await page.goto('/u/phase0_admin');
   await expect(page.locator('.Campus-profileTags')).toContainText('账号编号');
   await expect(page.locator('.Campus-profileTags')).toContainText('#');
   await expect(page.locator('.Campus-profileTags')).toContainText('Lv.1');

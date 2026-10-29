@@ -130,7 +130,8 @@ return [
                     $table->text('share_permission')->nullable();
                 });
             }
-            if ($db->getSchemaBuilder()->hasColumn('ucasser_resources', 'external_key')) {
+            if ($schema->hasColumn('ucasser_resources', 'external_key')
+                && !$schema->hasIndex('ucasser_resources', ['external_key'])) {
                 $schema->table('ucasser_resources', function (Blueprint $table): void {
                     $table->index('external_key');
                 });

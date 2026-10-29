@@ -41,7 +41,7 @@ def phase1(f, guest, admin):
         admin.call('/api/campus/sections/' + str(section['id']), 'PATCH', body)
     guest.call('/api/campus/sections', expected=(401,403))
     assert guest.call('/api/campus/rules')['data']['rules']
-    print('PASS phase 1: ten sections, real homepage, admin settings, direct URL/search/tag visibility and public rules')
+    print('PASS phase 1: six public sections, real homepage, admin settings, direct URL/search/tag visibility and public rules')
 
 def confirm_email(url, token):
     # Flarum 2.x renders a confirmation form on GET; activation is the CSRF-

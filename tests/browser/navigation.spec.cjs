@@ -103,8 +103,9 @@ test('directory and native pages keep readable theme colors and reflow at high D
     await page.goto('/resources');
     await expect(page.getByRole('heading',{name:'资料分类目录',exact:true})).toBeVisible();
     await expect(page.locator('.Campus-directoryCard').first()).toBeVisible();
-    await page.getByRole('link',{name:'校外资料',exact:true}).first().click();
+    await page.getByRole('link',{name:'四六级',exact:true}).first().click();
     await expect(page.locator('.Campus-directoryCard a[href="https://cet.neea.edu.cn/"]').first()).toBeVisible();
+    await page.getByRole('link',{name:'计算机二级',exact:true}).first().click();
     await expect(page.locator('.Campus-directoryCard a[href="https://ncre.neea.edu.cn/"]').first()).toBeVisible();
     // Wait for the rendered description itself: evaluating a node from the
     // redraw gap yields a detached element with empty computed styles.

@@ -60,7 +60,7 @@ class Sections
     public function visible(User $actor): array
     {
         $tagIds = Tag::query()->whereVisibleTo($actor)->pluck('id')->all();
-        return array_values(array_filter($this->rows(), fn ($s) => $s->key !== 'archive' && $this->allowed($actor, $s) && in_array($s->tag_id, $tagIds)));
+        return array_values(array_filter($this->rows(), fn ($s) => $s->key !== 'archive' && !in_array($s->key, self::RETIRED, true) && $this->allowed($actor, $s) && in_array($s->tag_id, $tagIds)));
     }
     public function byId(int $id): object
     {
