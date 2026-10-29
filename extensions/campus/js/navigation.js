@@ -173,10 +173,10 @@ export function registerNavigation() {
       icon: 'far fa-user',
       active: m.route.get().split('?')[0] === '/campus/me'
     }, '我的校园空间'), -22.5);
-    if (app.session.user?.isAdmin()) items.add('campus-control', m(LinkButton, {
+    if (app.session.user) items.add('campus-control', m(LinkButton, {
       href: '/campus/control',
       icon: 'fas fa-tachometer-alt',
       active: m.route.get().split('?')[0] === '/campus/control'
-    }, '站点控制台'), -23);
+    }, '运营控制台'), -23);
   });
 }

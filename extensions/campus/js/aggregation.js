@@ -8,9 +8,7 @@ const categories = { notice: '通知', activity: '活动', lecture: '讲座', op
 const stateText = { pending: '待审核', published: '已发布', rejected: '未通过' };
 const tabs = active => m('nav.Aggregation-tabs', { 'aria-label': '信息汇集页面' }, [
   link('/campus/aggregation', '信息流', { 'aria-current': active === 'feed' ? 'page' : undefined }),
-  app.session.user ? link('/campus/aggregation/submit', '提交线索', { 'aria-current': active === 'submit' ? 'page' : undefined }) : null,
-  app.session.user?.isAdmin() ? link('/campus/aggregation/review', '审核候选', { 'aria-current': active === 'review' ? 'page' : undefined }) : null,
-  app.session.user?.isAdmin() ? link('/campus/aggregation/sources', '来源管理', { 'aria-current': active === 'sources' ? 'page' : undefined }) : null
+  app.session.user ? link('/campus/aggregation/submit', '提交线索', { 'aria-current': active === 'submit' ? 'page' : undefined }) : null
 ]);
 
 const sourceLabel = source => source.trust === 'official' ? '官方来源' : '非官方来源';
@@ -33,7 +31,7 @@ export class AggregationPage extends DataPage {
         onclick: () => app.modal.show(() => import('flarum/forum/components/LogInModal'))
       }, '登录后提交线索')),
       tabs('feed'),
-      m('p.Aggregation-explainer', [symbol('info-circle'), ' “未核实”表示管理员已审核展示，但尚未确认事实；请勿据此直接缴费或报名。']),
+      m('p.Aggregation-explainer', [symbol('info-circle'), ' “未核实”表示运营人员已审核展示，但尚未确认事实；请勿据此直接缴费或报名。']),
       this.data.length ? m('div.Aggregation-list', this.data.map(entry => m('article.Aggregation-entry', { key: entry.id }, [
         m('div.Aggregation-entryTop', [
           m('span.Aggregation-type', categories[entry.category] || '其他'),
@@ -48,7 +46,7 @@ export class AggregationPage extends DataPage {
         ]),
         sourceList(entry),
         entry.verification !== 'verified' ? m('p.Aggregation-caution', '这条信息尚未核实。报名、缴费等事项请到发布机构核对。') : null
-      ]))) : emptyState('暂无已发布信息', '抓取结果和成员线索经管理员审核后会出现在这里。', app.session.user ? link('/campus/aggregation/submit', '提交第一条线索') : null),
+      ]))) : emptyState('暂无已发布信息', '抓取结果和成员线索经运营人员审核后会出现在这里。', app.session.user ? link('/campus/aggregation/submit', '提交第一条线索') : null),
       this.meta.total > 20 ? pagination({ page: this.meta.page, total: this.meta.total, size: 20, href: page => '/campus/aggregation' + (page > 1 ? '?page=' + page : ''), unit: '条信息' }) : null
     ]);
   }
@@ -65,12 +63,12 @@ export class AggregationSubmitPage extends DataPage {
   }
   content() {
     return m('div.Aggregation', [
-      pageHeading('提交信息线索', '公开网页和无链接线索都可以提交。管理员审核后才会展示；请勿复制群聊记录或他人个人信息。'),
+      pageHeading('提交信息线索', '公开网页和无链接线索都可以提交。运营人员审核后才会展示；请勿复制群聊记录或他人个人信息。'),
       tabs('submit'),
       m('div.Aggregation-submitLayout', [
         m('form.Aggregation-form.Campus-panel', { onsubmit: event => {
           event.preventDefault();
-          this.perform(() => api('aggregation/submissions', 'POST', this.form), { message: '线索已提交，等待管理员审核。', after: () => {
+          this.perform(() => api('aggregation/submissions', 'POST', this.form), { message: '线索已提交，等待运营人员审核。', after: () => {
             this.form = { title: '', summary: '', category: 'notice', origin: 'public_web', source_name: '', source_url: '', show_submitter: false };
           }});
         }}, [
@@ -207,14 +205,14 @@ export class AggregationSourcesPage extends DataPage {
   }
   content() {
     return m('div.Aggregation', [
-      pageHeading('管理信息来源', '先登记要关注的网站和公众号，接入抓取后，新内容会进入管理员审核队列。'),
+      pageHeading('管理信息来源', '先登记要关注的网站和公众号，接入抓取后，新内容会进入运营审核队列。'),
       tabs('sources'),
       this.meta?.collector?.state === 'authorization_required' ? m('div.Campus-notice.is-error', { role: 'alert' }, [
         '公众号采集授权已失效。', m(Button, { type: 'button', onclick: () => app.modal.show(CollectorAuthorizationModal) }, '查看重新授权方法')
       ]) : null,
       this.meta?.collector?.state === 'unavailable' ? m('p.Campus-notice.is-error', { role: 'alert' }, '公众号订阅服务暂时不可用，请检查独立采集工具和日志。') : null,
       this.meta?.collector?.state === 'unconfigured' ? m('p.Campus-notice', { role: 'status' }, '公众号订阅服务尚未配置，当前定时任务只采集公开网页。') : null,
-      m('p.Aggregation-explainer', [symbol('info-circle'), ' 新登记的来源会标记“待接入抓取”，不会立即自动采集。管理员核对来源并配置适配器或公众号订阅后，才会开始抓取。']),
+      m('p.Aggregation-explainer', [symbol('info-circle'), ' 新登记的来源会标记“待接入抓取”，不会立即自动采集。运营人员核对来源并配置适配器或公众号订阅后，才会开始抓取。']),
       m('div.Aggregation-submitLayout', [
         m('form.Aggregation-form.Campus-panel', { onsubmit: event => {
           event.preventDefault();
@@ -232,7 +230,7 @@ export class AggregationSourcesPage extends DataPage {
         ]),
         m('aside.Aggregation-side', [
           m('h2', '其他入口'),
-          m('p', '微信群没有可直接读取的公开列表。群内消息由登录成员提交线索，再由管理员审核。'),
+          m('p', '微信群没有可直接读取的公开列表。群内消息由登录成员提交线索，再由运营人员审核。'),
           link('/campus/aggregation/submit', '提交无链接线索'),
           m('p', '公众号订阅与扫码授权目前仍在独立采集工具中完成；登记文章链接本身不会启动订阅。')
         ])

@@ -206,6 +206,16 @@
 
 @import "boards.less";
 @import "finish.less";
+@import "skin.less";
+.ComposerBody--message .TextEditor-toolbar > :not(.Campus-chatImageButton) { display:none!important; }
+.ComposerBody--message .TextEditor-controls > li:not(.item-submit):not(.TextEditor-toolbar) { display:none!important; }
+.ComposerBody--message .TextEditor-controls { display:flex; align-items:center; gap:10px; }
+.ComposerBody--message .TextEditor-toolbar { order:-1; margin-right:auto; }
+.Campus-chatImageButton { display:inline-flex; align-items:center; gap:7px; min-height:42px; padding:8px 14px; border:1px solid var(--campus-divider); border-radius:12px; color:var(--campus-ink); background:var(--campus-surface); cursor:pointer; font-weight:600; }
+.Campus-chatImageButton input { position:absolute; width:1px; height:1px; opacity:0; }
+.Campus-chatImageButton:focus-within { outline:3px solid var(--campus-mark); outline-offset:2px; }
+.Campus-chatImageButton[aria-busy=true] { opacity:.55; cursor:wait; }
+.ComposerBody--message .TextEditor-editor { min-height:115px; border-radius:12px; }
 .Campus-resourceAssist,.Campus-resourceAssistAI { max-width:900px; margin:0 auto 20px; }
 .Campus-resourceAssistSearch { display:flex; align-items:end; gap:12px; }
 .Campus-resourceAssistSearch .Campus-field { flex:1; margin:0; min-width:0; }

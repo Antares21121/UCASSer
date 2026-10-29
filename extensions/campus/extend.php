@@ -49,7 +49,10 @@ return [
     (new Extend\Console())->command(Campus\AggregationImportTrialCommand::class),
     (new Extend\Console())->command(Campus\AggregationImportFeedCommand::class),
     (new Extend\Console())->command(Campus\AggregationImportWebLocalCommand::class),
-    (new Extend\Event())->listen(\Flarum\Post\Event\Saving::class,Campus\NativeRevision::class)->listen(\Flarum\Discussion\Event\Saving::class,Campus\NativeRevision::class),
+    (new Extend\Console())->command(Campus\OperatorGrantCommand::class),
+    (new Extend\Console())->command(Campus\CollectionJobCommand::class),
+    (new Extend\Event())->listen(\Flarum\Post\Event\Saving::class,Campus\NativeRevision::class)->listen(\Flarum\Discussion\Event\Saving::class,Campus\NativeRevision::class)
+        ->listen(\Flarum\Messages\DialogMessage\Event\Created::class,Campus\ChatImages::class),
     (new Extend\Routes('api'))->get('/campus/catalog','campus.catalog',Campus\RecordController::class)
         ->get('/campus/records','campus.records',Campus\RecordController::class)->post('/campus/records','campus.records.create',Campus\RecordController::class)
         ->get('/campus/records/{id}','campus.record',Campus\RecordController::class)->patch('/campus/records/{id}','campus.record.update',Campus\RecordController::class)
@@ -73,7 +76,12 @@ return [
         ->get('/campus/aggregation/sources','campus.aggregation.sources',Campus\AggregationController::class)
         ->post('/campus/aggregation/sources','campus.aggregation.source.create',Campus\AggregationController::class)
         ->patch('/campus/aggregation/sources/{id}','campus.aggregation.source.update',Campus\AggregationController::class),
-    (new Extend\Routes('api'))->get('/campus/control','campus.control',Campus\OperationsController::class),
+    (new Extend\Routes('api'))->get('/campus/control','campus.control',Campus\OperationsController::class)
+        ->post('/campus/control/collect','campus.control.collect',Campus\OperationsController::class)
+        ->post('/campus/control/import','campus.control.import',Campus\OperationsController::class)
+        ->patch('/campus/control/sources/{id}','campus.control.source.update',Campus\OperationsController::class),
+    (new Extend\Routes('api'))->post('/campus/chat-images','campus.chat.image.upload',Campus\ChatImageController::class)
+        ->get('/campus/chat-images/{id}','campus.chat.image',Campus\ChatImageController::class),
     (new Extend\Routes('api'))->get('/campus/governance','campus.governance',Campus\GovernanceController::class)->post('/campus/governance','campus.governance.publish',Campus\GovernanceController::class),
     (new Extend\Routes('api'))->get('/campus/cases','campus.cases',Campus\CaseController::class)->post('/campus/cases','campus.cases.create',Campus\CaseController::class)
         ->get('/campus/cases/{id}','campus.case',Campus\CaseController::class)->patch('/campus/cases/{id}','campus.case.update',Campus\CaseController::class)

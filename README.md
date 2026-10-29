@@ -6,7 +6,7 @@
 
 [校园工具箱](docs/toolbox.md)提供日历、食堂菜单、课程表、摆渡车时间表和新生导引入口；实际信息尚待录入。
 
-信息汇集见 [设计与运行说明](docs/aggregation-design.md)、[交接与自动抓取](docs/aggregation-handoff.md) 和 [本地官网采集](docs/local-aggregation.md)：独立信息流、用户投稿和管理员审核已接入；经核对的学校、学院与部门公开栏目可批量登记并采集到待审队列。公众号订阅另需独立服务与人工授权。
+信息汇集见 [设计与运行说明](docs/aggregation-design.md)、[交接与自动抓取](docs/aggregation-handoff.md) 和 [本地官网采集](docs/local-aggregation.md)：独立信息流、用户投稿和运营审核已接入；经核对的学校、学院与部门公开栏目可批量登记并采集到待审队列。公众号订阅另需独立服务与人工授权。[运营后台](docs/control-console.md)提供独立运营账号、一键采集、来源与待审内容管理；本轮改版见[交接说明](docs/handoff-operator-backend-skin.md)。
 
 技术栈：Flarum 2.0.2、PHP 8.3.35、Composer 2.10.3、MariaDB 11.4.13、Nginx 1.30.1；管理脚本使用 Python 3.11+ 标准库。依赖版本由 `composer.lock` 固定。
 
@@ -74,7 +74,7 @@ Windows 替代方案在脚本名之后加 `--backend native`，例如 `python sc
 ## 协作与验证
 
 - [开发环境同步手册](docs/development.md)：新开发者按文档安装相同工具、依赖和配置，不复制队友密码或数据库。
-- [原生页面与蓝色主题](docs/native-ui.md)：十板块信息结构、中文与图标、详情主操作及发布动线。
+- [原生页面与校园视觉](docs/native-ui.md)：十板块信息结构、中文与图标、详情主操作及发布动线。
 - [资料分类目录](docs/resources.md)：学院与课程索引、来源、修订对比与问题反馈；[开发演示数据](docs/development.md#资料目录与可读的演示数据)。
 - [架构](docs/architecture.md)、[部署](docs/deployment.md)、[安全](docs/security.md)、[权限](docs/permissions.md)。
 - [本次环境与验证报告](docs/verification.md)：Windows 实际安装、重启持久化、备份及隔离恢复已经验证；Docker/HTTPS 未在本机运行。

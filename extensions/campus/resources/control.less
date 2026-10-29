@@ -45,5 +45,44 @@
 .Campus-controlSources li .Button { min-height:31px; margin-top:8px; padding:4px 9px; font-size:12px; }
 .Campus-controlFootnote { color:var(--campus-muted); font-size:12px; line-height:1.6; }
 .Campus-control a:focus-visible,.Campus-control button:focus-visible { outline:3px solid var(--campus-accent); outline-offset:2px; }
+.Campus-controlCollect { margin:0 0 28px; }
+.Campus-controlCollectActions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.Campus-controlCollectActions>div { padding:24px; border:1px solid var(--campus-divider); border-radius:16px; background:var(--campus-surface); }
+.Campus-controlCollectActions h3 { margin:0 0 9px; font-size:18px; }
+.Campus-controlCollectActions p { min-height:48px; margin:0 0 16px; color:var(--campus-muted); line-height:1.6; }
+.Campus-controlUpload { display:inline-flex!important; align-items:center; gap:8px; padding:10px 16px; min-height:44px; border-radius:10px; background:var(--campus-accent); color:#fff; cursor:pointer; }
+.Campus-controlUpload input { position:absolute; width:1px; height:1px; opacity:0; }
+.Campus-controlUpload:focus-within { outline:3px solid var(--campus-accent); outline-offset:3px; }
+.Campus-controlCollectActions>div>a { display:block; margin-top:12px; }
+.Campus-controlJob,.Campus-controlImportResult,.Campus-controlEmpty { margin:16px 0 0; padding:16px 20px; border:1px solid var(--campus-divider); border-radius:12px; background:var(--campus-surface); }
+.Campus-controlJob strong,.Campus-controlJob small { display:block; }
+.Campus-controlJob small { color:var(--campus-muted); }
+.Campus-controlJob pre { max-height:220px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; margin:12px 0 0; font:12px/1.5 ui-monospace,monospace; }
+.Campus-controlWork { display:block; }
+.Campus-controlWorkLink>span { flex:1; display:grid; gap:3px; }
+.Campus-controlWorkLink>span>small { color:var(--campus-muted); }
+.Campus-controlWorkLink>.fas:first-child { width:27px; color:var(--campus-accent); }
+.Campus-controlSourceActions { display:flex; gap:8px; flex-wrap:wrap; }
+.CampusOperations .Campus-operationsWrap { max-width:1320px; margin:0 auto; padding:28px 22px 56px; }
+.CampusOperations .Page-sidebar { display:none; }
+.CampusOperations .Page-content { flex:1; min-width:0; }
+.CampusOperations .Campus-control { max-width:none; }
+.Campus-controlTabs { display:flex; gap:8px; flex-wrap:wrap; margin:18px 0 20px; padding:7px; border:1px solid var(--campus-divider); border-radius:15px; background:var(--campus-surface); }
+.Campus-controlTabs a { display:inline-flex; align-items:center; gap:8px; min-height:42px; padding:8px 14px; border-radius:10px; color:var(--campus-ink)!important; font-weight:650; text-decoration:none!important; }
+.Campus-controlTabs a:hover { background:var(--campus-soft); }
+.Campus-controlTabs a[aria-current="page"] { color:#fff!important; background:var(--campus-accent); }
+.Campus-controlQueue { display:grid; gap:14px; }
+.Campus-controlQueueItem { min-width:0; padding:20px 22px; border:1px solid var(--campus-divider); border-radius:15px; background:var(--campus-surface); }
+.Campus-controlQueueItem h3 { margin:9px 0; font-size:19px; overflow-wrap:anywhere; }
+.Campus-controlQueueItem p { line-height:1.6; overflow-wrap:anywhere; }
+.Campus-controlQueueMeta { display:flex; align-items:center; flex-wrap:wrap; gap:10px; color:var(--campus-muted); font-size:12px; }
+.Campus-controlQueueItem .Campus-field { max-width:640px; margin-top:13px; }
+.Campus-controlQueueItem .Campus-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; }
+.Campus-controlSourceForm { display:grid; grid-template-columns:180px minmax(180px,1fr) minmax(240px,1.5fr) auto; align-items:end; gap:12px; padding:17px; border:1px solid var(--campus-divider); border-radius:15px; background:var(--campus-surface); margin-bottom:16px; }
+.Campus-controlSourceForm .Campus-field { margin:0; min-width:0; }
+.Campus-controlSourceForm .Button { min-height:42px; }
+@media(max-width:980px) { .Campus-controlSourceForm { grid-template-columns:1fr 1fr; } }
+@media(max-width:600px) { .CampusOperations .Campus-operationsWrap { padding:18px 14px 40px; } .Campus-controlTabs { display:grid; grid-template-columns:1fr 1fr; } .Campus-controlSourceForm { grid-template-columns:1fr; } .Campus-controlQueueItem { padding:16px; } }
+@media(max-width:700px) { .Campus-controlCollectActions { grid-template-columns:1fr; } }
 @media(max-width:900px) { .Campus-controlLayout { grid-template-columns:minmax(0,1fr); } .Campus-controlAside { display:grid; grid-template-columns:1fr 1fr; gap:14px; } .Campus-controlSummary,.Campus-controlSources { margin:0; } .Campus-controlFootnote { grid-column:1/-1; } }
 @media(max-width:600px) { .Campus-controlHeader { display:block; } .Campus-controlHeader .Button { margin-top:12px; } .Campus-controlLayout,.Campus-controlAside { display:block; } .Campus-controlModules { grid-template-columns:minmax(0,1fr); } .Campus-controlSummary,.Campus-controlSources { margin-bottom:14px; } .Campus-controlWorkLink { gap:11px; padding:15px 13px; } .Campus-controlWorkText small { font-size:11px; } .Campus-controlHeader h1 { font-size:25px; } }
