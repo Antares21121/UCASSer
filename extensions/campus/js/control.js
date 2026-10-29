@@ -324,6 +324,13 @@ export default class ControlPage extends DataPage {
   }
 
   collect(sourceId = null) {
+    // Collection is useless before the WeChat session is authorised, so the
+    // first click hands the operator the QR instead of silently queueing.
+    if (this.collector && this.collector.state !== 'ready') {
+      app.alerts.show({ type: 'info' }, '公众号尚未授权：先扫码，授权后再采集。');
+      this.showCollectorQr();
+      return Promise.resolve();
+    }
     return this.perform(() => api('control/collect', 'POST', sourceId ? { source_id: sourceId } : {}), {
       message: '采集任务已加入队列。学校官网若拒绝服务器连接，可改用本地快照。'
     });

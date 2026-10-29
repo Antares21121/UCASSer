@@ -261,3 +261,8 @@ table.Campus-tt th[scope=col]:first-child, table.Campus-tt tbody th[scope=row] {
 .Campus-directoryBranch > summary::before { content:'▸'; display:inline-block; margin-right:6px; transition:transform .15s; }
 .Campus-directoryBranch[open] > summary::before { transform:rotate(90deg); }
 .Campus-directoryBranch > ul { margin-left:8px; }
+
+.Campus-directoryToggle { display:flex; align-items:center; gap:8px; border:0; background:transparent; color:var(--campus-ink); font:inherit; font-weight:600; padding:4px 6px; border-radius:8px; cursor:pointer; text-align:left; }
+.Campus-directoryToggle:hover { background:var(--campus-soft); color:var(--campus-link); }
+.Campus-directoryBranch > summary { font-size:15px; padding:6px 4px; color:var(--campus-muted); }
+.Campus-directoryBranch > summary::before { font-size:13px; width:18px; text-align:center; }

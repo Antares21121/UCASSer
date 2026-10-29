@@ -228,7 +228,11 @@ export class DirectoryPage extends DataPage {
       key: category.id
     }, [m('div.Campus-directoryNode', {
       className: Number(this.params.category_id) === category.id ? 'is-active' : ''
-    }, [m(Link, {
+    }, [children.length ? m('button.Campus-directoryToggle', {
+      type: 'button',
+      'aria-label': '展开或收起 ' + category.name,
+      onclick: e => { const branch = e.currentTarget.closest('li')?.querySelector(':scope > details'); if (branch) branch.open = !branch.open; }
+    }, [symbol(depth === 0 ? 'folder-open' : 'folder'), m('span', category.name)]) : m(Link, {
       href: this.filter(category.id),
       className: 'Campus-directoryCategory'
     }, [symbol(depth === 0 ? 'folder-open' : category.kind === 'course' ? 'book' : 'folder'), m('span', category.name)]), this.data.can_manage ? m('span.Campus-directoryNodeActions', [canCollege || category.kind === 'course_group' ? m(Button, {
