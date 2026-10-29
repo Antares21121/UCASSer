@@ -121,6 +121,20 @@ class CollectorClient
             throw new ValidationException(['article_url' => '请填写该公众号一篇原文的 https://mp.weixin.qq.com/s/... 链接']);
         }
         $token = $this->token();
+        // A canonical article URL carries the account's __biz id, which is all
+        // the collector needs to add it. This avoids depending on its async
+        // article resolver, which only understands short links.
+        if (preg_match('/[?&]__biz=([A-Za-z0-9+\/=]+)/', $articleUrl, $match)) {
+            $biz = urldecode($match[1]);
+            if (strlen($biz) >= 8) {
+                $result = $this->call('POST', 'mps', [
+                    'mp_name' => $name, 'mp_id' => $biz, 'mp_cover' => '', 'avatar' => '', 'mp_intro' => '',
+                ], $token);
+                if (($result['code'] ?? 1) === 0) {
+                    return ['name' => $name, 'status' => 'subscribed', 'mp_id' => $biz];
+                }
+            }
+        }
         $existing = $this->mpList($token);
         foreach ($existing as $row) {
             if ((string) ($row['mp_name'] ?? '') === $name) {
