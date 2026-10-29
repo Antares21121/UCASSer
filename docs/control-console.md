@@ -22,7 +22,7 @@ sudo env FORUM_ENV_FILE=.env.test docker compose --env-file .env.test -f compose
 
 ## 一键采集与本地快照
 
-“一键采集”只把任务加入队列。后台任务执行器每分钟取一项任务，逐个访问已启用的网页来源；结果显示在总览页。任务失败会显示来源报错，不会自动发布内容。服务器无法连接学校官网时，可在能访问学校官网的本地电脑按[本地官网采集](local-aggregation.md)生成 JSON 快照，再点“选择快照并导入”。浏览器直接把最多 1 MB 的快照送入待审队列，不需要将文件放到服务器目录。新候选仍须在“信息审核”栏目核对来源并决定发布、合并、更新或拒绝。
+“一键采集”只把任务加入队列。Docker Compose 的 `runner` 服务每 30 秒检查一次队列，与应用从相同 Dockerfile 构建，并共享依赖、资源和运行存储卷；结果显示在总览页。任务失败会显示来源报错，不会自动发布内容。服务器无法连接学校官网时，可在能访问学校官网的本地电脑按[本地官网采集](local-aggregation.md)生成 JSON 快照，再点“选择快照并导入”。浏览器直接把最多 1 MB 的快照送入待审队列，不需要将文件放到服务器目录。新候选仍须在“信息审核”栏目核对来源并决定发布、合并、更新或拒绝。
 
 本地开发机可手动处理一项已排队任务：
 
@@ -30,7 +30,9 @@ sudo env FORUM_ENV_FILE=.env.test docker compose --env-file .env.test -f compose
 python scripts/aggregation_jobs.py
 ```
 
-服务器在更新代码和迁移后安装工作执行器：
+Compose 部署在更新代码和迁移后启动 `runner` 即可。备份或迁移前应先停止 `runner` 和采集调度，完成后再启动，避免采集在维护期间写入数据库。若此前安装了 `ucasser-collection-worker.timer`，确认 `runner` 正常后停用旧执行器，避免同时轮询；`ucasser-aggregation.timer` 的每日定时采集继续保留。
+
+只有不使用 Compose 常驻 `runner` 的部署才需安装以下备用执行器（与常驻执行器二选一）：
 
 ```bash
 cd /opt/ucasser-test

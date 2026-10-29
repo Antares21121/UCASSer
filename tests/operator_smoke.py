@@ -43,9 +43,10 @@ def main():
         operator['api'].call('/api/campus/identity/' + str(application), 'PATCH', {
             'status': 'rejected', 'reason': '测试申请不对应真实身份'
         })
-        operator['api'].call('/api/campus/control/collect', 'POST', {}, expected=202)
+        queued = operator['api'].call('/api/campus/control/collect', 'POST', {}, expected=202)['data']
         job = operator['api'].call('/api/campus/control')['data']['collection_job']
-        assert job['status'] in ('queued', 'running')
+        assert job['id'] == queued['id']
+        assert job['status'] in ('queued', 'running', 'succeeded', 'partial', 'failed')
         admin.call('/api/campus/control/collect', 'POST', {}, expected=403)
         outsider['api'].call('/api/campus/control/import', 'POST', {'snapshot': '{}'}, expected=403)
         # A genuine encoded PNG is accepted. Until a message binds it to a dialog,

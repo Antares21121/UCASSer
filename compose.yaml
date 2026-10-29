@@ -1,4 +1,7 @@
 name: ${COMPOSE_PROJECT_NAME:-campus-forum-dev}
+x-php-build: &php-build
+  context: .
+  dockerfile: docker/php/Dockerfile
 x-logging: &logging
   driver: json-file
   options:
@@ -26,7 +29,7 @@ services:
   runner:
     # Always-on executor: picks up queued collection jobs within 30 seconds so
     # one click in the console finishes without anyone touching a terminal.
-    image: ucasser-redesign-app
+    build: *php-build
     command: ["sh", "-c", "while true; do php flarum campus:aggregation:run-job; sleep 30; done"]
     env_file: ${FORUM_ENV_FILE:-.env}
     environment:
@@ -40,6 +43,7 @@ services:
       - .:/var/www/forum
       - vendor:/var/www/forum/vendor
       - assets:/var/www/forum/public/assets
+      - storage:/var/www/forum/storage
     depends_on:
       db:
         condition: service_healthy
@@ -49,9 +53,7 @@ services:
   app:
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
+    build: *php-build
     env_file: ${FORUM_ENV_FILE:-.env}
     environment:
       DB_HOST: db
