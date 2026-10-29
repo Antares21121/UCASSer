@@ -221,6 +221,17 @@ export class DirectoryPage extends DataPage {
       message: '已加载待处理反馈。'
     });
   }
+  courseReviewsLink() {
+    const id = Number(this.params.category_id);
+    if (!id) return null;
+    const category = this.data.categories.find(c => Number(c.id) === id);
+    if (!category || category.kind !== 'course') return null;
+    return m('p.Campus-hint.Campus-directoryBack', [
+      '当前分类是一门课程的资料。',
+      m(Link, { href: '/campus/courses?search=' + encodeURIComponent(category.name), className: 'Button Button--link' }, '查看这门课的评价 ↗')
+    ]);
+  }
+
   categoryNode(category, depth = 0) {
     const children = this.data.categories.filter(c => c.parent_id === category.id).sort((a, b) => a.position - b.position || a.id - b.id);
     const canCollege = category.kind === 'root' && category.parent_id === null && !children.some(c => c.kind === 'external_topic');
@@ -270,7 +281,7 @@ export class DirectoryPage extends DataPage {
       'aria-label': '资料位置'
     }, [link(this.filter(null), '全部资料'), ...crumbs.flatMap(c => [m('span', {
       'aria-hidden': 'true'
-    }, '/'), link(this.filter(c.id), c.name)])]), m('form.Campus-directorySearch', {
+    }, '/'), link(this.filter(c.id), c.name)])]), this.courseReviewsLink(), m('form.Campus-directorySearch', {
       onsubmit: e => {
         e.preventDefault();
         m.route.set(this.filter(this.params.category_id));

@@ -86,7 +86,8 @@ export default class CoursesPage extends DataPage {
       className: 'Button Button--link Campus-searchReset'
     })])])), m('div.Campus-courseResults', [m('p', {
       role: 'status'
-    }, `共 ${this.meta.total} 门课程`), addCourse]), m('p.Campus-hint.Campus-courseScope', this.definitions.sample), ...this.courses.map(c => m('article.Campus-panel.Campus-courseCard', [m('header.Campus-courseHeading', [m('h2', c.name), m('span.Campus-badge', `${c.samples} 条有效评价`)]), m('p.Campus-meta', [c.offer?.college, c.offer?.code ? `课程代码 ${c.offer.code}` : null, c.type, c.grade, c.semester, c.nature].filter(Boolean).join(' · ')), m('div.Campus-stats', Object.entries(c.scores).map(([k, v]) => m('div.Campus-stat', [m('span', {
+    }, `共 ${this.meta.total} 门课程`), addCourse]), m('p.Campus-hint.Campus-courseScope', this.definitions.sample), ...this.courses.map(c => m('article.Campus-panel.Campus-courseCard', [m('header.Campus-courseHeading', [m('h2', c.name), m('span.Campus-badge', `${c.samples} 条有效评价`)]), m('p.Campus-meta', [c.offer?.college, c.offer?.code ? `课程代码 ${c.offer.code}` : null, c.type, c.grade, c.semester, c.nature].filter(Boolean).join(' · ')),
+          c.offer?.resource_category_id ? m('p.Campus-courseLinks', link('/campus/resources?category_id=' + c.offer.resource_category_id, '查看这门课的资料 ↗', { className: 'Button Button--link' })) : null, m('div.Campus-stats', Object.entries(c.scores).map(([k, v]) => m('div.Campus-stat', [m('span', {
       title: this.definitions[k]
     }, {
       overall: '总体体验',
