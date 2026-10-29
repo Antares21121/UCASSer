@@ -116,10 +116,14 @@
 
 // Permanent display suffix in mentions and on profile pages.
 .Campus-mentionSuffix { color:var(--campus-link); font-weight:700; font-variant-numeric:tabular-nums; margin-left:6px; font-size:.92em; }
-.Campus-profileTags { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
-.Campus-profileTag { display:inline-flex; align-items:baseline; gap:8px; padding:8px 14px; border:1px solid var(--campus-divider); border-radius:12px; background:var(--campus-surface); }
-.Campus-profileTag small { color:var(--campus-muted); font-size:12px; }
-.Campus-profileTag strong { color:var(--campus-link); font-size:16px; font-variant-numeric:tabular-nums; }
+// The user card keeps the campus ink-blue surface instead of per-user random
+// colors, so the profile header stays on brand and readable.
+.UserCard { --usercard-bg:#1C3042!important; }
+.UserCard .UserCard-content { min-width:0; }
+.Campus-profileTags { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 0; }
+.Campus-profileTag { display:inline-flex; align-items:baseline; gap:8px; padding:7px 12px; border:1px solid var(--campus-divider); border-radius:10px; background:rgba(255,255,255,.94); white-space:nowrap; }
+.Campus-profileTag small { color:#576273; font-size:12px; }
+.Campus-profileTag strong { color:#A71937; font-size:16px; font-variant-numeric:tabular-nums; }
 
 // Public reply bar: one image button plus mention, aligned with the submit.
 .Campus-postImageButton { display:inline-flex; align-items:center; gap:7px; min-height:42px; padding:8px 14px; border:1px solid var(--campus-divider); border-radius:12px; color:var(--campus-ink); background:var(--campus-surface); cursor:pointer; font-weight:600; }

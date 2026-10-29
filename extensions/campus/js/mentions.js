@@ -46,8 +46,9 @@ export default function registerMentions() {
   }).catch(() => {});
 
   // User cards (profile page and hover cards): show the permanent suffix and
-  // the experience baseline so equal display names stay distinguishable.
-  extend(UserCard.prototype, 'profileItems', function (items) {
+  // the experience baseline inside the content column so equal display names
+  // stay distinguishable without breaking the card layout.
+  extend(UserCard.prototype, 'contentItems', function (items) {
     const user = this.attrs.user;
     if (!user) return;
     const suffix = displaySuffix(user);
@@ -56,6 +57,6 @@ export default function registerMentions() {
     items.add('campus-profile-tags', m('div.Campus-profileTags', [
       suffix ? m('span.Campus-profileTag', [m('small', '账号编号'), m('strong', suffix)]) : null,
       level ? m('span.Campus-profileTag', [m('small', '经验等级'), m('strong', level)]) : null
-    ]), 5);
+    ]), -100);
   });
 }

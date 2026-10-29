@@ -106,10 +106,12 @@ test('directory and native pages keep readable theme colors and reflow at high D
     await page.getByRole('link',{name:'校外资料',exact:true}).first().click();
     await expect(page.locator('.Campus-directoryCard a[href="https://cet.neea.edu.cn/"]').first()).toBeVisible();
     await expect(page.locator('.Campus-directoryCard a[href="https://ncre.neea.edu.cn/"]').first()).toBeVisible();
+    // Wait for the rendered description itself: evaluating a node from the
+    // redraw gap yields a detached element with empty computed styles.
+    await expect(page.locator('.Campus-directoryDescription').first()).toBeVisible();
     for(const theme of ['light','dark','light-hc','dark-hc']) {
       await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
-      const contrast=await page.locator('.Campus-directoryDescription').first().evaluate(renderedContrast);
-      expect(contrast,theme+' text contrast').toBeGreaterThanOrEqual(4.5);
+      await expect.poll(()=>page.locator('.Campus-directoryDescription').first().evaluate(renderedContrast),{message:theme+' text contrast'}).toBeGreaterThanOrEqual(4.5);
     }
     for(const width of [720,390,320]) {
       await page.setViewportSize({width,height:1000});
@@ -123,11 +125,9 @@ test('directory and native pages keep readable theme colors and reflow at high D
     await page.emulateMedia({forcedColors:'none'});
     for (const theme of ['light','dark','light-hc','dark-hc']) {
       await page.evaluate(theme=>document.documentElement.setAttribute('data-theme',theme),theme);
-      const contrast=await page.locator('.Campus-feedTags .TagLabel-text').first().evaluate(renderedContrast);
-      expect(contrast,theme+' tag contrast').toBeGreaterThanOrEqual(4.5);
+      await expect.poll(()=>page.locator('.Campus-feedTags .TagLabel-text').first().evaluate(renderedContrast),{message:theme+' tag contrast'}).toBeGreaterThanOrEqual(4.5);
       for (const selector of ['.Header-primary .Button-label','.Header-secondary .Button-label','.Campus-listMetadata']) {
-        const ratio=await page.locator(selector).first().evaluate(renderedContrast);
-        expect(ratio,theme+' '+selector+' contrast').toBeGreaterThanOrEqual(4.5);
+        await expect.poll(()=>page.locator(selector).first().evaluate(renderedContrast),{message:theme+' '+selector+' contrast'}).toBeGreaterThanOrEqual(4.5);
       }
     }
     for (const width of [992,768,390,320]) {
