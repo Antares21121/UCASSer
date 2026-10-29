@@ -226,3 +226,31 @@ table.Campus-tt th[scope=col]:first-child, table.Campus-tt tbody th[scope=row] {
 .Campus-collectorSubscribed { color:#1E7A46; font-size:13px; }
 .Campus-collectorAccountForm { display:flex; gap:8px; margin-top:8px; }
 .Campus-collectorAccountForm .FormControl { flex:1 1 auto; }
+
+/* ---------------- 课程表：网格按钮 + 时段弹窗 + 原图 ---------------- */
+.Campus-ttSwitch { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:4px 0 12px; }
+.Campus-ttSwitch .Campus-hint { margin:0; }
+.Campus-ttGrid { display:flex; flex-direction:column; gap:6px; overflow-x:auto; border:1px solid var(--campus-divider); border-radius:14px; background:var(--campus-surface); padding:10px; }
+.Campus-ttGridHead,.Campus-ttGridRow { display:grid; grid-template-columns:86px repeat(6,minmax(128px,1fr)); gap:6px; min-width:900px; }
+.Campus-ttGridHead span { font-size:13px; font-weight:650; color:var(--campus-ink); padding:4px 6px; }
+.Campus-ttGridCorner { color:var(--campus-muted)!important; font-weight:600!important; }
+.Campus-ttGridPeriod { display:flex; align-items:center; font-size:12px; color:var(--campus-muted); padding-left:6px; }
+.Campus-ttCell { display:flex; flex-direction:column; justify-content:center; gap:2px; min-height:58px; padding:6px 8px; border:1px dashed var(--campus-divider); border-radius:10px; background:transparent; color:var(--campus-muted); cursor:default; text-align:left; font:inherit; }
+.Campus-ttCell[disabled] { opacity:.55; }
+.Campus-ttCell.is-filled { border-style:solid; border-left:3px solid var(--campus-link); background:var(--campus-soft); color:var(--campus-ink); cursor:pointer; }
+.Campus-ttCell.is-filled:hover { background:var(--campus-mist); }
+.Campus-ttCell.is-filled strong { font-size:13px; }
+.Campus-ttCell.is-filled small { font-size:11px; color:var(--campus-ink); opacity:.8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.Campus-ttCell.is-mine { border-left-color:#1E7A46; }
+.Campus-slotList { display:flex; flex-direction:column; gap:10px; margin:6px 0 14px; max-height:60vh; overflow:auto; }
+.Campus-slotItem { border:1px solid var(--campus-divider); border-radius:12px; padding:10px 12px; background:var(--campus-soft); }
+.Campus-slotHead { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.Campus-slotHead strong { color:var(--campus-ink); }
+.Campus-slotMeta { margin:6px 0 0; font-size:13px; color:var(--campus-ink); opacity:.86; }
+.Campus-toolImage { margin:14px 0; }
+.Campus-toolImage img { width:100%; height:auto; border:1px solid var(--campus-divider); border-radius:12px; background:#fff; }
+.Campus-toolImage figcaption { margin-top:6px; font-size:12px; color:var(--campus-muted); }
+@media (max-width:640px) {
+  .Campus-ttGridHead,.Campus-ttGridRow { grid-template-columns:70px repeat(6,minmax(104px,1fr)); min-width:760px; }
+  .Campus-ttCell { min-height:52px; }
+}

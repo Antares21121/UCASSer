@@ -20,6 +20,7 @@ export default class CoursesPage extends DataPage {
       type: this.params['type'] || '',
       semester: this.params['semester'] || '',
       grade: this.params['grade'] || '',
+      college: this.params['college'] || '',
       review_semester: this.params['review_semester'] || ''
     };
     const r = await api('courses?' + new URLSearchParams(this.params));
@@ -62,9 +63,19 @@ export default class CoursesPage extends DataPage {
     })]), m(Button, {
       type: 'submit',
       className: 'Button Button--primary'
-    }, '查询课程')]), m('div.Campus-searchOptions', ['type', 'semester'].map(key => field(key, fields[key], this.filters[key], value => this.filters[key] = value, {
-      placeholder: key === 'type' ? '全部类型' : '全部学期'
-    }))), m('div.Campus-searchRefinements', [m('details.Campus-searchAdvanced', [m('summary', [symbol('sliders-h'), '更多筛选', advancedCount ? m('span.Campus-badge', advancedCount) : null]), m('div.Campus-searchAdvancedFields', [field('grade', '适用年级', this.filters.grade, value => this.filters.grade = value, {
+    }, '查询课程')]), m('div.Campus-searchOptions', [
+      field('college', '院系', this.filters.college, value => this.filters.college = value, {
+        type: 'select', placeholder: '全部院系',
+        options: [['', '全部院系'], ...(this.meta.colleges || []).map(c => [c.name, c.name])]
+      }),
+      field('type', '课程类别', this.filters.type, value => this.filters.type = value, {
+        type: 'select', placeholder: '全部类型',
+        options: [['', '全部类型'], ...(this.meta.types || []).map(t => [t, t])]
+      }),
+      field('semester', '开课学期', this.filters.semester, value => this.filters.semester = value, {
+        type: 'select', placeholder: '全部学期',
+        options: [['', '全部学期'], ...(this.meta.semesters || []).map(s => [s, s])]
+      })]), m('div.Campus-searchRefinements', [m('details.Campus-searchAdvanced', [m('summary', [symbol('sliders-h'), '更多筛选', advancedCount ? m('span.Campus-badge', advancedCount) : null]), m('div.Campus-searchAdvancedFields', [field('grade', '适用年级', this.filters.grade, value => this.filters.grade = value, {
       placeholder: '全部年级'
     }), field('review_semester', '统计评价学期', this.filters.review_semester, value => this.filters.review_semester = value, {
       placeholder: '留空统计全部学期'

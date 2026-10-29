@@ -16,8 +16,6 @@ class CampusToolsController implements RequestHandlerInterface
 {
     private const FILES = [
         'timetable' => 'timetable.json',
-        'calendars' => 'calendars.json',
-        'shuttle' => 'shuttle.json',
     ];
 
     public function handle(Request $request): ResponseInterface

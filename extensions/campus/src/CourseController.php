@@ -53,6 +53,8 @@ class CourseController implements RequestHandlerInterface
         $pageRows=$query->orderBy('name')->offset(($page-1)*20)->limit(20)->get();
         $offers=$hasOfferings ? $db->table('campus_course_offerings')->whereIn('course_id',$pageRows->pluck('id'))->get(['course_id','code','college','semester','resource_category_id','nature','description','college_id'])->keyBy('course_id') : collect();
         $colleges=$db->getSchemaBuilder()->hasTable('campus_colleges') ? $db->table('campus_colleges')->where('status','active')->orderBy('position')->get(['id','code','name'])->all() : [];
+        $types=$db->table('campus_courses')->whereNotNull('type')->where('type','<>','')->distinct()->orderBy('type')->pluck('type')->all();
+        $semesters=$db->table('campus_courses')->whereNotNull('semester')->where('semester','<>','')->distinct()->orderByDesc('semester')->pluck('semester')->all();
         $courses=$pageRows->map(function ($course) use ($a,$q,$offers) {
             $course->offer=$offers->get($course->id);
             $reviews=$this->records->query($a)->where('course_id',$course->id)->where('type','review')->where('status','active')->when(!empty($q['review_semester']),fn($b)=>$b->where('semester',$q['review_semester']));
@@ -60,6 +62,6 @@ class CourseController implements RequestHandlerInterface
             $stats=$reviews->selectRaw(implode(',',$metrics))->first(); $course->samples=(int)$stats->samples; $course->scores=[];
             foreach (['overall','difficulty','workload'] as $key) $course->scores[$key]=$course->samples?round((float)$stats->$key,2):null; return $course;
         })->all();
-        return new JsonResponse(['data'=>$courses,'meta'=>['total'=>$total,'page'=>$page,'page_size'=>20,'can_manage'=>$canManage,'colleges'=>$colleges],'definitions'=>['overall'=>'1 不满意，5 满意','difficulty'=>'1 易，5 难','workload'=>'1 少，5 多','sample'=>'只统计可见且未撤回的评价；少量样本不能代表课程全貌。主观评分不等于客观教学质量。']]);
+        return new JsonResponse(['data'=>$courses,'meta'=>['total'=>$total,'page'=>$page,'page_size'=>20,'can_manage'=>$canManage,'colleges'=>$colleges,'types'=>$types,'semesters'=>$semesters],'definitions'=>['overall'=>'1 不满意，5 满意','difficulty'=>'1 易，5 难','workload'=>'1 少，5 多','sample'=>'只统计可见且未撤回的评价；少量样本不能代表课程全貌。主观评分不等于客观教学质量。']]);
     }
 }

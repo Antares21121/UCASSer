@@ -45,6 +45,7 @@ return [
     (new Extend\Console())->command(Campus\SetupCommand::class),
     (new Extend\Console())->command(Campus\BoardMigrateCommand::class),
     (new Extend\Console())->command(Campus\CourseImportCommand::class),
+    (new Extend\Console())->command(Campus\ResourcesSyncCommand::class),
     (new Extend\Console())->command(Campus\AggregationPollCommand::class),
     (new Extend\Console())->command(Campus\AggregationSyncSourcesCommand::class),
     (new Extend\Console())->command(Campus\AggregationCollectorStatusCommand::class),
@@ -116,6 +117,8 @@ return [
     (new Extend\Routes('api'))->post('/campus/control/collector/subscribe','campus.control.collector.subscribe',Campus\CollectorController::class),
     // Retired discussion boards keep their old URLs alive via 301s.
     (new Extend\Middleware('forum'))->add(Campus\LegacyBoardRedirect::class),
+    (new Extend\Routes('api'))->get('/campus/timetable/subscriptions','campus.timetable.subscriptions',Campus\TimetableController::class),
+    (new Extend\Routes('api'))->post('/campus/timetable/subscriptions','campus.timetable.subscribe',Campus\TimetableController::class),
     (new Extend\Routes('api'))->get('/campus/governance','campus.governance',Campus\GovernanceController::class)->post('/campus/governance','campus.governance.publish',Campus\GovernanceController::class),
     (new Extend\Routes('api'))->get('/campus/cases','campus.cases',Campus\CaseController::class)->post('/campus/cases','campus.cases.create',Campus\CaseController::class)
         ->get('/campus/cases/{id}','campus.case',Campus\CaseController::class)->patch('/campus/cases/{id}','campus.case.update',Campus\CaseController::class)

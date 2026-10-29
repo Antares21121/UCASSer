@@ -343,6 +343,13 @@ class Catalog
     private function planCourse(int $line, array $row, ?string $externalKey, array &$results, int &$valid, int &$new, int &$updated, int &$skipped, int &$conflicts, int &$failed): object
     {
         if (!$externalKey) throw new ValidationException(['external_key' => '缺少外部稳定编号']);
+        // The import template identifies the college by its stable code so the
+        // same CSV works on any install; resolve it before validation.
+        if (empty($row['college_id']) && !empty($row['college_key'])) {
+            $collegeId = $this->db->table('campus_colleges')->where('code', (string) $row['college_key'])->value('id');
+            if (!$collegeId) throw new ValidationException(['college_key' => '开课学院编号不存在：'.(string) $row['college_key']]);
+            $row['college_id'] = (int) $collegeId;
+        }
         $values = $this->validateCourse($row);
         $hash = self::identityHash($values['college_id'] ?? null, $values['code'] ?? '', $values['semester'] ?? '');
         $offering = $this->db->table('campus_course_offerings')->where('external_key', $externalKey)->orWhere('identity_hash', $hash)->first();

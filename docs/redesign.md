@@ -72,3 +72,11 @@ php flarum campus:boards:migrate --apply    # 写入（重跑跳过已完成项�
 - 课程目录导入素材：`data/import/2026-autumn/colleges.csv`（18 个开课单位）与 `courses.csv`（501 门课程，`semester=2026 秋`），走控制台「课程目录 → 预览导入」或 `campus:courses:import`；单批上限 500 行。
 - 资料目录的「校内资料」条目按运营要求暂不预置，待后续在控制台上传时再建（外链需 https + 来源/授权字段）。
 - 采集作业：控制台「一键采集」只负责入队，实际抓取由 `php flarum campus:aggregation:run-job`（或 `python scripts/aggregation_jobs.py --backend docker`）执行；队列中的任务超过 2 分钟会解锁按钮，可重新入队。
+
+## 课程表订阅与工具页改版（2026-10-29 第二轮）
+
+- 课程表改为「天 × 节」按钮网格：点击格子弹出该时段全部课程，可逐门订阅；「我的课表」只显示订阅项，数据存 `campus_course_subscriptions`（登录用户，主键 user_id + entry_id）。
+- 筛选：院系、课程类别、节次、楼宇、关键词；`/api/campus/timetable/subscriptions` 提供读取与开关。
+- 校历、摆渡车改为学校发布原图（`assets/calendar-*.jpg`、`shuttle.jpg`），由 `/api/campus/assets/{file}` 白名单提供；不再使用生成的表格与 JSON。
+- 课程目录筛选：新增院系、课程类别、开课学期下拉（`meta.types/semesters/colleges`）。
+- `php flarum campus:resources:sync`：按已导入课程生成「校内资料 → 学院 → 课程类型 → 课程」分类树，并把课程叶节点写回开课记录；CSV 导入现在会解析 `college_key`。
