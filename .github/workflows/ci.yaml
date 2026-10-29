@@ -62,6 +62,7 @@ jobs:
           python tests/chat_image_smoke.py --backend docker
       - name: Board redesign, operator catalog and mention acceptance
         run: |
+          docker compose exec -T -u www-data app php -r 'exit((extension_loaded("gd") && (gd_info()["WebP Support"] ?? false)) ? 0 : 1);'
           docker compose exec -T -u www-data app php flarum campus:boards:migrate
           docker compose exec -T -u www-data app php tests/suffix_mention_parser.php
           python tests/redesign_smoke.py --backend docker

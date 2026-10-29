@@ -1,8 +1,8 @@
 FROM composer:2.10.3 AS composer
 FROM php:8.3.35-fpm-bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libfreetype6-dev libjpeg62-turbo-dev libpng-dev libzip-dev libonig-dev libicu-dev libxml2-dev git unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libzip-dev libonig-dev libicu-dev libxml2-dev git unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j2 gd mbstring pdo_mysql zip intl dom opcache \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
