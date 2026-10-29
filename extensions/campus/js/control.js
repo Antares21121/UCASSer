@@ -30,13 +30,26 @@ export default class ControlPage extends DataPage {
 
   async fetch() {
     this.tab = tabs.some(([name]) => name === this.params.tab) ? this.params.tab : 'overview';
+    this.page = Math.max(1, Math.min(10000, Number.parseInt(this.params.page, 10) || 1));
     const path = {
-      review: 'aggregation/queue', sources: 'aggregation/sources',
-      identity: 'identity/queue', cases: 'cases?status=open'
+      review: `aggregation/queue?page=${this.page}`, sources: 'aggregation/sources',
+      identity: `identity/queue?page=${this.page}`, cases: `cases?status=open&page=${this.page}`
     }[this.tab];
     const [overview, detail] = await Promise.all([api('control'), path ? api(path) : Promise.resolve(null)]);
     this.data = overview.data;
     this.detail = detail?.data || [];
+    this.detailMeta = detail?.meta || null;
+  }
+
+  pager(size = 20) {
+    const total = Number(this.detailMeta?.total || 0);
+    if (total <= size) return null;
+    const href = page => `/campus/control?tab=${this.tab}&page=${page}`;
+    return m('nav.Campus-controlPager', { 'aria-label': `${tabs.find(([name]) => name === this.tab)?.[1]}翻页` }, [
+      this.page > 1 ? link(href(this.page - 1), '上一页') : m('span', '上一页'),
+      m('span', `第 ${this.page} 页 · 共 ${total} 条`),
+      this.page * size < total ? link(href(this.page + 1), '下一页') : m('span', '下一页')
+    ]);
   }
 
   view() {
@@ -141,7 +154,8 @@ export default class ControlPage extends DataPage {
           candidate.item_id ? m(Button, { onclick: () => this.decide(candidate, 'update') }, '批准更新') : null,
           m(Button, { onclick: () => this.decide(candidate, 'reject') }, '拒绝')
         ])
-      ]))) : emptyState('待审核队列已清空', '新采集和成员投稿会在这里等待处理。')
+      ]))) : emptyState('本页没有待审核信息', '新采集和成员投稿会在这里等待处理。'),
+      this.pager()
     ]);
   }
 
@@ -184,7 +198,8 @@ export default class ControlPage extends DataPage {
           m(Button, { className: 'Button Button--primary', onclick: () => this.reviewIdentity(row, 'approved') }, '批准'),
           m(Button, { onclick: () => this.reviewIdentity(row, 'rejected') }, '拒绝')
         ])
-      ]))) : emptyState('没有待审核申请', '成员提交校园身份申请后会显示在这里。')
+      ]))) : emptyState('本页没有待审核申请', '成员提交校园身份申请后会显示在这里。'),
+      this.pager(50)
     ]);
   }
 
@@ -213,7 +228,8 @@ export default class ControlPage extends DataPage {
             m(Button, { onclick: () => this.processCase(row, 'rejected') }, '不予受理')
           ])
         ] : m('p.Campus-hint', '此申诉需要另一位运营人员复核。')
-      ]))) : emptyState('当前没有未结案件', '新的举报和申诉会显示在这里。')
+      ]))) : emptyState('本页没有未结案件', '新的举报和申诉会显示在这里。'),
+      this.pager()
     ]);
   }
 

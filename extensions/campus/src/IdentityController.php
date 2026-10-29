@@ -52,10 +52,12 @@ class IdentityController implements RequestHandlerInterface
             return new JsonResponse(['data'=>['id'=>$id,'status'=>$data['status']]]);
         }
         if ($route === 'campus.identity.queue') {
-            $this->assertOperator($a); $rows=$db->table('campus_verifications')->where('status','pending')->orderBy('id')->limit(50)->get();
+            $this->assertOperator($a); $page=max(1,min(10000,(int)($r->getQueryParams()['page'] ?? 1)));
+            $query=$db->table('campus_verifications')->where('status','pending'); $total=(clone $query)->count();
+            $rows=$query->orderBy('id')->offset(($page-1)*50)->limit(50)->get();
             $users=User::query()->whereIn('id',$rows->pluck('user_id'))->get()->keyBy('id');
             foreach ($rows as $row) $row->display_name=$users->get($row->user_id)?->display_name ?? '已删除账号';
-            return new JsonResponse(['data'=>$rows->all()]);
+            return new JsonResponse(['data'=>$rows->all(),'meta'=>['total'=>$total,'page'=>$page,'page_size'=>50]]);
         }
         if (in_array($route,['campus.moderators','campus.moderators.list'],true)) {
             if ($r->getMethod()==='GET') {

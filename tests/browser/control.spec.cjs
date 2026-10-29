@@ -22,6 +22,8 @@ test('operations backend keeps daily work in one responsive workspace', async ({
   await expect(page.getByRole('button', { name: /一键采集/ })).toBeVisible();
   await page.locator('.Campus-controlTabs a[href*="tab=review"]').click();
   await expect(page.getByRole('heading', { name: '信息审核' })).toBeVisible();
+  await page.goto('/campus/control?tab=review&page=2');
+  await expect(page.getByRole('heading', { name: '信息审核' })).toBeVisible();
   await page.locator('.Campus-controlTabs a[href*="tab=sources"]').click();
   await expect(page.getByRole('heading', { name: '来源管理' })).toBeVisible();
   await expect(page.getByRole('button', { name: '登记来源' })).toBeVisible();
