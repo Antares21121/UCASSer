@@ -19,18 +19,18 @@ from campus_security import phase10, phase11
 
 def phase1(f, guest, admin):
     home = guest.call('/api/campus/home')['data']
-    assert len(home['sections']) == 10
+    assert len(home['sections']) == 6
     assert home['latest'] and all(d['id'] and d['title'] for d in home['latest'])
     sections = admin.call('/api/campus/sections')['data']
-    section = next(s for s in sections if s['key'] == 'chat')
+    section = next(s for s in sections if s['key'] == 'travel')
     body = {k: section[k] for k in ('name', 'description', 'position', 'visibility')}
     body['position'] = int(body['position']); body['is_open'] = bool(section['is_open'])
-    matches = admin.call('/api/discussions?filter[tag]=campus-chat')['data']
+    matches = admin.call('/api/discussions?filter[tag]=campus-travel')['data']
     discussion = int(matches[0]['id'])
     try:
         restricted = {**body, 'visibility': 'members'}
         admin.call('/api/campus/sections/' + str(section['id']), 'PATCH', restricted)
-        assert not any(s['key'] == 'chat' for s in guest.call('/api/campus/home')['data']['sections'])
+        assert not any(s['key'] == 'travel' for s in guest.call('/api/campus/home')['data']['sections'])
         guest.call('/api/discussions/' + str(discussion), expected=(403,404))
         results = guest.call('/api/discussions?filter[q]='+str(discussion))
         assert not any(d['id'] == str(discussion) for d in results.get('data', []))
@@ -78,15 +78,15 @@ def phase2(f, guest, admin):
             assert pending.call('/api/campus/aggregation/items')['data']==guest.call('/api/campus/aggregation/items')['data']
             assert not fixture(f,{'action':'inspect','user_id':pending_id,'password':pending_password})['is_email_confirmed']
             sections=admin.call('/api/campus/sections')['data']
-            restricted=next(section for section in sections if section['key']=='chat')
+            restricted=next(section for section in sections if section['key']=='travel')
             original={key:restricted[key] for key in ('name','description','position','visibility')}
             original['position']=int(original['position']); original['is_open']=bool(restricted['is_open'])
             try:
                 admin.call('/api/campus/sections/'+str(restricted['id']),'PATCH',{**original,'visibility':'members','is_open':True})
-                assert not any(section['key']=='chat' for section in pending.call('/api/campus/home')['data']['sections'])
+                assert not any(section['key']=='travel' for section in pending.call('/api/campus/home')['data']['sections'])
                 confirm_email(guest.url,confirmation)
                 confirmed=guest.login(pending_email,pending_password)
-                assert any(section['key']=='chat' for section in confirmed.call('/api/campus/home')['data']['sections'])
+                assert any(section['key']=='travel' for section in confirmed.call('/api/campus/home')['data']['sections'])
                 assert confirmed.call('/api/campus/aggregation/items/'+str(private_id))['data']['id']==private_id
             finally:
                 admin.call('/api/campus/sections/'+str(restricted['id']),'PATCH',original)
@@ -115,17 +115,17 @@ def phase2(f, guest, admin):
             state=fixture(f,{'action':'inspect','user_id':uid,'password':first['password'],'target':str(rid)})
             assert all(r['evidence'] is None for r in state['verifications']) and 1 not in state['groups'] and 4 not in state['groups']
             member.call('/api/users/'+str(uid),'PATCH',{'data':{'type':'users','id':str(uid),'relationships':{'groups':{'data':[{'type':'groups','id':'1'}]}}}},expected=(403,422))
-            sections=admin.call('/api/campus/sections')['data']; chat=next(s for s in sections if s['key']=='chat'); life=next(s for s in sections if s['key']=='life')
-            discussion=int(admin.call('/api/discussions?filter[tag]=campus-chat')['data'][0]['id'])
+            sections=admin.call('/api/campus/sections')['data']; travel=next(s for s in sections if s['key']=='travel'); life=next(s for s in sections if s['key']=='life')
+            discussion=int(admin.call('/api/discussions?filter[tag]=campus-travel')['data'][0]['id'])
             outside=int(admin.call('/api/discussions?filter[tag]=campus-life')['data'][0]['id'])
-            admin.call('/api/campus/moderators','POST',{'user_id':uid,'section_id':chat['id'],'enabled':True,'reason':'开发示例分区授权'})
+            admin.call('/api/campus/moderators','POST',{'user_id':uid,'section_id':travel['id'],'enabled':True,'reason':'开发示例分区授权'})
             member.call('/api/campus/moderate','POST',{'discussion_id':outside,'action':'hide','reason':'跨分区操作必须拒绝'},expected=(401,403))
             member.call('/api/campus/moderate','POST',{'discussion_id':discussion,'action':'hide','reason':'短'},expected=422)
             member.call('/api/campus/moderate','POST',{'discussion_id':discussion,'action':'hide','reason':'开发示例隐藏测试'})
             guest.call('/api/discussions/'+str(discussion),expected=(403,404))
             member.call('/api/campus/moderate','POST',{'discussion_id':discussion,'action':'restore','reason':'开发示例恢复测试'})
             guest.call('/api/discussions/'+str(discussion))
-            admin.call('/api/campus/moderators','POST',{'user_id':uid,'section_id':chat['id'],'enabled':False,'reason':'开发示例权限交接撤销'})
+            admin.call('/api/campus/moderators','POST',{'user_id':uid,'section_id':travel['id'],'enabled':False,'reason':'开发示例权限交接撤销'})
             member.call('/api/campus/moderate','POST',{'discussion_id':discussion,'action':'hide','reason':'撤权后操作必须拒绝'},expected=(401,403))
             admin.call('/api/campus/identity/'+str(rid),'PATCH',{'status':'revoked','reason':'开发示例验证撤销'})
             assert not member.call('/api/campus/identity')['data']['verified']

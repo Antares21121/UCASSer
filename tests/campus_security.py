@@ -34,7 +34,7 @@ def security_checks(f, guest, admin):
     guest.call('/api/campus/search?q[]=unexpected','GET',expected=422)
     guest.call('/api/campus/records?course_id[]=unexpected','GET',expected=422)
     first=account(guest,admin); member=first['api']
-    section=next(s for s in admin.call('/api/campus/catalog')['data']['sections'] if s['key']=='life')
+    section=next(s for s in admin.call('/api/campus/catalog')['data']['sections'] if s['key']=='careers')
     payload=information(admin,section['id'])
     record=member.call('/api/campus/records','POST',payload,expected=201)['data']
     member.call('/api/campus/records','POST',payload,expected=422)

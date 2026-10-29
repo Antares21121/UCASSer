@@ -9,15 +9,15 @@ class SetupCommand extends AbstractCommand
         $this->sections->installDefaults();
         $this->identity->setup();
         resolve(Records::class)->setup();
-        // Choose a blue baseline once; retain administrators' custom colors.
+        // Choose the campus-red baseline once; retain administrators' custom colors.
         if (!$this->settings->get('ucasser-campus.theme_initialized')) {
-            if (in_array($this->settings->get('theme_primary_color'),[null,'','#536F90','#536f90','#4d698e','#4D698E'],true)) $this->settings->set('theme_primary_color','#2563eb');
+            if (in_array($this->settings->get('theme_primary_color'),[null,'','#536F90','#536f90','#4d698e','#4D698E','#2563eb'],true)) $this->settings->set('theme_primary_color','#A71937');
             $this->settings->set('ucasser-campus.theme_initialized','1');
         }
-        // Move only our previous blue default to the new campus-red visual system.
+        // Move only our previous blue/red defaults to the new visual system.
         if (!$this->settings->get('ucasser-campus.redesign_initialized')) {
-            if (in_array(strtolower((string) $this->settings->get('theme_primary_color')), ['#2563eb','#4d698e','#536f90'], true)) {
-                $this->settings->set('theme_primary_color','#bd1838');
+            if (in_array(strtolower((string) $this->settings->get('theme_primary_color')), ['#2563eb','#4d698e','#536f90','#bd1838','#c8193b'], true)) {
+                $this->settings->set('theme_primary_color','#A71937');
             }
             $this->settings->set('ucasser-campus.redesign_initialized','1');
         }

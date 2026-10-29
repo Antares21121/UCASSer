@@ -86,15 +86,24 @@ export const field = (name, label, value, onchange, options = {}) => {
     textarea,
     utc,
     hint,
+    options: selectOptions,
     ...attrs
   } = options;
   if (textarea) delete attrs.type;
-  return m('label.Campus-field', [m('span.Campus-fieldLabel', label + (utc ? '（北京时间）' : '')), m(textarea ? 'textarea.FormControl' : 'input.FormControl', {
+  const control = selectOptions ? m('select.FormControl', {
+    name,
+    value: value ?? '',
+    oninput: e => onchange(e.target.value),
+    ...attrs
+  }, selectOptions.map(([optionValue, title]) => m('option', {
+    value: optionValue
+  }, title))) : m(textarea ? 'textarea.FormControl' : 'input.FormControl', {
     name,
     value: utc ? localInput(value) : value ?? '',
     oninput: e => onchange(utc ? utcInput(e.target.value) : e.target.value),
     ...attrs
-  }), hint ? m('small.Campus-hint', hint) : null]);
+  });
+  return m('label.Campus-field', [m('span.Campus-fieldLabel', label + (utc ? '（北京时间）' : '')), control, hint ? m('small.Campus-hint', hint) : null]);
 };
 export const pageHeading = (title, description, actions) => m('header.Campus-pageHeader', [m('div', [m('h1', title), description ? m('p.Campus-lead', description) : null]), actions ? m('div.Campus-actions', actions) : null]);
 export const emptyState = (title, description, action) => m('div.Campus-empty', [symbol('seedling'), m('strong', title), m('p', description), action]);

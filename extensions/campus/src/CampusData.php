@@ -20,6 +20,15 @@ class CampusData extends Type
             $out[$table]=$query->get()->map(function ($row) { unset($row->reviewer_id); return $row; })->all();
         }
         $out['campus_cases']=$db->table('campus_cases')->where('reporter_id',$this->user->id)->get(['id','target_type','target_id','reason','status','resolution','created_at','updated_at'])->all();
+        if ($db->getSchemaBuilder()->hasTable('campus_user_tags')) {
+            $out['campus_profile']=['suffix'=>$db->table('campus_user_tags')->where('user_id',$this->user->id)->value('suffix')];
+        }
+        if ($db->getSchemaBuilder()->hasTable('campus_user_stats')) {
+            $out['campus_profile']['experience']=$db->table('campus_user_stats')->where('user_id',$this->user->id)->first();
+        }
+        if ($db->getSchemaBuilder()->hasTable('campus_post_images')) {
+            $out['campus_post_images']=$db->table('campus_post_images')->where('owner_id',$this->user->id)->get(['id','discussion_id','post_id','bytes','created_at'])->all();
+        }
         return ['campus.json'=>$this->encodeForExport($out)];
     }
     public function anonymize(): void
@@ -45,6 +54,17 @@ class CampusData extends Type
             $db->table('campus_feedback')->where('reviewer_id',$id)->update(['reviewer_id'=>null]);
             $db->table('campus_verifications')->where('reviewer_id',$id)->update(['reviewer_id'=>null]);
             $db->table('campus_audit')->where('actor_id',$id)->update(['actor_id'=>null]);
+            if ($db->getSchemaBuilder()->hasTable('campus_user_tags')) {
+                // Suffixes are permanent public disambiguators: reserved, not reused.
+                $db->table('campus_user_tags')->where('user_id',$id)->update(['user_id'=>null,'reserved'=>true]);
+            }
+            if ($db->getSchemaBuilder()->hasTable('campus_user_stats')) $db->table('campus_user_stats')->where('user_id',$id)->delete();
+            if ($db->getSchemaBuilder()->hasTable('campus_post_images')) {
+                foreach ($db->table('campus_post_images')->where('owner_id',$id)->get(['id']) as $image) {
+                    @unlink(dirname(__DIR__,3).'/storage/campus-post-images/'.$image->id.'.image');
+                }
+                $db->table('campus_post_images')->where('owner_id',$id)->update(['owner_id'=>null]);
+            }
         });
     }
     public function delete(): void { $this->anonymize(); }

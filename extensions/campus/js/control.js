@@ -10,8 +10,68 @@ const tabs = [
   ['review', '信息审核', 'clipboard-check'],
   ['sources', '来源管理', 'rss'],
   ['identity', '身份审核', 'user-check'],
-  ['cases', '举报处理', 'flag']
+  ['cases', '举报处理', 'flag'],
+  ['colleges', '学院目录', 'university'],
+  ['courses', '课程目录', 'book'],
+  ['resources', '共享资料', 'folder-open']
 ];
+const catalogKinds = {
+  colleges: {
+    title: '学院目录',
+    api: 'control/catalog/colleges',
+    hint: '学院是受控目录：名称唯一，可改名而不破坏课程关联；停用后不再出现在公开选择中。',
+    template: ['external_key,name,aliases,status', 'demo-college-01,示例学院,演示学院,active'],
+    form: [
+      ['code', '稳定代码', { required: true, minlength: 1, maxlength: 40 }],
+      ['name', '学院名称', { required: true, minlength: 2, maxlength: 120 }],
+      ['aliases', '别名（逗号分隔）', { maxlength: 300 }],
+      ['external_key', '外部稳定编号', { maxlength: 80 }]
+    ],
+    columns: [
+      ['name', '名称'], ['code', '代码'], ['aliases', '别名'], ['status', '状态'], ['position', '排序']
+    ]
+  },
+  courses: {
+    title: '课程目录',
+    api: 'control/catalog/courses',
+    hint: '课程按「学院 + 代码 + 学期」确定唯一身份；同名课程不会自动合并，名称冲突需人工处理。',
+    template: ['external_key,college_key,code,name,semester,type,nature,description', 'demo-course-01,demo-college-01,DEMO101,示例课程,2026秋,本科,选修,仅用于测试'],
+    form: [
+      ['code', '课程代码', { maxlength: 32 }],
+      ['name', '课程名称', { required: true, minlength: 2, maxlength: 80 }],
+      ['college_id', '开课学院', { type: 'select' }],
+      ['semester', '学期', { maxlength: 80 }],
+      ['type', '类型', { maxlength: 80 }],
+      ['nature', '性质', { maxlength: 80 }],
+      ['description', '简介', { textarea: true, maxlength: 2000 }],
+      ['external_key', '外部稳定编号', { maxlength: 80 }]
+    ],
+    columns: [
+      ['name', '课程'], ['code', '代码'], ['college_name', '学院'], ['semester', '学期'], ['type', '类型'], ['nature', '性质']
+    ]
+  },
+  resources: {
+    title: '共享资料网盘链接',
+    api: 'control/catalog/resources',
+    hint: '这里录入的是链接元数据，不托管网盘文件；只允许 https 链接，页面输出转义、外链新窗口打开。',
+    template: ['external_key,course_key,title,url,resource_type,description,source_url,share_permission,access_code,status', 'demo-resource-01,demo-course-01,示例课程公开资料,https://example.org/course,参考链接,仅用于测试,https://example.org/course,已获分享许可,,pending'],
+    form: [
+      ['title', '资料标题', { required: true, minlength: 2, maxlength: 180 }],
+      ['url', '访问链接（https）', { required: true, type: 'url', maxlength: 2048 }],
+      ['category_id', '课程归属', { type: 'select' }],
+      ['resource_type', '资料类型', { maxlength: 40 }],
+      ['description', '简介', { textarea: true, maxlength: 2000 }],
+      ['source_url', '来源链接', { type: 'url', maxlength: 2048 }],
+      ['share_permission', '来源 / 分享授权说明', { textarea: true, maxlength: 2000 }],
+      ['access_code', '提取码（可选）', { maxlength: 80 }],
+      ['status', '状态', { type: 'select' }],
+      ['external_key', '外部稳定编号', { maxlength: 80 }]
+    ],
+    columns: [
+      ['title', '标题'], ['url', '链接'], ['category_name', '归属'], ['resource_type', '类型'], ['status', '状态'], ['updated_at', '更新时间']
+    ]
+  }
+};
 
 export default class ControlPage extends DataPage {
   requiresLogin = true;
@@ -25,6 +85,9 @@ export default class ControlPage extends DataPage {
     this.caseNotes = {};
     this.caseActions = {};
     this.sourceForm = { kind: 'web', name: '', url: '' };
+    this.catalogForm = null;
+    this.catalogImport = null;
+    this.catalogOptions = null;
     super.oninit(vnode);
   }
 
@@ -35,6 +98,15 @@ export default class ControlPage extends DataPage {
       review: `aggregation/queue?page=${this.page}`, sources: 'aggregation/sources',
       identity: `identity/queue?page=${this.page}`, cases: `cases?status=open&page=${this.page}`
     }[this.tab];
+    const catalogKind = Object.keys(catalogKinds).includes(this.tab) ? this.tab : null;
+    if (catalogKind) {
+      const detail = await api(`${catalogKinds[catalogKind].api}?page=${this.page}` + (this.catalogSearch ? `&search=${encodeURIComponent(this.catalogSearch)}` : ''));
+      this.detail = detail.data.items || [];
+      this.detailMeta = detail.data.meta || { total: 0 };
+      if (catalogKind !== 'colleges') this.catalogOptions = (await api('control/catalog/categories')).data;
+      this.data = { work: {}, content: {}, community: {}, sources: {} };
+      return;
+    }
     const [overview, detail] = await Promise.all([api('control'), path ? api(path) : Promise.resolve(null)]);
     this.data = overview.data;
     this.detail = detail?.data || [];
@@ -233,6 +305,156 @@ export default class ControlPage extends DataPage {
     ]);
   }
 
+  catalogImportSummary(result) {
+    if (!result) return null;
+    return m('div.Campus-catalogImportSummary', { role: 'status' }, [
+      m('p', `共 ${result.total} 行：有效 ${result.valid}，新增 ${result.new}，更新 ${result.updated}，跳过 ${result.skipped}，冲突 ${result.conflicts}，失败 ${result.failed}。`),
+      result.batch_id ? m('p', `已应用为批次 #${result.batch_id}；如需撤销，可回滚该批次。`) : m('p.Campus-hint', '预览模式：尚未写入。核对逐行结果后再确认导入。'),
+      m('table.Campus-catalogImportTable', [
+        m('thead', m('tr', [m('th', '行'), m('th', '结果'), m('th', '外部编号'), m('th', '说明')])),
+        m('tbody', (result.results || []).map(row => m('tr', [m('td', row.line), m('td', row.action), m('td', row.external_key || ''), m('td', row.error || '')])))
+      ])
+    ]);
+  }
+
+  async importCatalogFile(event) {
+    const kind = this.tab;
+    const config = catalogKinds[kind];
+    if (!config) return;
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (file.size > 1024 * 1024) {
+      this.notice = '导入文件不能超过 1 MB。';
+      this.noticeError = true;
+      return;
+    }
+    let rows;
+    try {
+      const text = await file.text();
+      if (file.name.toLowerCase().endsWith('.json')) {
+        rows = JSON.parse(text);
+        if (!Array.isArray(rows)) throw new Error('数组');
+      } else {
+        const lines = text.split(/\r?\n/).filter(line => line.trim());
+        const headers = lines.shift().replace(/^\uFEFF/, '').split(',');
+        rows = lines.map(line => {
+          const values = line.split(',');
+          const row = {};
+          headers.forEach((header, index) => row[header.trim()] = (values[index] ?? '').trim());
+          return row;
+        });
+      }
+    } catch (error) {
+      this.notice = '文件读取或解析失败：请使用控制台下载的模板格式。';
+      this.noticeError = true;
+      return;
+    }
+    this.catalogImport = {
+      kind,
+      rows,
+      result: null,
+      applying: false
+    };
+    return this.perform(async () => {
+      const response = await api(config.api + '/import', 'POST', {
+        rows: this.catalogImport.rows,
+        apply: false
+      });
+      this.catalogImport.result = response.data;
+    }, { message: '预览已生成：请核对逐行结果后再确认导入。', refresh: false });
+  }
+
+  applyCatalogImport() {
+    const kind = this.catalogImport?.kind;
+    const config = catalogKinds[kind];
+    if (!config) return;
+    return this.perform(async () => {
+      const response = await api(config.api + '/import', 'POST', {
+        rows: this.catalogImport.rows,
+        apply: true
+      });
+      this.catalogImport.result = response.data;
+    }, { message: '导入已应用并记录批次，可随时回滚。' });
+  }
+
+  downloadTemplate() {
+    const config = catalogKinds[this.tab];
+    if (!config) return;
+    const content = config.template.map(line => line.split(',').join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'campus-' + this.tab + '-template.csv';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  catalogPanel() {
+    const config = catalogKinds[this.tab];
+    if (!config) return null;
+    const form = this.catalogForm;
+    const statuses = ['active', 'inactive'];
+    const resourceStatuses = [['active', '正常'], ['needs_review', '待审核'], ['broken', '已失效'], ['archived', '已归档']];
+    return m('section.Campus-controlSection', [
+      m('div.Campus-controlSectionHead', [m('h2', config.title), m('span', `${this.detailMeta?.total || 0} 条记录`)]),
+      m('p.Campus-hint', config.hint),
+      m('div.Campus-actions', [
+        m(Button, { className: 'Button Button--primary', onclick: () => { this.catalogForm = this.emptyCatalogForm(); } }, '新建记录'),
+        m(Button, { onclick: () => this.downloadTemplate() }, '下载导入模板'),
+        m('label.Campus-controlUpload', [symbol('file-upload'), ' 选择 CSV / JSON 预览导入', m('input', { type: 'file', accept: '.csv,.json', disabled: this.busy, onchange: e => this.importCatalogFile(e) })])
+      ]),
+      this.catalogImport ? [this.catalogImportSummary(this.catalogImport.result), this.catalogImport.result && !this.catalogImport.result.batch_id ? m('div.Campus-actions', [m(Button, { className: 'Button Button--primary', loading: this.busy, onclick: () => this.applyCatalogImport() }, '确认导入（写入）'), m(Button, { onclick: () => this.catalogImport = null }, '放弃导入')]) : null] : null,
+      form ? m('form.Campus-panel.Campus-catalogForm', {
+        onsubmit: e => {
+          e.preventDefault();
+          const body = {};
+          for (const [key] of config.form) body[key] = form[key] === '' ? null : form[key];
+          body.status = form.status || (this.tab === 'colleges' ? 'active' : this.tab === 'resources' ? 'needs_review' : undefined);
+          if (this.tab === 'resources' && !body.status) delete body.status;
+          this.perform(() => api(config.api + (form.id ? '/' + form.id : ''), form.id ? 'PATCH' : 'POST', body), {
+            message: '记录已保存并写入审计。',
+            after: () => { this.catalogForm = null; }
+          });
+        }
+      }, [m('h3', form.id ? '编辑记录 #' + form.id : '新建记录'), this.tab === 'courses' ? field('college_id', '开课学院', form.college_id, v => form.college_id = v, {
+        type: 'select',
+        options: [['', '不关联学院'], ...(this.catalogOptions?.colleges || []).map(c => [c.id, c.name + '（' + c.code + '）'])]
+      }) : null, ...config.form.filter(([key]) => !(this.tab === 'courses' && key === 'college_id')).map(([key, label, options]) => {
+        if (options.type === 'select') {
+          return field(key, label, form[key], v => form[key] = v, {
+            options: this.tab === 'resources' && key === 'category_id' ? [['', '选择课程归属'], ...(this.catalogOptions?.categories || []).map(c => [c.id, c.name])] : key === 'status' ? (this.tab === 'resources' ? resourceStatuses : statuses.map(s => [s, s === 'active' ? '正常' : '停用'])) : []
+          });
+        }
+        return field(key, label, form[key], v => form[key] = v, options);
+      }), m('div.Campus-actions', [m(Button, { type: 'submit', className: 'Button Button--primary' }, '保存记录'), m(Button, { type: 'button', onclick: () => this.catalogForm = null }, '取消')])]) : null,
+      this.detail.length ? m('div.Campus-controlQueue', this.detail.map(row => m('article.Campus-controlQueueItem', { key: row.id }, [
+        m('h3', row.title || row.name),
+        m('p.Campus-controlQueueMeta', config.columns.map(([key, label]) => [label, row[key]]).filter(([, value]) => value !== null && value !== undefined && value !== '').map(([label, value]) => `${label}：${value}`).join(' · ')),
+        this.tab === 'resources' && row.url ? m('a', { href: row.url, target: '_blank', rel: 'noopener noreferrer nofollow' }, '打开链接 ↗') : null,
+        m('div.Campus-actions', [
+          m(Button, { onclick: () => { this.catalogForm = this.emptyCatalogForm(row); } }, '编辑'),
+          this.tab === 'colleges' ? m(Button, { onclick: () => this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: row.status === 'active' ? 'inactive' : 'active' }), { message: '状态已更新并写入审计。' }) }, row.status === 'active' ? '停用' : '启用') : null,
+          this.tab === 'resources' ? m(Button, { onclick: () => this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: 'broken' }), { message: '已标记为失效链接。' }) }, '报告失效') : null
+        ])
+      ]))) : emptyState('还没有记录', '使用上方表单或批量导入建立目录；导入会先预览再写入。'),
+      this.pager(25)
+    ]);
+  }
+
+  emptyCatalogForm(row = null) {
+    const config = catalogKinds[this.tab];
+    const form = { id: row?.id || '' };
+    for (const [key] of config.form) form[key] = row?.[key] ?? '';
+    if (this.tab === 'resources') form.status = row?.status || 'needs_review';
+    if (this.tab === 'colleges') form.status = row?.status || 'active';
+    if (this.tab === 'courses' && row?.offer) form.college_id = row?.offer?.college_id ?? row?.college_id ?? '';
+    if (this.tab === 'courses') form.college_id = row?.college_id ?? '';
+    return form;
+  }
+
   content() {
     const d = this.data;
     const job = d.collection_job;
@@ -246,13 +468,14 @@ export default class ControlPage extends DataPage {
         link('/campus/control' + (name === 'overview' ? '' : '?tab=' + name), [symbol(icon), title], {
           'aria-current': this.tab === name ? 'page' : undefined
         }))),
-      m('p.Campus-controlTimestamp', '数据更新于 ' + formatTime(d.generated_at)),
-      d.sources.collector?.state === 'authorization_required' ? m('div.Campus-notice.is-error', { role: 'alert' },
+      m('p.Campus-controlTimestamp', d.generated_at ? '数据更新于 ' + formatTime(d.generated_at) : '当前为目录管理栏目'),
+      d.sources?.collector?.state === 'authorization_required' ? m('div.Campus-notice.is-error', { role: 'alert' },
         '公众号订阅授权已失效，请在采集器管理页面重新扫码；服务器上的本机地址需要安全转发才能访问。') :
-      d.sources.collector?.state === 'unavailable' ? m('div.Campus-notice.is-error', { role: 'alert' },
+      d.sources?.collector?.state === 'unavailable' ? m('div.Campus-notice.is-error', { role: 'alert' },
         '公众号订阅服务不可用，请检查采集工具和运行日志。') : null,
       this.tab === 'review' ? this.reviewPanel() : this.tab === 'sources' ? this.sourcesPanel() :
         this.tab === 'identity' ? this.identityPanel() : this.tab === 'cases' ? this.casesPanel() :
+        Object.keys(catalogKinds).includes(this.tab) ? this.catalogPanel() :
       m('div.Campus-controlLayout', [
         m('main.Campus-controlMain', [
           m('section.Campus-controlCollect', [

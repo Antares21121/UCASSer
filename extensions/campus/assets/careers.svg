@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-label="公文包与文件，代表实习与就业机会">
+  <rect width="320" height="240" fill="#F7F4EE"/>
+  <g transform="translate(84 78)">
+    <rect x="8" y="26" width="128" height="80" rx="12" fill="#1C3042"/>
+    <rect x="34" y="6" width="76" height="30" rx="8" fill="#1C3042" opacity="0.9"/>
+    <rect x="44" y="6" width="56" height="8" rx="4" fill="#C22A49"/>
+    <rect x="34" y="26" width="76" height="6" fill="#8E6B4F"/>
+    <rect x="34" y="64" width="60" height="24" rx="4" fill="#FFFFFF" opacity="0.9"/>
+    <rect x="42" y="72" width="44" height="6" rx="3" fill="#DFEAF2"/>
+    <circle cx="104" cy="76" r="7" fill="#C22A49"/>
+  </g>
+  <g transform="translate(228 96)">
+    <rect x="0" y="0" width="60" height="82" rx="8" fill="#FFFFFF" stroke="#E6DFD1"/>
+    <rect x="10" y="12" width="40" height="7" rx="3" fill="#DFEAF2"/>
+    <rect x="10" y="26" width="34" height="6" rx="3" fill="#E6DFD1"/>
+    <rect x="10" y="38" width="38" height="6" rx="3" fill="#E6DFD1"/>
+    <path d="M30 58c-8 0-14 6-14 14h28c0-8-6-14-14-14z" fill="#C22A49"/>
+  </g>
+  <g transform="translate(150 148)">
+    <path d="M0 8l16-14 16 14z" fill="#A71937"/>
+    <path d="M4 8v10h24V8" fill="#A71937" opacity="0.8"/>
+    <path d="M8 14h16" stroke="#F7F4EE" stroke-width="2" opacity="0.7"/>
+  </g>
+  <rect x="52" y="196" width="216" height="6" rx="3" fill="#E6DFD1"/>
+</svg>

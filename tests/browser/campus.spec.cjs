@@ -10,7 +10,7 @@ test('homepage, header, tag list and discussion use original Flarum components o
   await expect(page.locator('.WelcomeHero')).toContainText('校园公共论坛');
   await expect(page.locator('.DiscussionListItem').first()).toBeVisible();
   await expect(page.locator('.Navigation-back')).toHaveCount(0);
-  await expect(page.locator('.Campus-section')).toHaveCount(10);
+  await expect(page.locator('.Campus-section')).toHaveCount(6);
   await expect(page.locator('.Campus-topbar')).toHaveCount(0);
   await expect(page.locator('.Header-primary').getByRole('link',{name:'首页',exact:true})).toBeVisible();
   await page.locator('.Campus-section').filter({hasText:'共享资料库'}).click();
@@ -36,9 +36,9 @@ test('homepage, header, tag list and discussion use original Flarum components o
   expect(errors).toEqual([]);
 });
 
-test('native campus search stays usable without access to the course section',async({page})=>{
+test('native campus search stays usable without access to a course section',async({page})=>{
   let courseRequests=0,catalogRequests=0;
-  await page.route('**/api/campus/catalog',async route=>{catalogRequests++;const response=await route.fetch(),body=await response.json();body.data.sections=body.data.sections.filter(s=>s.key!=='courses');await route.fulfill({response,json:body});});
+  await page.route('**/api/campus/catalog',async route=>{catalogRequests++;const response=await route.fetch(),body=await response.json();body.data.sections=body.data.sections.filter(s=>s.key!=='secondhand');await route.fulfill({response,json:body});});
   await page.route('**/api/campus/courses*',route=>{courseRequests++;return route.fulfill({status:403,json:{errors:[]}});});
   await page.goto('/campus/search');
   await expect(page.getByRole('heading',{name:'详细检索',exact:true})).toBeVisible();

@@ -81,7 +81,7 @@ test('a delayed previous board cannot flash or replace the next board',async({pa
     await route.fulfill({response});
   });
   try {
-    await page.locator('.Header-primary').getByRole('link',{name:'课程经验',exact:true}).click();
+    await page.locator('.Header-primary').getByRole('link',{name:'校园信息',exact:true}).click();
     await ready;
     await expect(page.locator('.Campus-feedLoading')).toBeVisible();
     await expect(page.locator('.DiscussionListItem')).toHaveCount(0);

@@ -5,12 +5,15 @@ test('visitor home makes the four main tasks reachable on desktop and phone', as
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/campus');
   await expect(page.locator('.Campus-homeIdentity')).toContainText('非学校官方平台');
-  await expect(page.locator('.Campus-homeArtwork')).toHaveAttribute('aria-hidden', 'true');
+  // The hero image is meaningful content with a descriptive alt, not a
+  // decorative aria-hidden ornament.
+  await expect(page.locator('.Campus-homeArtwork img')).toHaveAttribute('alt', /书|笔记/);
   const paths = page.getByRole('navigation', { name: '校园常用入口' });
-  await expect(paths.getByRole('link')).toHaveCount(4);
+  await expect(paths.getByRole('link')).toHaveCount(5);
   for (const [name, href] of [
     ['查看校园信息', '/campus/aggregation'],
     ['寻找学习资料', '/resources'],
+    ['浏览课程目录', '/campus/courses'],
     ['提出一个问题', '/t/campus-questions'],
     ['打开校园工具', '/campus/tools']
   ]) await expect(paths.getByRole('link', { name: new RegExp(name) })).toHaveAttribute('href', href);

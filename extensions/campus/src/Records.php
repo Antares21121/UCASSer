@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class Records
 {
     public const CATEGORIES=[
-        'information'=>['activity'=>'校园活动','lecture'=>'讲座','internship'=>'实习','job'=>'就业','competition'=>'竞赛','recruit'=>'招募','volunteer'=>'志愿','market'=>'二手','travel'=>'出行','buddy'=>'找伙伴','help'=>'互助','other'=>'其他'],
+        'information'=>['activity'=>'校园活动','lecture'=>'讲座','academic'=>'学术活动','internship'=>'实习','job'=>'就业','competition'=>'竞赛','recruit'=>'招募','volunteer'=>'志愿','market'=>'二手','travel'=>'出行','buddy'=>'找伙伴','help'=>'互助','other'=>'其他'],
         'resource'=>['lecture'=>'公开讲义','notes'=>'学习笔记','exam'=>'考试经验','revision'=>'复习指南','competition'=>'竞赛资料','academic'=>'学术阅读','guide'=>'校园指南','faq'=>'常见问题','other'=>'其他合法共享资源'],
         'question'=>['study'=>'学习与课程','life'=>'校园生活','procedure'=>'校园办事','activity'=>'活动与竞赛','other'=>'其他互助'],
         'review'=>['experience'=>'课程体验'],
@@ -50,7 +50,21 @@ class Records
         if ($section->key==='governance') $actor->assertAdmin();
         if ($type==='resource' && $section->key!=='resources') throw new ValidationException(['section_id'=>'资料必须发布到共享资料分区']);
         if ($type==='question' && $section->key!=='questions') throw new ValidationException(['section_id'=>'问题必须发布到问答分区']);
-        if ($type==='review' && $section->key!=='courses') throw new ValidationException(['section_id'=>'课程评价必须发布到课程分区']);
+        if ($type==='review' && $section->key!=='archive') throw new ValidationException(['section_id'=>'课程评价使用内部归档分类，请从课程目录的发布入口发起']);
+        if ($type==='information') {
+            $boardCategories = [
+                'secondhand' => ['market'],
+                'travel' => ['travel', 'buddy'],
+                'life' => ['help', 'buddy', 'other'],
+                'careers' => ['activity', 'lecture', 'academic', 'internship', 'job', 'competition', 'recruit', 'volunteer'],
+            ];
+            if (isset($boardCategories[$section->key]) && !in_array($category, $boardCategories[$section->key], true)) {
+                throw new ValidationException(['category'=>'该分类不能发布到此板块，请选择对应板块']);
+            }
+            if (!in_array($section->key, ['secondhand', 'travel', 'life', 'careers'], true)) {
+                throw new ValidationException(['section_id'=>'校园信息请发布到二手、出行、生活互助或机会板块']);
+            }
+        }
         $actor->assertPermission($this->sections->allowed($actor,$section));
         $status=$d['status'] ?? $row?->status ?? self::STATES[$type][0]; if (!in_array($status,self::STATES[$type],true)) throw new ValidationException(['status'=>'请选择有效状态']);
         if ($type==='question' && (($status==='resolved' && !$row?->accepted_post_id) || ($row?->accepted_post_id && $status!=='resolved'))) throw new ValidationException(['status'=>'请通过采纳或取消采纳更改解决状态']);

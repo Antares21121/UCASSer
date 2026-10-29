@@ -7,33 +7,36 @@ use Illuminate\Database\ConnectionInterface;
 
 class Sections
 {
-    public const ICONS = ['news'=>'bullhorn','careers'=>'briefcase','academic'=>'microscope','life'=>'hands-helping','market'=>'exchange-alt','resources'=>'book-open','courses'=>'graduation-cap','questions'=>'comment-dots','chat'=>'comments','governance'=>'balance-scale'];
+    public const ICONS = ['careers'=>'briefcase','life'=>'hands-helping','secondhand'=>'box-open','travel'=>'route','resources'=>'book-open','questions'=>'comment-dots','archive'=>'archive'];
+    /** Key => [name, description, icon, is_open, visibility]. Retired boards are absent: setup must never rebuild them. */
     public const DEFAULTS = [
-        'news' => ['校园资讯与活动', '校园活动、公共通知与机会'],
-        'careers' => ['实习、就业与竞赛', '实习、就业、竞赛与项目招募'],
-        'academic' => ['讲座、学术与志愿服务', '讲座、学术活动与志愿参与'],
-        'life' => ['校园生活与互助', '生活经验、需求与互助'],
-        'market' => ['二手交易与出行信息', '二手物品、拼车与出行'],
-        'resources' => ['共享资料库', '资料来源、版权说明与有效链接'],
-        'courses' => ['课程评价与学习经验', '课程体验、学习负担与备考经验'],
-        'questions' => ['校园问答', '提问、回答与公共知识积累'],
-        'chat' => ['闲聊与公共讨论', '友善交流与公共议题'],
-        'governance' => ['社区公告与治理', '社区公约、规则与治理公告'],
+        'careers' => ['实习、就业与竞赛', '实习、就业、竞赛与项目招募', 'briefcase', true, 'public'],
+        'life' => ['校园生活与互助', '生活经验、需求与互助', 'hands-helping', true, 'public'],
+        'secondhand' => ['二手交易', '二手物品转让与求购', 'box-open', true, 'public'],
+        'travel' => ['出行信息', '拼车、同行与出行安排', 'route', true, 'public'],
+        'resources' => ['共享资料库', '资料来源、版权说明与有效链接', 'book-open', true, 'public'],
+        'questions' => ['校园问答', '提问、回答与公共知识积累', 'comment-dots', true, 'public'],
+        'archive' => ['课程评价归档', '课程评价讨论的内部归档，不对外展示', 'archive', false, 'public'],
     ];
+    public const RETIRED = BoardMigrator::RETIRED;
     public function __construct(public ConnectionInterface $db) {}
     public function installDefaults(): void
     {
         $this->db->transaction(function () {
-            foreach (self::DEFAULTS as $key => [$name, $description]) {
+            foreach (self::DEFAULTS as $key => [$name, $description, $icon, $isOpen, $visibility]) {
                 if ($this->db->table('campus_sections')->where('key', $key)->exists()) continue;
-                $tag = Tag::query()->where('slug', 'campus-'.$key)->first();
+                $tag = Tag::query()->where('slug', BoardMigrator::TARGETS[$key])->first();
                 if (!$tag) {
-                    $tag = Tag::build($name, 'campus-'.$key, $description, '#2563eb', 'fas fa-'.self::ICONS[$key], false);
+                    $tag = Tag::build($name, BoardMigrator::TARGETS[$key], $description, '#A71937', 'fas fa-'.$icon, !$isOpen);
                     $tag->is_primary = true;
                     $tag->save();
                 }
-                $this->db->table('campus_sections')->insert(['key' => $key, 'tag_id' => $tag->id]);
+                $this->db->table('campus_sections')->insert(['key' => $key, 'tag_id' => $tag->id, 'is_open' => $isOpen, 'visibility' => $visibility]);
             }
+            // Retired sections stay closed even if someone reopens them in the admin panel.
+            $this->db->table('campus_sections')->whereIn('key', self::RETIRED)->update(['is_open' => false]);
+            // And their tags stay out of public tag listings.
+            Tag::query()->whereIn('slug', array_map(fn ($key) => 'campus-'.$key, self::RETIRED))->orWhere('slug', 'general')->update(['is_hidden' => true]);
         });
     }
     public function rows(): array
@@ -46,7 +49,7 @@ class Sections
     {
         if ($actor->isAdmin()) return true;
         if (AccountAccess::isConfirmed($actor) && $this->db->getSchemaBuilder()->hasTable('campus_moderators') && $this->db->table('campus_moderators')->where('user_id',$actor->id)->where('section_id',$section->id)->exists()) return true;
-        if (!$section->is_open) return false;
+        if (!$section->is_open && $section->key !== 'archive') return false;
         return match ($section->visibility) {
             'public' => true,
             'members' => AccountAccess::isConfirmed($actor),
@@ -57,12 +60,21 @@ class Sections
     public function visible(User $actor): array
     {
         $tagIds = Tag::query()->whereVisibleTo($actor)->pluck('id')->all();
-        return array_values(array_filter($this->rows(), fn ($s) => $this->allowed($actor, $s) && in_array($s->tag_id, $tagIds)));
+        return array_values(array_filter($this->rows(), fn ($s) => $s->key !== 'archive' && $this->allowed($actor, $s) && in_array($s->tag_id, $tagIds)));
     }
     public function byId(int $id): object
     {
         $row = $this->db->table('campus_sections')->where('id', $id)->first();
         if (!$row) throw new \Illuminate\Database\Eloquent\ModelNotFoundException;
         return $row;
+    }
+    /** The internal archive section used to categorize review discussions. */
+    public function archive(): ?object
+    {
+        return $this->db->table('campus_sections')->where('key', 'archive')->first();
+    }
+    public function byKey(string $key): ?object
+    {
+        return $this->db->table('campus_sections')->where('key', $key)->first();
     }
 }

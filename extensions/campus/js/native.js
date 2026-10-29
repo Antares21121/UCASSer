@@ -20,25 +20,30 @@ import Button from './button';
 import { labels } from './records';
 import { DataPage, api, field, link, pageHeading, emptyState, symbol, formatTime, errorMessage, loginPrompt, shell } from './ui';
 import { PersonalPage as Collections } from './personal';
-import { boards, BoardHero, routeBoard, boardKey, boardParams, recordOverview, registerBoards } from './boards';
+import { boards, BoardHero, routeBoard, boardKey, boardParams, recordOverview, registerBoards, legacyBoards } from './boards';
 const icons = {
-  news: 'bullhorn',
   careers: 'briefcase',
-  academic: 'microscope',
   life: 'hands-helping',
-  market: 'exchange-alt',
+  secondhand: 'box-open',
+  travel: 'route',
   resources: 'book-open',
-  courses: 'graduation-cap',
-  questions: 'comment-dots',
-  chat: 'comments',
-  governance: 'balance-scale'
+  questions: 'comment-dots'
 };
-const primary = [['/campus', '首页', 'compass'], ['/campus/records?type=information', '校园信息', 'bullhorn'], ['/t/campus-resources', '共享资料', 'book-open'], ['/t/campus-questions', '问答', 'comment-dots'], ['/t/campus-courses', '课程经验', 'graduation-cap']];
+const sectionImages = {
+  careers: 'careers.svg',
+  life: 'life.svg',
+  secondhand: 'secondhand.svg',
+  travel: 'travel.svg',
+  resources: 'resources.svg',
+  questions: 'questions.svg'
+};
+const primary = [['/campus', '首页', 'compass'], ['/campus/records?type=information', '校园信息', 'bullhorn'], ['/t/campus-resources', '共享资料', 'book-open'], ['/t/campus-questions', '问答', 'comment-dots'], ['/campus/courses', '课程目录', 'graduation-cap']];
 const extras = [['/campus/aggregation', '信息汇集', 'stream'], ['/campus/courses', '课程目录', 'graduation-cap'], ['/campus/search', '详细检索', 'search'], ['/campus/identity', '校园身份', 'id-card'], ['/campus/governance', '公开治理', 'balance-scale'], ['/campus/cases', '举报与申诉', 'flag'], ['/campus/rules', '社区公约', 'handshake']];
 const isCampusHome = () => ['/', '/campus', '/all'].includes((m.route.get() || '').split('?')[0]);
 const homePaths = [
   ['/campus/aggregation', '查看校园信息', '学校、学院与同学分享的消息，逐条标明来源和核验状态。', 'bullhorn'],
   ['/resources', '寻找学习资料', '按学院和课程查找资料链接，也能查看校外学习资源。', 'book-open'],
+  ['/campus/courses', '浏览课程目录', '按课程查找学习经验，参考同学分享的评价与建议。', 'graduation-cap'],
   ['/t/campus-questions', '提出一个问题', '从已有问答里找经验，或向社区发起讨论。', 'comment-dots'],
   ['/campus/tools', '打开校园工具', '日历、食堂、课程与出行入口集中在这里。', 'th-large']
 ];
@@ -61,18 +66,14 @@ const homeQuick = () => m('aside.Campus-homeQuick', [
     ['/t/campus-questions', '向同学提问', 'comment-dots']
   ].map(([href, title, icon]) => link(href, [symbol(icon), m('span', title), symbol('arrow-right')])))
 ]);
-const campusArtwork = () => m('svg.Campus-homeArtwork', {
-  viewBox: '0 0 520 280',
-  fill: 'none',
-  'aria-hidden': 'true'
-}, [
-  m('path.Campus-artAxis', { d: 'M260 10V258M22 214H498' }),
-  m('path.Campus-artRoof', { d: 'M66 90H454M90 76H430L405 53H115L90 76ZM118 53L148 35H372L402 53' }),
-  m('path.Campus-artStructure', { d: 'M79 90V196H441V90M95 110H425M95 184H425M215 184V143C215 118 235 100 260 100C285 100 305 118 305 143V184M225 184V144C225 125 239 111 260 111C281 111 295 125 295 144V184' }),
-  ...[110, 145, 180, 340, 375, 410].map(x => m('path.Campus-artColumn', { d: `M${x} 111V184M${x - 6} 111H${x + 6}M${x - 6} 184H${x + 6}` })),
-  m('path.Campus-artSteps', { d: 'M60 196H460M44 206H476M29 214H491' }),
-  m('path.Campus-artBook', { d: 'M260 241C210 227 162 226 119 236V221C162 211 210 212 260 227C310 212 358 211 401 221V236C358 226 310 227 260 241ZM260 227V241M119 249C164 239 211 241 260 254C309 241 356 239 401 249' })
-]);
+const campusArtwork = () => m('div.Campus-homeArtwork', [m('img', {
+  src: app.forum.attribute('baseUrl') + '/api/campus/assets/hero.svg',
+  alt: '书桌上展开的书、笔记与咖啡杯，背景是抽象的校园建筑轮廓',
+  width: 640,
+  height: 400,
+  decoding: 'async',
+  fetchpriority: 'high'
+})]);
 const homeGuide = () => m('section.Campus-homeGuide', { 'aria-labelledby': 'campus-home-guide-title' }, [
   m('div.Campus-homeGuideHeading', [
     m('h2#campus-home-guide-title', '今天从哪里开始？'),
@@ -122,12 +123,16 @@ export async function openCampusComposer(params = {}) {
   if (!catalog.categories[type]) throw {
     status: 404
   };
-  const key = {
+  const key = type === 'review' ? 'archive' : {
     resource: 'resources',
-    question: 'questions',
-    review: 'courses'
+    question: 'questions'
   }[type];
-  const sections = catalog.sections.filter(s => key ? s.key === key : s.key !== 'governance' || app.session.user.isAdmin());
+  let sections = catalog.sections.filter(s => key ? s.key === key : s.key !== 'governance' || app.session.user.isAdmin());
+  if (type === 'review') sections = [{
+    id: catalog.review_section_id,
+    key: 'archive',
+    name: '课程评价归档'
+  }];
   if (!sections.length || !Object.keys(catalog.categories[type]).length) {
     app.alerts.show({
       type: 'error'
@@ -823,7 +828,6 @@ export function registerNative() {
       link('/resources', [symbol('book-open'), '找学习资料'], { className: 'Campus-homeHeroAction' })
     ]), -1000);
     if (isCampusHome()) items.add('campus-home-search', homeSearch(), -800);
-    if (isCampusHome()) items.add('campus-home-quick', homeQuick(), -1200);
     if (isCampusHome()) items.add('campus-home-artwork', campusArtwork(), -1100);
   });
   override(GlobalSearchState.prototype, 'params', function (original) {
@@ -876,6 +880,19 @@ export function registerNative() {
     }) : original();
   });
   extend(IndexPage.prototype, 'oninit', function () {
+    const tags = m.route.param('tags');
+    if (tags && legacyBoards[tags]) {
+      m.route.set(legacyBoards[tags], {}, {
+        replace: true
+      });
+      return;
+    }
+    if ((m.route.get() || '').split('?')[0] === '/all') {
+      m.route.set('/campus', {}, {
+        replace: true
+      });
+      return;
+    }
     if (!app.cache.campusCatalog) {
       const pending = app.cache.campusCatalog = {
         loading: true
@@ -901,7 +918,14 @@ export function registerNative() {
     const cache = app.cache.campusCatalog;
     if (cache?.data) items.add('campus-sections', m('nav.Campus.Campus-nativeExplore', {
       'aria-label': '探索校园板块'
-    }, [m('div.Campus-sectionHeading', [m('h2', '按主题浏览'), link('/tags', '全部板块')]), m('div.Campus-grid', cache.data.sections.map(s => link('/t/' + s.slug, [m('span.Campus-sectionIcon', symbol(icons[s.key] || 'folder-open')), m('strong', s.name)], {
+    }, [m('div.Campus-sectionHeading', [m('h2', '按主题浏览'), m('p', '内容按主题组织，旧板块入口已合并到对应主题')]), m('div.Campus-grid', cache.data.sections.map(s => link('/t/' + s.slug, [sectionImages[s.key] ? m('span.Campus-sectionFigure', [m('img', {
+      src: app.forum.attribute('baseUrl') + '/api/campus/assets/' + sectionImages[s.key],
+      alt: '',
+      loading: 'lazy',
+      decoding: 'async',
+      width: 320,
+      height: 240
+    })]) : null, m('span.Campus-sectionBody', [m('span.Campus-sectionIcon', symbol(icons[s.key] || 'folder-open')), m('strong', s.name)])], {
       className: 'Campus-section',
       title: s.description
     })))]), 120);
