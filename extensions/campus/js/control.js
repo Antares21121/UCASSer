@@ -4,7 +4,7 @@ import Button from './button';
 import Modal from 'flarum/common/components/Modal';
 import { DataPage, api, field, formatTime, link, symbol, errorMessage, loginPrompt, emptyState } from './ui';
 
-const jobNames = { queued: '等待执行', running: '正在采集', succeeded: '已完成', failed: '部分或全部失败' };
+const jobNames = { queued: '等待执行', running: '正在采集', succeeded: '已完成', partial: '部分来源失败', failed: '部分或全部失败' };
 const categories = { notice: '通知', activity: '活动', lecture: '讲座', opportunity: '机会', other: '其他' };
 const tabs = [
   ['overview', '总览与采集', 'tachometer-alt'],
@@ -190,6 +190,7 @@ class CourseLinkModal extends Modal {
     this.form = { title: row.name, url: '', category_id: row.offer?.resource_category_id || row.resource_category_id || '', source: '', reason: '课程资料补充' };
     this.busy = false;
     this.error = '';
+    this.categoryQuery = '';
   }
   async submit(e) {
     e.preventDefault();
@@ -210,14 +211,35 @@ class CourseLinkModal extends Modal {
     }
   }
   content() {
-    const categories = this.attrs.categories.filter(c => ['course', 'course_group', 'college'].includes(c.kind));
+    const query = (this.categoryQuery || '').trim();
+    const every = this.attrs.categories || [];
+    const byId = new Map(every.map(c => [Number(c.id), c]));
+    // Same course name exists in several colleges, so every option carries its
+    // full path and the list is grouped by that path.
+    const pathOf = category => {
+      const parts = [];
+      let node = category;
+      for (let guard = 0; node && guard < 8; guard++) {
+        parts.unshift(node.name);
+        node = node.parent_id ? byId.get(Number(node.parent_id)) : null;
+      }
+      return parts.slice(1).join(' / ');
+    };
+    const all = every.filter(c => ['course', 'course_group', 'college'].includes(c.kind))
+      .map(c => ({ ...c, path: c.path || pathOf(c) }))
+      .sort((a, b) => a.path.localeCompare(b.path, 'zh'));
+    const categories = (query ? all.filter(c => (c.path + c.name).includes(query)) : all);
     return m('form.Modal-body.Campus', { onsubmit: e => this.submit(e) }, [
       m('p.Campus-hint', '链接会加入「共享资料」并在分类树中归到所选节点；只接受 https。'),
       field('title', '资料标题', this.form.title, v => this.form.title = v, { required: true, maxlength: 180 }),
       field('url', '资料链接（https）', this.form.url, v => this.form.url = v, { required: true, type: 'url', placeholder: 'https://…' }),
-      field('category_id', '归属分类', this.form.category_id, v => this.form.category_id = v, {
-        type: 'select', options: [['', '不指定分类'], ...categories.map(c => [String(c.id), c.name])]
+      field('categoryQuery', '查找分类', this.categoryQuery, v => { this.categoryQuery = v; }, {
+        placeholder: '输入学院、课程类型或课程名筛选，例如「社会学」', autocomplete: 'off'
       }),
+      field('category_id', '归属分类', this.form.category_id, v => this.form.category_id = v, {
+        type: 'select', options: [['', '不指定分类'], ...categories.slice(0, 700).map(c => [String(c.id), c.path || c.name])]
+      }),
+      m('p.Campus-hint', '共 ' + all.length + ' 个分类，当前显示 ' + Math.min(categories.length, 700) + ' 个；按「学院 / 课程类型 / 课程」排列，输入关键词可快速定位。'),
       field('source', '来源说明', this.form.source, v => this.form.source = v, { maxlength: 200 }),
       this.error ? m('p.Campus-controlSourceError', this.error) : null,
       m('div.Campus-actions', [
@@ -330,9 +352,13 @@ export default class ControlPage extends DataPage {
     // first click hands the operator the QR instead of silently queueing.
     // The overview tab does not prefetch the collector, so load it here.
     if (!this.collector) await this.loadCollector();
-    if (this.collector && this.collector.state !== 'ready') {
+    if (this.collector && this.collector.state === 'authorization_required') {
       app.alerts.show({ type: 'info' }, '公众号尚未授权：先扫码，授权后再采集。');
       this.showCollectorQr();
+      return;
+    }
+    if (this.collector && this.collector.state !== 'ready') {
+      app.alerts.show({ type: 'error' }, '订阅服务不可用：' + (this.collector.message || '请检查本机采集器'));
       return;
     }
     return this.perform(() => api('control/collect', 'POST', sourceId ? { source_id: sourceId } : {}), {
@@ -437,7 +463,7 @@ export default class ControlPage extends DataPage {
     this.collectorBusy = true;
     try {
       const { data } = await api('control/collector/qr', 'POST', {});
-      app.modal.show(CollectorQrModal, { image: data.image, uid: data.uid });
+      app.modal.show(CollectorQrModal, { image: data.image, uid: data.uid, after: () => { this.loadCollector(); this.collect(); } });
     } catch (error) {
       app.alerts.show({ type: 'error' }, errorMessage(error, '无法获取二维码：请确认订阅服务正在本机运行'));
     } finally {
@@ -613,6 +639,13 @@ export default class ControlPage extends DataPage {
     return m('section.Campus-controlSection', [
       m('div.Campus-controlSectionHead', [m('h2', config.title), m('span', `${this.detailMeta?.total || 0} 条记录`)]),
       m('p.Campus-hint', config.hint),
+      this.tab === 'courses' ? m('nav.Campus-courseIndex', { 'aria-label': '按学院索引课程' }, [
+        m(Button, { className: this.catalogSearch ? '' : 'Button Button--primary', onclick: () => this.filterCourseIndex('') }, '全部学院'),
+        ...(this.catalogOptions?.colleges || []).map(college => m(Button, {
+          className: this.catalogSearch === college.name ? 'Button Button--primary' : '',
+          onclick: () => this.filterCourseIndex(college.name)
+        }, college.name))
+      ]) : null,
       m('div.Campus-actions', [
         m(Button, { className: 'Button Button--primary', onclick: () => { this.catalogForm = this.emptyCatalogForm(); } }, '新建记录'),
         m(Button, { onclick: () => this.downloadTemplate() }, '下载导入模板'),
@@ -650,11 +683,26 @@ export default class ControlPage extends DataPage {
           m(Button, { onclick: () => { this.catalogForm = this.emptyCatalogForm(row); } }, '编辑'),
           this.tab === 'colleges' ? m(Button, { onclick: () => this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: row.status === 'active' ? 'inactive' : 'active' }), { message: '状态已更新并写入审计。' }) }, row.status === 'active' ? '停用' : '启用') : null,
           this.tab === 'resources' ? m(Button, { onclick: () => this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: 'broken' }), { message: '已标记为失效链接。' }) }, '报告失效') : null,
-          this.tab === 'courses' ? m(Button, { onclick: () => app.modal.show(CourseLinkModal, { course: row, categories: this.catalogOptions?.categories || [], after: () => this.load() }) }, '加资料链接') : null
+          this.tab === 'courses' ? m(Button, { onclick: () => app.modal.show(CourseLinkModal, { course: row, categories: this.catalogOptions?.categories || [], after: () => this.load() }) }, '加资料链接') : null,
+          this.tab === 'resources' ? m(Button, {
+            onclick: () => {
+              if (!window.confirm('删除后前台立即隐藏，修订记录保留。确定删除「' + (row.title || '') + '」？')) return;
+              this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: 'archived', reason: '运营删除（归档）' }), { message: '已删除：前台隐藏，修订记录保留。' });
+            }
+          }, '删除') : null
         ])
       ]))) : emptyState('还没有记录', '使用上方表单或批量导入建立目录；导入会先预览再写入。'),
       this.pager(25)
     ]);
+  }
+
+  async filterCourseIndex(name) {
+    this.catalogSearch = name;
+    this.page = 1;
+    // Fetch directly on this instance: the DataPage draft copy would drop the
+    // filtered result before it reaches the rendered list.
+    await this.fetch();
+    m.redraw();
   }
 
   emptyCatalogForm(row = null) {

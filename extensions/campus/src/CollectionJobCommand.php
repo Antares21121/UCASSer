@@ -31,8 +31,14 @@ class CollectionJobCommand extends AbstractCommand
             if ($job->source_id) $args['--source'] = (string) $job->source_id;
             $exit = $this->poll->run(new ArrayInput($args), $output);
             $result = mb_substr($output->fetch(), 0, 4000);
+            // A single broken source should not paint the whole run red.
+            $lines = max(1, substr_count(trim($result), "\n") + 1);
+            $broken = preg_match_all('/失败（/u', $result);
+            // Zero candidates is not a failure: sources can simply have nothing
+            // new. Only a run where every source broke is marked failed.
+            $status = $exit === 0 ? 'succeeded' : ($broken > 0 && $broken >= $lines ? 'failed' : 'partial');
             $this->db->table('campus_collection_jobs')->where('id', $job->id)->update([
-                'status' => $exit === 0 ? 'succeeded' : 'failed', 'result' => $result,
+                'status' => $status, 'result' => $result,
                 'finished_at' => gmdate('Y-m-d H:i:s'),
             ]);
             $this->info('采集任务 #'.$job->id.($exit === 0 ? ' 已完成' : ' 有来源失败'));

@@ -38,7 +38,9 @@ class ResourcesController extends Support implements RequestHandlerInterface
             // disable the filter and return the unfiltered full list.
             return $this->error(mb_strlen($rawSearch) > 100 ? '搜索词最长 100 字' : '搜索词不能只包含空白或不可见字符');
         }
-        $rows = $this->db->table('ucasser_resources')->orderByDesc('updated_at')->orderByDesc('id');
+        // Archived rows are “deleted” from the directory and must never show up
+        // here, even though they stay in the table for the revision history.
+        $rows = $this->db->table('ucasser_resources')->whereIn('status', ['active', 'needs_review'])->orderByDesc('updated_at')->orderByDesc('id');
 
         if ($categoryId) {
             $ids = [(int)$categoryId];

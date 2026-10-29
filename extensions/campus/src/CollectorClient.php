@@ -167,6 +167,39 @@ class CollectorClient
         return ['name' => $name, 'status' => 'subscribed', 'mp_id' => (string) $created['id']];
     }
 
+    /** Subscribed accounts with their RSS ids. */
+    public function feeds(): array
+    {
+        return array_values(array_filter($this->mpList($this->token()), fn ($row) => preg_match('/^MP_WXS_[0-9]+$/', (string) ($row['id'] ?? ''))));
+    }
+
+    /** Ask the collector to refresh one account, then return its RSS URL. */
+    public function refreshFeed(string $id, string $name): string
+    {
+        $token = $this->token();
+        $this->call('POST', 'weread/collect', ['mp_id' => $id, 'faker_id' => $id, 'mp_name' => $name, 'max_page' => 1, 'gather_content' => false], $token);
+        return preg_replace('#/api/v1/wx/$#', '', $this->base()).'/rss/'.$id;
+    }
+
+    /** Fetch and parse an RSS feed into import rows. */
+    public function feedRows(string $url, int $limit = 5): array
+    {
+        $xml = @simplexml_load_string((string) (new Client(['timeout' => 30, 'http_errors' => false]))->request('GET', $url)->getBody());
+        if (!$xml) return [];
+        $rows = [];
+        foreach ($xml->channel->item as $item) {
+            $url = trim((string) $item->link);
+            if (!preg_match('~^https://mp\.weixin\.qq\.com/s(?:/[A-Za-z0-9_-]+|\?[A-Za-z0-9_=&%.-]+)$~D', $url)) continue;
+            $rows[] = [
+                'url' => $url, 'title' => trim((string) $item->title),
+                'summary' => trim(strip_tags((string) $item->description)),
+                'published_at' => ($t = strtotime((string) $item->pubDate)) ? gmdate('Y-m-d H:i:s', $t + 8 * 3600) : null,
+            ];
+            if (count($rows) >= $limit) break;
+        }
+        return $rows;
+    }
+
     /** Current subscriptions (id + display name). */
     private function mpList(string $token): array
     {

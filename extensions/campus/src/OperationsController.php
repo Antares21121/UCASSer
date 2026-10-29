@@ -10,7 +10,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class OperationsController implements RequestHandlerInterface
 {
     public function __construct(private Aggregation $aggregation, private OperatorAccess $access,
-        private AggregationImportWebLocalCommand $webImport) {}
+        private AggregationImportWebLocalCommand $webImport, private WechatImport $wechat) {}
 
     public function handle(Request $request): ResponseInterface
     {
@@ -25,13 +25,21 @@ class OperationsController implements RequestHandlerInterface
                 ->where('enabled', true)->whereIn('adapter', ['ucass-notices', 'ucass-vsb', 'ucass-employment'])->exists())) {
                 throw new \Flarum\Foundation\ValidationException(['source_id' => '来源不存在或尚未启用']);
             }
+            // WeChat accounts are fetched inline: the collector already holds the
+            // session, so one click can put both channel types into review.
+            $wechat = ['added' => 0, 'failed' => 0, 'accounts' => 0];
+            try {
+                $wechat = $this->wechat->run(5);
+            } catch (\Throwable $error) {
+                $wechat['error'] = mb_substr($error->getMessage(), 0, 120);
+            }
             $existing = $db->table('campus_collection_jobs')->whereIn('status', ['queued', 'running'])->first();
-            if ($existing) return new JsonResponse(['data' => ['id' => $existing->id, 'status' => $existing->status]], 202);
+            if ($existing) return new JsonResponse(['data' => ['id' => $existing->id, 'status' => $existing->status, 'wechat' => $wechat]], 202);
             $id = $db->table('campus_collection_jobs')->insertGetId([
                 'requested_by' => $actor->id, 'status' => 'queued', 'source_id' => $sourceId,
                 'created_at' => gmdate('Y-m-d H:i:s'),
             ]);
-            return new JsonResponse(['data' => ['id' => $id, 'status' => 'queued']], 202);
+            return new JsonResponse(['data' => ['id' => $id, 'status' => 'queued', 'wechat' => $wechat]], 202);
         }
         if ($route === 'campus.control.import') {
             $snapshot = $input['snapshot'] ?? null;

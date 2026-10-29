@@ -316,13 +316,11 @@ export class DirectoryPage extends DataPage {
       href: item.source_url,
       target: '_blank',
       rel: 'noopener noreferrer'
-    }, '原始来源') : null]), m('div.Campus-directorySecondary', [app.session.user ? m(Button, {
+    }, '原始来源') : null]), m('div.Campus-directorySecondary', [m(Button, {
       className: 'Button Button--link',
       icon: 'far fa-flag',
-      onclick: () => this.open('report', {
-        item
-      })
-    }, '反馈问题') : null, d.can_manage ? [m(Button, {
+      onclick: () => app.session.user ? this.open('report', { item }) : app.modal.show(() => import('flarum/forum/components/LogInModal'))
+    }, '反馈问题'), d.can_manage ? [m(Button, {
       className: 'Button Button--link',
       icon: 'fas fa-pen',
       onclick: () => this.open('resource', {

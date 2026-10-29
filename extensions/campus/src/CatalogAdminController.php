@@ -36,7 +36,22 @@ class CatalogAdminController implements RequestHandlerInterface
             return new JsonResponse($this->catalog->rollback($id, $actor));
         }
         if ($route === 'campus.control.catalog.categories') {
-            $categories = $this->db->table('ucasser_resource_categories')->whereIn('kind', ['course', 'external_topic'])->orderBy('kind')->orderBy('name')->get(['id', 'kind', 'name', 'parent_id'])->all();
+            // The whole tree is returned: the course dialog needs the college and
+            // course-type ancestors to tell same-named courses apart.
+            $categories = $this->db->table('ucasser_resource_categories')->orderBy('kind')->orderBy('name')->get(['id', 'kind', 'name', 'parent_id'])->all();
+            // Resolve the ancestry here so the console can label a course with
+            // "学院 / 课程类型 / 课程" and never confuse namesakes.
+            $byId = [];
+            foreach ($categories as $row) $byId[(int) $row->id] = $row;
+            foreach ($categories as $row) {
+                $parts = [];
+                $node = $row;
+                for ($guard = 0; $node && $guard < 8; $guard++) {
+                    array_unshift($parts, $node->name);
+                    $node = $node->parent_id ? ($byId[(int) $node->parent_id] ?? null) : null;
+                }
+                $row->path = implode(' / ', array_slice($parts, 1));
+            }
             return new JsonResponse(['data' => ['categories' => $categories, 'colleges' => $this->db->table('campus_colleges')->orderBy('position')->orderBy('name')->get(['id', 'code', 'name'])->all()]]);
         }
         $kind = null;

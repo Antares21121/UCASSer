@@ -23,6 +23,29 @@ services:
       start_period: 20s
     logging: *logging
     restart: unless-stopped
+  runner:
+    # Always-on executor: picks up queued collection jobs within 30 seconds so
+    # one click in the console finishes without anyone touching a terminal.
+    image: ucasser-redesign-app
+    command: ["sh", "-c", "while true; do php flarum campus:aggregation:run-job; sleep 30; done"]
+    env_file: ${FORUM_ENV_FILE:-.env}
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_ROOT_PASSWORD: ""
+      MP_RSS_URL: ${MP_RSS_URL:-http://host.docker.internal:8001}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - .:/var/www/forum
+      - vendor:/var/www/forum/vendor
+      - assets:/var/www/forum/public/assets
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    user: "33:33"
+    logging: *logging
   app:
     extra_hosts:
       - "host.docker.internal:host-gateway"

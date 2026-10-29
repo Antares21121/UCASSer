@@ -25,7 +25,11 @@ class RateLimit implements MiddlewareInterface
         $resourceAssist = $path === '/api/ucasser/resources/assist';
         if (!$auth && !$resourceAssist && !preg_match('~/(campus|posts|discussions|flags)(/|$)~', $path)) return $handler->handle($r);
         $auth = $auth && $r->getMethod()==='POST';
-        $window = 900; $limit = $resourceAssist ? 12 : ($auth ? 240 : ($actor->isAdmin() ? 1200 : 120));
+        // One collection per operator per minute: enough for normal use, and it
+        // fails with a message the console can show instead of a generic error.
+        $collect = $path === '/api/campus/control/collect';
+        $window = $collect ? 60 : 900;
+        $limit = $collect ? 1 : ($resourceAssist ? 12 : ($auth ? 240 : ($actor->isAdmin() ? 1200 : 120)));
         $ip = (string)($r->getAttribute('ipAddress') ?? $r->getServerParams()['REMOTE_ADDR'] ?? 'unknown');
         // Never persist raw IP, email, password, evidence or token.
         $route = preg_replace('~/\d+(?=/|$)~', '/:id', $path);
@@ -44,7 +48,8 @@ class RateLimit implements MiddlewareInterface
             $this->db->table('campus_rate_limits')->where('expires','<',time()-86400)->delete();
             return true;
         });
-        if (!$accepted) return new JsonResponse(['errors'=>[['status'=>'429','code'=>'rate_limit','detail'=>'请求过于频繁，请稍后重试']]],429,['Retry-After'=>(string)$window]);
+        if (!$accepted) return new JsonResponse(['errors'=>[['status'=>'429','code'=>'rate_limit',
+            'detail'=>$collect ? '刚采集过，请 1 分钟后再试' : '请求过于频繁，请稍后重试']]],429,['Retry-After'=>(string)$window]);
         return $handler->handle($r);
     }
 }

@@ -193,7 +193,9 @@ class Catalog
             }
             $host = parse_url($url, PHP_URL_HOST);
             if (!$host || !str_contains($host, '.')) throw new ValidationException(['url' => '链接域名无效']);
-            $dupe = $this->db->table('ucasser_resources')->where('url', $url)->first();
+            // Archived rows are deleted from the operator's point of view, so a
+            // URL can be added again instead of being blocked forever.
+            $dupe = $this->db->table('ucasser_resources')->where('url', $url)->where('status', '<>', 'archived')->first();
             if ($dupe && (!$partial || !isset($d['id']) || (int) $dupe->id !== (int) $d['id'])) throw new ValidationException(['url' => '该链接已存在，请编辑原资料']);
             $out['url'] = $url;
         }
