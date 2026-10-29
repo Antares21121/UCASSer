@@ -76,6 +76,20 @@ class CollectorClient
         return ['image' => $image, 'uid' => $data['uid'] ?? ''];
     }
 
+    /** Raw QR image bytes, proxied so a cloud deployment needs no public port. */
+    public function qrImage(): string
+    {
+        $client = new Client(['base_uri' => $this->base(), 'timeout' => 10, 'connect_timeout' => 4, 'http_errors' => false]);
+        $data = $this->call('GET', 'weread/qr/code', null, $this->token());
+        $path = (string) (($data['data'] ?? [])['code'] ?? '');
+        if ($path === '') throw new ValidationException(['collector' => '订阅服务未返回二维码']);
+        $url = str_starts_with($path, 'http') ? $path : $this->publicBase().'/'.ltrim($path, '/');
+        $response = (new Client(['timeout' => 10, 'http_errors' => false]))->request('GET', $url);
+        $body = (string) $response->getBody();
+        if ($response->getStatusCode() !== 200 || strlen($body) < 100) throw new ValidationException(['collector' => '无法读取二维码图片']);
+        return $body;
+    }
+
     /** Account names already subscribed in the collector. */
     public function subscribed(): array
     {

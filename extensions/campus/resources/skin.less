@@ -254,3 +254,10 @@ table.Campus-tt th[scope=col]:first-child, table.Campus-tt tbody th[scope=row] {
   .Campus-ttGridHead,.Campus-ttGridRow { grid-template-columns:70px repeat(6,minmax(104px,1fr)); min-width:760px; }
   .Campus-ttCell { min-height:52px; }
 }
+
+/* 分类树折叠 */
+.Campus-directoryBranch > summary { cursor:pointer; list-style:none; padding:2px 0 2px 2px; color:var(--campus-muted); font-size:12px; }
+.Campus-directoryBranch > summary::-webkit-details-marker { display:none; }
+.Campus-directoryBranch > summary::before { content:'▸'; display:inline-block; margin-right:6px; transition:transform .15s; }
+.Campus-directoryBranch[open] > summary::before { transform:rotate(90deg); }
+.Campus-directoryBranch > ul { margin-left:8px; }

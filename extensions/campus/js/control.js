@@ -103,7 +103,7 @@ class CollectorQrModal extends Modal {
         ? m('p.Campus-collectorState', [symbol('check-circle'), ' 授权成功，可以关闭此窗口并订阅公众号。'])
         : m('p', '用手机微信扫描下方二维码完成「微信读书」授权；二维码由本机订阅服务生成，本站不保存任何微信凭据。'),
       m('div.Campus-collectorQr', [
-        m('img', { src: this.attrs.image + (this.attrs.uid ? '?v=' + encodeURIComponent(this.attrs.uid) : ''), alt: '微信读书授权二维码', width: 220, height: 220 }),
+        m('img', { src: '/api/campus/control/collector/qr-image' + (this.attrs.uid ? '?v=' + encodeURIComponent(this.attrs.uid) : ''), alt: '微信读书授权二维码', width: 220, height: 220 }),
         m('small', ready ? '' : '二维码有有效期；过期后点「刷新二维码」重新获取。')
       ]),
       this.state ? m('p.Campus-hint', '当前状态：' + ({ ready: '已授权', authorization_required: '等待扫码', unavailable: '订阅服务不可用', unconfigured: '未配置' }[this.state.state] || this.state.state)) : null,
@@ -175,6 +175,53 @@ class CollectorSubscribeModal extends Modal {
       ]))),
       m('p.Campus-hint', '订阅完成后运行 python scripts/aggregation_weread.py --backend docker 拉取文章；内容仍会先进入「信息审核」。'),
       m('div.Campus-actions', [m(Button, { type: 'button', onclick: () => this.hide() }, '完成')])
+    ]);
+  }
+}
+
+class CourseLinkModal extends Modal {
+  className() { return 'CampusRecordActionModal'; }
+  title() { return '为「' + this.attrs.course.name + '」添加资料链接'; }
+  oninit(vnode) {
+    super.oninit(vnode);
+    const row = vnode.attrs.course;
+    this.form = { title: row.name, url: '', category_id: row.offer?.resource_category_id || row.resource_category_id || '', source: '', reason: '课程资料补充' };
+    this.busy = false;
+    this.error = '';
+  }
+  async submit(e) {
+    e.preventDefault();
+    this.busy = true;
+    this.error = '';
+    try {
+      await api('control/catalog/resources', 'POST', {
+        title: this.form.title, url: this.form.url, category_id: Number(this.form.category_id) || null,
+        source: this.form.source || null, reason: this.form.reason
+      });
+      app.alerts.show({ type: 'success' }, '资料链接已添加');
+      this.hide();
+      this.attrs.after?.();
+    } catch (error) {
+      this.error = errorMessage(error, '添加失败，请检查链接');
+    } finally {
+      this.busy = false;
+    }
+  }
+  content() {
+    const categories = this.attrs.categories.filter(c => ['course', 'course_group', 'college'].includes(c.kind));
+    return m('form.Modal-body.Campus', { onsubmit: e => this.submit(e) }, [
+      m('p.Campus-hint', '链接会加入「共享资料」并在分类树中归到所选节点；只接受 https。'),
+      field('title', '资料标题', this.form.title, v => this.form.title = v, { required: true, maxlength: 180 }),
+      field('url', '资料链接（https）', this.form.url, v => this.form.url = v, { required: true, type: 'url', placeholder: 'https://…' }),
+      field('category_id', '归属分类', this.form.category_id, v => this.form.category_id = v, {
+        type: 'select', options: [['', '不指定分类'], ...categories.map(c => [String(c.id), c.name])]
+      }),
+      field('source', '来源说明', this.form.source, v => this.form.source = v, { maxlength: 200 }),
+      this.error ? m('p.Campus-controlSourceError', this.error) : null,
+      m('div.Campus-actions', [
+        m(Button, { type: 'submit', className: 'Button Button--primary', loading: this.busy, disabled: this.busy }, '添加链接'),
+        m(Button, { type: 'button', onclick: () => this.hide() }, '取消')
+      ])
     ]);
   }
 }
@@ -591,7 +638,8 @@ export default class ControlPage extends DataPage {
         m('div.Campus-actions', [
           m(Button, { onclick: () => { this.catalogForm = this.emptyCatalogForm(row); } }, '编辑'),
           this.tab === 'colleges' ? m(Button, { onclick: () => this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: row.status === 'active' ? 'inactive' : 'active' }), { message: '状态已更新并写入审计。' }) }, row.status === 'active' ? '停用' : '启用') : null,
-          this.tab === 'resources' ? m(Button, { onclick: () => this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: 'broken' }), { message: '已标记为失效链接。' }) }, '报告失效') : null
+          this.tab === 'resources' ? m(Button, { onclick: () => this.perform(() => api(config.api + '/' + row.id, 'PATCH', { status: 'broken' }), { message: '已标记为失效链接。' }) }, '报告失效') : null,
+          this.tab === 'courses' ? m(Button, { onclick: () => app.modal.show(CourseLinkModal, { course: row, categories: this.catalogOptions?.categories || [], after: () => this.load() }) }, '加资料链接') : null
         ])
       ]))) : emptyState('还没有记录', '使用上方表单或批量导入建立目录；导入会先预览再写入。'),
       this.pager(25)

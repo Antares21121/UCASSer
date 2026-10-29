@@ -4,6 +4,7 @@ namespace UCASSer\Campus;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\User\User;
+use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -49,6 +50,19 @@ class CollectorController implements RequestHandlerInterface
             }
             $this->audit($actor, 'aggregation.collector.qr', 'collector');
             return new JsonResponse(['data' => $qr + ['state' => $state['state']]]);
+        }
+
+        if ($route === 'campus.control.collector.qr-image') {
+            try {
+                $bytes = $this->collector->qrImage();
+            } catch (\Throwable $error) {
+                return new JsonResponse(['errors' => [['detail' => '二维码不可用：'.mb_substr($error->getMessage(), 0, 120)]]], 502);
+            }
+            $response = new Response();
+            $response->getBody()->write($bytes);
+            return $response->withHeader('Content-Type', 'image/png')
+                ->withHeader('Cache-Control', 'no-store')
+                ->withHeader('X-Content-Type-Options', 'nosniff');
         }
 
         if ($route === 'campus.control.collector.subscribe') {

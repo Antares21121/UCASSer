@@ -114,6 +114,7 @@ return [
     (new Extend\Routes('api'))->get('/campus/tools/data','campus.tools.data',Campus\CampusToolsController::class),
     (new Extend\Routes('api'))->get('/campus/control/collector','campus.control.collector',Campus\CollectorController::class),
     (new Extend\Routes('api'))->post('/campus/control/collector/qr','campus.control.collector.qr',Campus\CollectorController::class),
+    (new Extend\Routes('api'))->get('/campus/control/collector/qr-image','campus.control.collector.qr-image',Campus\CollectorController::class),
     (new Extend\Routes('api'))->post('/campus/control/collector/subscribe','campus.control.collector.subscribe',Campus\CollectorController::class),
     // Retired discussion boards keep their old URLs alive via 301s.
     (new Extend\Middleware('forum'))->add(Campus\LegacyBoardRedirect::class),

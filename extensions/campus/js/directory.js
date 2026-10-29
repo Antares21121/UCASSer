@@ -246,7 +246,10 @@ export class DirectoryPage extends DataPage {
       onclick: () => this.open('category', {
         item: category
       })
-    }) : null]) : null]), children.length ? m('ul', children.map(c => this.categoryNode(c, depth + 1))) : category.kind === 'root' ? m('p.Campus-directoryTreeEmpty', '学院由维护者按实际情况补充。') : null]);
+    }) : null]) : null]), children.length ? m('details.Campus-directoryBranch', { open: depth < 1 || Number(this.params.category_id) === category.id }, [
+      m('summary', { 'aria-label': '展开或收起 ' + category.name }),
+      m('ul', children.map(c => this.categoryNode(c, depth + 1)))
+    ]) : category.kind === 'root' ? m('p.Campus-directoryTreeEmpty', '学院由维护者按实际情况补充。') : null]);
   }
   content() {
     const d = this.data,
