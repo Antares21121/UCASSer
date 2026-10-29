@@ -65,6 +65,7 @@ jobs:
           docker compose exec -T -u www-data app php -r 'exit((extension_loaded("gd") && (gd_info()["WebP Support"] ?? false)) ? 0 : 1);'
           docker compose exec -T -u www-data app php flarum campus:boards:migrate
           docker compose exec -T -u www-data app php tests/board_migration.php
+          docker compose exec -T -u www-data app php tests/catalog_recovery.php
           docker compose exec -T -u www-data app php tests/suffix_mention_parser.php
           python tests/redesign_smoke.py --backend docker
       - name: Browser workflows and mobile layout
