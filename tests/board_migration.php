@@ -20,6 +20,11 @@ try {
         }
         $tags[] = $tag->id;
     }
+    if (!$db->table('campus_sections')->where('key', 'chat')->exists()) {
+        $db->table('campus_sections')->insert(['key' => 'chat', 'tag_id' => $tags[0], 'is_open' => false, 'visibility' => 'public']);
+    }
+    $visibleKeys = array_map(fn ($section) => $section->key, $container->make(UCASSer\Campus\Sections::class)->visible($actor));
+    $check(!array_intersect($visibleKeys, UCASSer\Campus\Sections::RETIRED), 'Retired sections must stay out of the admin publishing catalogue');
     $discussion = Flarum\Discussion\Discussion::start('【示例】二手迁移验收', $actor);
     $discussion->save();
     $postId = $db->table('posts')->insertGetId([
