@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-label="文件夹与书页构成的资料整理场景">
+  <rect width="320" height="240" fill="#F7F4EE"/>
+  <path d="M40 72h70l16 16h134c8 0 14 6 14 14v72c0 8-6 14-14 14H40c-8 0-14-6-14-14V86c0-8 6-14 14-14z" fill="#C22A49"/>
+  <path d="M40 96h70l16 16h134c8 0 14 6 14 14v48c0 8-6 14-14 14H40c-8 0-14-6-14-14V96z" fill="#F7F4EE" stroke="#E6DFD1"/>
+  <rect x="44" y="118" width="130" height="8" rx="4" fill="#DFEAF2"/>
+  <rect x="44" y="134" width="96" height="8" rx="4" fill="#E6DFD1"/>
+  <rect x="60" y="92" width="112" height="104" rx="8" fill="#FFFFFF" stroke="#E6DFD1" transform="rotate(-6 60 92)"/>
+  <path d="M92 84l10 30 34-12-10-30z" fill="#DFEAF2"/>
+  <rect x="76" y="122" width="86" height="7" rx="3" fill="#E6DFD1" transform="rotate(-6 60 92)"/>
+  <rect x="76" y="138" width="66" height="7" rx="3" fill="#E6DFD1" transform="rotate(-6 60 92)"/>
+  <circle cx="238" cy="70" r="6" fill="#C22A49"/>
+</svg>

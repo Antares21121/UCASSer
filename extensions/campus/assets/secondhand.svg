@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-label="整洁的书本与台灯，可转让的实物">
+  <rect width="320" height="240" fill="#F7F4EE"/>
+  <rect x="60" y="128" width="200" height="12" rx="6" fill="#8E6B4F"/>
+  <rect x="60" y="152" width="200" height="10" rx="5" fill="#C8DBE8"/>
+  <g transform="translate(108 74)">
+    <rect x="0" y="0" width="104" height="24" rx="4" fill="#1C3042"/>
+    <rect x="0" y="22" width="104" height="22" rx="4" fill="#C22A49"/>
+    <rect x="0" y="42" width="104" height="20" rx="4" fill="#A71937"/>
+    <rect x="10" y="6" width="56" height="6" rx="3" fill="#FFFFFF" opacity="0.75"/>
+    <rect x="10" y="28" width="44" height="6" rx="3" fill="#FFFFFF" opacity="0.75"/>
+  </g>
+  <g transform="translate(232 96)">
+    <path d="M10 8l52 30v46c0 6-5 10-11 8L10 96z" fill="#FFFFFF" stroke="#C8DBE8"/>
+    <path d="M22 44c12-4 24-4 34 2v8c-10-6-22-6-34-2z" fill="#C22A49" opacity="0.9"/>
+    <path d="M14 8h56c4 0 7 3 7 7v6H14v-6c0-4 3-7 7-7z" fill="#DFEAF2"/>
+    <circle cx="62" cy="52" r="5" fill="#A71937"/>
+  </g>
+  <path d="M42 172c26 14 52 14 78 0s52-14 78 0" fill="none" stroke="#E6DFD1" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="160" cy="50" r="6" fill="#C22A49"/>
+</svg>

@@ -11,17 +11,12 @@ import { symbol, formatTime, errorMessage } from './ui';
 
 // Layout and copy follow the task of each board; all rows retain native links,
 // pagination, permissions, unread state and discussion controls.
+// Retired discussion boards (news/academic/market/chat/governance/courses and
+// the legacy "general" tag) no longer exist as publish targets; their content
+// was migrated by the backend mover. Review records keep their structured
+// catalog under the internal archive section, displayed under the "courses"
+// board key below.
 export const boards = {
-  news: {
-    icon: 'bullhorn',
-    title: '校园资讯与活动',
-    subtitle: '不错过校园里的重要消息，也发现值得参与的新鲜事。',
-    type: 'information',
-    category: 'activity',
-    action: '发布校园信息',
-    kind: 'calendar',
-    tabs: [['activity', '校园活动'], ['recruit', '招募'], ['other', '公共通知']]
-  },
   careers: {
     icon: 'briefcase',
     title: '实习、就业与竞赛',
@@ -30,17 +25,7 @@ export const boards = {
     category: 'internship',
     action: '分享新机会',
     kind: 'opportunity',
-    tabs: [['internship', '实习'], ['job', '就业'], ['competition', '竞赛'], ['recruit', '项目招募']]
-  },
-  academic: {
-    icon: 'microscope',
-    title: '讲座、学术与志愿服务',
-    subtitle: '从一场讲座、一项活动开始，拓展视野与连接。',
-    type: 'information',
-    category: 'lecture',
-    action: '发布学术活动',
-    kind: 'agenda',
-    tabs: [['lecture', '讲座'], ['academic', '学术'], ['volunteer', '志愿']]
+    tabs: [['internship', '实习'], ['job', '就业'], ['competition', '竞赛'], ['recruit', '项目招募'], ['lecture', '讲座'], ['activity', '校园活动'], ['volunteer', '志愿']]
   },
   life: {
     icon: 'hands-helping',
@@ -52,15 +37,26 @@ export const boards = {
     kind: 'help',
     tabs: [['help', '生活互助'], ['buddy', '寻找伙伴'], ['other', '生活经验']]
   },
-  market: {
-    icon: 'exchange-alt',
-    title: '二手交易与出行信息',
-    subtitle: '让闲置找到新主人，让出行找到同行的人。',
+  secondhand: {
+    icon: 'box-open',
+    title: '二手交易',
+    subtitle: '让闲置找到新主人，交易前记得核对成色与价格。',
     type: 'information',
     category: 'market',
-    action: '发布交易或出行',
+    action: '发布二手信息',
     kind: 'market',
-    tabs: [['market', '二手交易'], ['travel', '出行'], ['buddy', '找同行']]
+    tabs: [['market', '二手交易']]
+  },
+  travel: {
+    icon: 'route',
+    title: '出行信息',
+    subtitle: '拼车、同行与出行安排，让每一次出发都更顺利。',
+    type: 'information',
+    category: 'travel',
+    action: '发布出行信息',
+    kind: 'market',
+    variant: 'travel',
+    tabs: [['travel', '出行'], ['buddy', '找同行']]
   },
   resources: {
     icon: 'book-open',
@@ -75,13 +71,14 @@ export const boards = {
   },
   courses: {
     icon: 'graduation-cap',
-    title: '课程评价与学习经验',
+    title: '课程目录与评价',
     subtitle: '真实体验与学习方法，帮助下一位同学做出选择。',
     type: 'review',
     category: 'experience',
     action: '写一条课程评价',
     kind: 'review',
-    secondary: ['/campus/courses', '查看课程目录与统计']
+    secondary: ['/campus/courses', '查看课程目录与统计'],
+    archive: true
   },
   questions: {
     icon: 'comment-dots',
@@ -92,34 +89,31 @@ export const boards = {
     action: '提出问题',
     kind: 'question',
     tabs: [['study', '学习与课程'], ['life', '校园生活'], ['procedure', '校园办事'], ['activity', '活动与竞赛']]
-  },
-  chat: {
-    icon: 'comments',
-    title: '闲聊与公共讨论',
-    subtitle: '说说最近的想法，听听不同的声音。',
-    type: null,
-    action: '发起讨论',
-    kind: 'conversation'
-  },
-  governance: {
-    icon: 'balance-scale',
-    title: '社区公告与治理',
-    subtitle: '规则、公告与公开记录，让社区运行清晰可见。',
-    type: 'information',
-    category: 'other',
-    action: '发布社区公告',
-    kind: 'notice',
-    secondary: ['/campus/governance', '查看正式公告与版本'],
-    adminOnly: true
   }
+};
+// Retired board slugs redirect to the closest current entry point so old
+// links never die silently.
+export const legacyBoards = {
+  'campus-courses': '/campus/courses',
+  'campus-general': '/t/campus-life',
+  general: '/t/campus-life',
+  'campus-market': '/t/campus-secondhand',
+  'campus-academic': '/t/campus-careers',
+  'campus-news': '/campus/aggregation',
+  'campus-chat': '/t/campus-life',
+  'campus-governance': '/campus/governance',
+  'campus-archive': '/campus/courses'
 };
 export function routeBoard() {
   return boards[(m.route.param('tags') || '').replace(/^campus-/, '')];
 }
 export function boardKey(discussion, record = discussion?.attribute('campusRecord')) {
-  return record?.section_key || (discussion?.tags?.() || []).filter(Boolean).find(t => boards[t.slug().replace(/^campus-/, '')])?.slug().replace(/^campus-/, '') || '';
+  const key = record?.section_key || (discussion?.tags?.() || []).filter(Boolean).find(t => boards[t.slug().replace(/^campus-/, '')])?.slug().replace(/^campus-/, '') || '';
+  // Review records live under the internal archive section; display them as
+  // course reviews everywhere outside the section catalog.
+  return key === 'archive' ? 'courses' : key;
 }
-export const marketVariant = record => ['travel', 'buddy'].includes(record?.category) ? 'travel' : 'trade';
+export const marketVariant = (record, key) => (key === 'travel' || ['travel', 'buddy'].includes(record?.category)) && key !== 'secondhand' ? 'travel' : 'trade';
 export function boardParams(board) {
   const key = Object.keys(boards).find(k => boards[k] === board);
   const section = app.cache.campusCatalog?.data?.sections.find(s => s.key === key);
@@ -216,11 +210,7 @@ function facts(key, r) {
       title: label + '：' + (time ? formatTime(value) + '（北京时间）' : value)
     }, [m('small', label), short(time ? formatTime(value) : value)]));
   };
-  if (['news', 'academic'].includes(key)) {
-    add('时间', f.starts_at, true);
-    add('地点', f.location);
-    add('主办', f.organizer);
-  } else if (key === 'careers') {
+  if (key === 'careers') {
     add('单位', f.organizer || f.source);
     add('截止', f.deadline, true);
     add('要求', f.conditions);
@@ -232,17 +222,14 @@ function facts(key, r) {
   } else if (key === 'courses') {
     add('课程', r.course_name);
     add('学期', r.semester);
-  } else if (key === 'market') {
-    const travel = marketVariant(r) === 'travel';
+  } else if (['secondhand', 'travel'].includes(key)) {
+    const travel = key === 'travel' || marketVariant(r, key) === 'travel';
     add(travel ? '同行需求' : '物品 / 供需', f.offer_type);
     add(travel ? '路线 / 集合' : '交接地点', f.location);
     if (travel) add('出发', f.starts_at, true);
   } else if (key === 'life') {
     add('地点', f.location);
     add('需求', f.offer_type);
-  } else if (key === 'governance') {
-    add('来源', f.source);
-    add('发布', f.published_at, true);
   }
   if (!entries.length && f.source && key !== 'questions') add('来源', f.source);
   return entries.length ? m('span.Campus-rowFacts', entries) : null;
@@ -252,16 +239,14 @@ export function recordOverview(r, discussion) {
     board = boards[key],
     f = r.fields || {},
     used = new Set(['related']);
-  // Conversation records from older seeds carry activity fields. Keep the
-  // discussion native rather than promoting those fields above the posts.
-  if (key === 'chat') return null;
-  const travel = key === 'market' && marketVariant(r) === 'travel';
+  if (!board || !r?.id) return null;
+  const travel = ['secondhand', 'travel'].includes(key) && (key === 'travel' || ['travel', 'buddy'].includes(r.category));
   const fieldLabels = {
     contact: '公开联系方式',
     tags: '标签',
-    location: key === 'market' ? travel ? '路线或集合地点' : '交接地点' : key === 'life' ? '互助地点' : labels.location,
-    organizer: ['careers', 'governance'].includes(key) ? '发布单位' : labels.organizer,
-    conditions: key === 'careers' ? '申请要求' : key === 'market' ? travel ? '同行说明' : '交易说明' : key === 'life' ? '互助说明' : labels.conditions,
+    location: ['secondhand', 'travel'].includes(key) ? travel ? '路线或集合地点' : '交接地点' : key === 'life' ? '互助地点' : labels.location,
+    organizer: ['careers'].includes(key) ? '发布单位' : labels.organizer,
+    conditions: key === 'careers' ? '申请要求' : ['secondhand', 'travel'].includes(key) ? travel ? '同行说明' : '交易说明' : key === 'life' ? '互助说明' : labels.conditions,
     starts_at: travel ? '出发时间' : labels.starts_at,
     ends_at: travel ? '返回或结束时间' : labels.ends_at,
     deadline: travel ? '联系截止' : labels.deadline
@@ -284,17 +269,15 @@ export function recordOverview(r, discussion) {
     return keys.length ? m('ol.Campus-detailSchedule', keys.map(k => m('li', [m('span', labels[k]), m('time', formatTime(f[k]) + '（北京时间）')]))) : null;
   };
   const heading = {
-    news: '信息速览',
     careers: '申请指南',
-    academic: '讲座与活动安排',
     life: '互助信息',
-    market: travel ? '出行与同行' : '二手交易',
-    governance: '公告信息',
+    secondhand: '二手交易',
+    travel: '出行与同行',
     resources: '资料索引',
     questions: '解答进展',
     courses: r.course_name || '课程体验'
   }[key] || labels[r.type];
-  const intro = m('div.Campus-detailHeading', [m('span.Campus-detailHeadingIcon', symbol(key === 'market' ? travel ? 'route' : 'box-open' : board?.icon || 'file-alt')), m('h2', heading), m('div.Campus-badges', [m('span.Campus-badge', {
+  const intro = m('div.Campus-detailHeading', [m('span.Campus-detailHeadingIcon', symbol(key === 'travel' ? 'route' : ['secondhand', 'travel'].includes(key) ? 'box-open' : board?.icon || 'file-alt')), m('h2', heading), m('div.Campus-badges', [m('span.Campus-badge', {
     className: 'is-' + r.status
   }, labels[r.status] || r.status), r.featured ? m('span.Campus-badge.is-featured', '精选') : null, r.semester ? m('span.Campus-badge', r.semester) : null])]);
   let main;
@@ -330,32 +313,30 @@ export function recordOverview(r, discussion) {
   }, '查看已采纳答案') : m('p.Campus-hint', '在下方回复区分享你的经验。提问者可采纳有帮助的答案。')];else if (key === 'careers') {
     used.add('apply_url');
     main = [m('div.Campus-applicationLead', [spotlight('申请截止', 'deadline', 'hourglass-half'), r.status === 'active' ? external(f.apply_url, '前往申请', true) : null]), group('单位与申请要求', ['organizer', 'conditions', 'location']), group('机会来源', ['source', 'source_url', 'published_at'])];
-  } else if (key === 'academic') {
-    used.add('apply_url');
-    main = [schedule(), group('地点与主办单位', ['location', 'organizer']), group('参与准备', ['conditions', 'contact']), r.status === 'active' ? external(f.apply_url, '报名参与', true) : null, group('活动来源', ['source', 'source_url'])];
-  } else if (key === 'market') {
-    main = travel ? [group('行程时间', ['starts_at', 'ends_at', 'deadline'], 'Campus-tripTimes'), spotlight('路线或集合地点', 'location', 'map-marker-alt'), group('寻找怎样的同行', ['offer_type', 'conditions', 'contact'])] : [spotlight('物品与供需', 'offer_type', 'box-open'), group('交接安排', ['location', 'conditions', 'contact'])];
-  } else if (key === 'life') main = [spotlight('需要什么帮助', 'offer_type', 'hands-helping'), group('互助安排', ['location', 'conditions', 'contact'])];else if (key === 'governance') main = [group('发布与依据', ['organizer', 'published_at', 'source', 'source_url'])];else {
+  } else if (key === 'secondhand') {
+    main = [spotlight('物品与供需', 'offer_type', 'box-open'), group('交接安排', ['location', 'conditions', 'contact'])];
+  } else if (key === 'travel') {
+    main = [group('行程时间', ['starts_at', 'ends_at', 'deadline'], 'Campus-tripTimes'), spotlight('路线或集合地点', 'location', 'map-marker-alt'), group('寻找怎样的同行', ['offer_type', 'conditions', 'contact'])];
+  } else if (key === 'life') main = [spotlight('需要什么帮助', 'offer_type', 'hands-helping'), group('互助安排', ['location', 'conditions', 'contact'])];else {
     used.add('apply_url');
     main = [group('活动日程', ['starts_at', 'ends_at', 'deadline'], 'Campus-calendarFacts'), group('地点与参与方式', ['location', 'organizer', 'conditions', 'contact']), r.status === 'active' ? external(f.apply_url, '报名或参与', true) : null, group('信息来源', ['source', 'source_url', 'published_at'])];
   }
   // Only board-relevant fields enter secondary disclosure. Old activity
   // metadata on a trade/help/notice record stays stored, not shown as a form.
   const secondaryFields = {
-    market: ['source', 'source_url', 'published_at', 'tags'],
+    secondhand: ['source', 'source_url', 'published_at', 'tags'],
+    travel: ['source', 'source_url', 'published_at', 'tags'],
     life: ['source', 'source_url', 'published_at', 'tags'],
-    governance: ['tags'],
     careers: ['contact', 'starts_at', 'tags'],
-    academic: ['published_at', 'tags'],
-    news: ['tags'],
     resources: ['tags'],
     questions: ['tags'],
     courses: ['tags']
   }[key];
   const extra = Object.keys(f).filter(k => !used.has(k) && (!secondaryFields || secondaryFields.includes(k)) && f[k] !== '' && f[k] != null);
+  const marketKeys = ['secondhand', 'travel'];
   return m('div.Campus-recordOverview', {
-    className: 'Campus-recordOverview--' + (board?.kind || r.type) + (key === 'market' ? ' Campus-market--' + marketVariant(r) : '')
-  }, [intro, main, extra.length ? m('details.Campus-detailMore', [m('summary', ['market', 'life'].includes(key) ? '信息出处与标签' : '补充说明与标签'), group(['market', 'life'].includes(key) ? '来源说明' : '补充说明', extra)]) : null, f.related?.length ? m('div.Campus-related', [m('h3', '关联内容'), f.related.map(item => m(Link, {
+    className: 'Campus-recordOverview--' + (board?.kind || r.type) + (marketKeys.includes(key) ? ' Campus-market--' + (key === 'travel' ? 'travel' : 'trade') : '')
+  }, [intro, main, extra.length ? m('details.Campus-detailMore', [m('summary', ['secondhand', 'travel', 'life'].includes(key) ? '信息出处与标签' : '补充说明与标签'), group(['secondhand', 'travel', 'life'].includes(key) ? '来源说明' : '补充说明', extra)]) : null, f.related?.length ? m('div.Campus-related', [m('h3', '关联内容'), f.related.map(item => m(Link, {
     href: '/campus/record/' + item.id
   }, [symbol('link'), item.title]))]) : null]);
 }

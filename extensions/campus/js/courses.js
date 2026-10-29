@@ -149,7 +149,7 @@ export default class CoursesPage extends DataPage {
         actionIcon: 'fas fa-arrow-right',
         subtitle: '按课程查找学习经验，参考同学分享的评价与建议。'
       },
-      publish: () => m.route.set('/t/campus-courses')
+      publish: () => m.route.set('/campus/records?type=review')
     });
   }
 }

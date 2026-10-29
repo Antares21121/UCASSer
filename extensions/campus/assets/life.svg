@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-label="学生生活的日常物件：帆布袋、绿植与水杯">
+  <rect width="320" height="240" fill="#F7F4EE"/>
+  <path d="M96 84h128l-8 108c-1 12-11 20-23 20h-66c-12 0-22-8-23-20z" fill="#1C3042"/>
+  <path d="M112 84c4-34 22-52 48-52s44 18 48 52" fill="none" stroke="#1C3042" stroke-width="8" stroke-linecap="round"/>
+  <rect x="150" y="86" width="20" height="18" rx="4" fill="#C22A49"/>
+  <g transform="translate(60 132)">
+    <path d="M14 0h36c4 0 7 3 7 7v26c0 4-3 7-7 7H14c-4 0-7-3-7-7V7c0-4 3-7 7-7z" fill="#FFFFFF" stroke="#E6DFD1"/>
+    <path d="M20 12c-4-14-2-26 6-34 0 12 2 24 6 34" fill="#C22A49"/>
+    <path d="M24 40v-8" stroke="#8E6B4F" stroke-width="3"/>
+  </g>
+  <g transform="translate(238 128)">
+    <rect x="0" y="6" width="34" height="42" rx="8" fill="#FFFFFF" stroke="#C8DBE8"/>
+    <rect x="4" y="0" width="26" height="12" rx="5" fill="#DFEAF2"/>
+    <path d="M14 24c8-6 14-2 14 4s-6 8-14 4-8-2-14-4 6-10 14-4z" fill="#A71937" opacity="0.85"/>
+  </g>
+  <rect x="150" y="196" width="20" height="4" rx="2" fill="#E6DFD1"/>
+  <circle cx="160" cy="178" r="8" fill="#C22A49" opacity="0.9"/>
+</svg>

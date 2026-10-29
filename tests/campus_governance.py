@@ -5,7 +5,7 @@ from campus_records import information
 
 def phase9(f, guest, admin):
     owner,reporter,outsider,volunteer,reviewer=[account(guest,admin) for _ in range(5)]
-    sections=admin.call('/api/campus/catalog')['data']['sections']; life=next(s for s in sections if s['key']=='life'); news=next(s for s in sections if s['key']=='news')
+    sections=admin.call('/api/campus/catalog')['data']['sections']; life=next(s for s in sections if s['key']=='careers'); news=next(s for s in sections if s['key']=='life')
     r=owner['api'].call('/api/campus/records','POST',information(admin,life['id']),expected=201)['data']
     body={'discussion_id':r['discussion_id'],'target_type':'discussion','target_id':r['discussion_id'],'reason':'【示例】需要人工核验的信息，不能仅凭举报自动处罚'}
     guest.call('/api/campus/cases','POST',body,expected=(401,403))

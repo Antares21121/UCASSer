@@ -20,6 +20,7 @@ return [
     (new Extend\Middleware('api'))->replace(\Flarum\Http\Middleware\SetLocale::class, Campus\ForumLocale::class),
     (new Extend\ApiResource(\Flarum\Api\Resource\DiscussionResource::class))->fields(Campus\NativeRecordFields::class)
         ->endpoint('index', fn(\Flarum\Api\Endpoint\Index $endpoint) => $endpoint->addDefaultInclude(['firstPost'])->eagerLoad(['firstPost'])->after(Campus\NativeListFields::hydrate(...))),
+    (new Extend\ApiResource(\Flarum\Api\Resource\UserResource::class))->fields(Campus\UserCampusFields::class),
     (new Extend\SearchDriver(\Flarum\Search\Database\DatabaseSearchDriver::class))->addFilter(\Flarum\Discussion\Search\DiscussionSearcher::class,Campus\NativeFilter::class),
     (new Extend\Frontend('forum'))->js(__DIR__.'/js/dist/forum.js')->css(__DIR__.'/resources/campus.less')->css(__DIR__.'/resources/aggregation.less')->css(__DIR__.'/resources/control.less')
         ->route('/campus', 'campus')->route('/campus/rules', 'campus.rules')->route('/campus/identity','campus.identity')->route('/campus/moderation','campus.moderation')
@@ -42,6 +43,7 @@ return [
     (new Extend\Policy())->modelPolicy(Discussion::class, Campus\SectionPolicy::class)->modelPolicy(Tag::class, Campus\SectionPolicy::class),
     (new Extend\Policy())->modelPolicy(Discussion::class,Campus\RecordPolicy::class)->modelPolicy(\Flarum\Post\Post::class,Campus\RecordPolicy::class),
     (new Extend\Console())->command(Campus\SetupCommand::class),
+    (new Extend\Console())->command(Campus\BoardMigrateCommand::class),
     (new Extend\Console())->command(Campus\CourseImportCommand::class),
     (new Extend\Console())->command(Campus\AggregationPollCommand::class),
     (new Extend\Console())->command(Campus\AggregationSyncSourcesCommand::class),
@@ -53,6 +55,14 @@ return [
     (new Extend\Console())->command(Campus\CollectionJobCommand::class),
     (new Extend\Event())->listen(\Flarum\Post\Event\Saving::class,Campus\NativeRevision::class)->listen(\Flarum\Discussion\Event\Saving::class,Campus\NativeRevision::class)
         ->listen(\Flarum\Messages\DialogMessage\Event\Created::class,Campus\ChatImages::class),
+    (new Extend\Event())->listen(\Flarum\Post\Event\Posted::class,Campus\PostImages::class)
+        ->listen(\Flarum\Post\Event\Revised::class,Campus\PostImages::class)
+        ->listen(\Flarum\Post\Event\Restored::class,Campus\PostImages::class),
+    (new Extend\Event())->listen(\Flarum\User\Event\Registered::class,Campus\UserAccountSetup::class)
+        ->listen(\Flarum\User\Event\Deleted::class,Campus\UserAccountSetup::class),
+    // Hand-typed `@昵称#后缀` resolves to the stable user id before the
+    // mentions extension parses, and rendered mentions carry the suffix.
+    (new Extend\Formatter())->parse(Campus\SuffixMentionParser::class)->render(Campus\SuffixMentionRenderer::class),
     (new Extend\Routes('api'))->get('/campus/catalog','campus.catalog',Campus\RecordController::class)
         ->get('/campus/records','campus.records',Campus\RecordController::class)->post('/campus/records','campus.records.create',Campus\RecordController::class)
         ->get('/campus/records/{id}','campus.record',Campus\RecordController::class)->patch('/campus/records/{id}','campus.record.update',Campus\RecordController::class)
@@ -82,6 +92,26 @@ return [
         ->patch('/campus/control/sources/{id}','campus.control.source.update',Campus\OperationsController::class),
     (new Extend\Routes('api'))->post('/campus/chat-images','campus.chat.image.upload',Campus\ChatImageController::class)
         ->get('/campus/chat-images/{id}','campus.chat.image',Campus\ChatImageController::class),
+    (new Extend\Routes('api'))->post('/campus/post-images','campus.post.image.upload',Campus\PostImageController::class)
+        ->get('/campus/post-images/{id}','campus.post.image',Campus\PostImageController::class),
+    (new Extend\Routes('api'))->get('/campus/colleges','campus.colleges',Campus\CatalogAdminController::class),
+    (new Extend\Routes('api'))->get('/campus/control/catalog/categories','campus.control.catalog.categories',Campus\CatalogAdminController::class)
+        ->get('/campus/control/catalog/colleges','campus.control.catalog.colleges',Campus\CatalogAdminController::class)
+        ->post('/campus/control/catalog/colleges','campus.control.catalog.colleges.create',Campus\CatalogAdminController::class)
+        ->patch('/campus/control/catalog/colleges/{id}','campus.control.catalog.colleges.update',Campus\CatalogAdminController::class)
+        ->post('/campus/control/catalog/colleges/import','campus.control.catalog.colleges.import',Campus\CatalogAdminController::class)
+        ->get('/campus/control/catalog/courses','campus.control.catalog.courses',Campus\CatalogAdminController::class)
+        ->post('/campus/control/catalog/courses','campus.control.catalog.courses.create',Campus\CatalogAdminController::class)
+        ->patch('/campus/control/catalog/courses/{id}','campus.control.catalog.courses.update',Campus\CatalogAdminController::class)
+        ->post('/campus/control/catalog/courses/import','campus.control.catalog.courses.import',Campus\CatalogAdminController::class)
+        ->get('/campus/control/catalog/resources','campus.control.catalog.resources',Campus\CatalogAdminController::class)
+        ->post('/campus/control/catalog/resources','campus.control.catalog.resources.create',Campus\CatalogAdminController::class)
+        ->patch('/campus/control/catalog/resources/{id}','campus.control.catalog.resources.update',Campus\CatalogAdminController::class)
+        ->post('/campus/control/catalog/resources/import','campus.control.catalog.resources.import',Campus\CatalogAdminController::class)
+        ->post('/campus/control/catalog/import/{id}/rollback','campus.control.catalog.import.rollback',Campus\CatalogAdminController::class),
+    (new Extend\Routes('api'))->get('/campus/assets/{file}','campus.asset',Campus\CampusAssetController::class),
+    // Retired discussion boards keep their old URLs alive via 301s.
+    (new Extend\Middleware('forum'))->add(Campus\LegacyBoardRedirect::class),
     (new Extend\Routes('api'))->get('/campus/governance','campus.governance',Campus\GovernanceController::class)->post('/campus/governance','campus.governance.publish',Campus\GovernanceController::class),
     (new Extend\Routes('api'))->get('/campus/cases','campus.cases',Campus\CaseController::class)->post('/campus/cases','campus.cases.create',Campus\CaseController::class)
         ->get('/campus/cases/{id}','campus.case',Campus\CaseController::class)->patch('/campus/cases/{id}','campus.case.update',Campus\CaseController::class)

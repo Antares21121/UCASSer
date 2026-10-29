@@ -22,7 +22,7 @@ class RecordController implements RequestHandlerInterface
     }
     public function handle(Request $r): ResponseInterface {
         $a=RequestUtil::getActor($r); $q=$r->getQueryParams(); $data=$r->getParsedBody() ?? []; $route=$r->getAttribute('routeName'); $db=$this->records->db;
-        if ($route==='campus.catalog') return new JsonResponse(['data'=>['categories'=>$this->records->categories(),'states'=>Records::STATES,'fields'=>Records::FIELDS,'sections'=>$this->records->sections->visible($a),'anonymousReviews'=>false]]);
+        if ($route==='campus.catalog') return new JsonResponse(['data'=>['categories'=>$this->records->categories(),'states'=>Records::STATES,'fields'=>Records::FIELDS,'sections'=>$this->records->sections->visible($a),'review_section_id'=>$this->records->sections->archive()?->id,'anonymousReviews'=>false]]);
         if (str_starts_with($route,'campus.categories')) {
             $a->assertAdmin(); if ($r->getMethod()==='PATCH') { $name=$this->records->text($data,'name',2,80); $type=$data['type'] ?? ''; $key=$data['key'] ?? ''; if (!isset(Records::CATEGORIES[$type][$key]) || !is_bool($data['enabled'] ?? null)) throw new ValidationException(['category'=>'分类或开放状态无效']); $db->table('campus_categories')->where('type',$type)->where('key',$key)->update(['name'=>$name,'enabled'=>$data['enabled']]); }
             return new JsonResponse(['data'=>$db->table('campus_categories')->get()->all()]);

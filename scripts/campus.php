@@ -43,10 +43,10 @@ if ($action === 'enable') {
         $course=(object)json_decode((string)$response->getBody(),true,512,JSON_THROW_ON_ERROR)['data'];
     }
     $examples=[
-        ['type'=>'information','title'=>'【示例】校园公共知识分享活动','category'=>'activity','section_id'=>$sections['news']->id,'source'=>'【示例】维护者','source_url'=>'https://example.invalid/event','deadline'=>gmdate('Y-m-d\TH:i',time()+86400),'starts_at'=>gmdate('Y-m-d\TH:i',time()+172800)],
+        ['type'=>'information','title'=>'【示例】校园公共知识分享活动','category'=>'activity','section_id'=>$sections['careers']->id,'source'=>'【示例】维护者','source_url'=>'https://example.invalid/event','deadline'=>gmdate('Y-m-d\TH:i',time()+86400),'starts_at'=>gmdate('Y-m-d\TH:i',time()+172800)],
         ['type'=>'resource','title'=>'【示例】公开笔记索引与授权说明','category'=>'notes','section_id'=>$sections['resources']->id,'source'=>'【示例】原创作者','source_url'=>'https://example.invalid/notes','license'=>'【示例】作者自行决定授权；此链接不对应真实资料','course'=>'【示例】公共知识导论','topic'=>'示例知识整理','grade'=>'示例所有年级'],
         ['type'=>'question','title'=>'【示例】如何共同维护校园公共知识？','category'=>'procedure','section_id'=>$sections['questions']->id,'background'=>'【示例】请核验来源与许可，避免公开个人信息'],
-        ['type'=>'review','title'=>'【示例】公共知识导论学习体验','category'=>'experience','section_id'=>$sections['courses']->id,'course_id'=>$course->id,'semester'=>'2026 秋（示例）','overall'=>3,'difficulty'=>3,'workload'=>3,'experience'=>'【示例】开发流程演示，不代表真实课程口碑'],
+        ['type'=>'review','title'=>'【示例】公共知识导论学习体验','category'=>'experience','section_id'=>$sections['archive']->id,'course_id'=>$course->id,'semester'=>'2026 秋（示例）','overall'=>3,'difficulty'=>3,'workload'=>3,'experience'=>'【示例】开发流程演示，不代表真实课程口碑'],
     ];
     foreach ($examples as $example) {
         if (Flarum\Discussion\Discussion::query()->where('title',$example['title'])->exists()) continue;

@@ -42,12 +42,31 @@ export function pagination({
 export function registerNavigation() {
   extend(HeaderSecondary.prototype, 'items', items => {
     items.remove('locale');
+    // The campus skin follows the system color scheme; no per-page theme
+    // switch button. Notification data and delivery stay intact and move
+    // into the personal menu below.
+    items.remove('themeSwitcher');
+    items.remove('notifications');
     for (const item of items.toArray()) {
       if (item.itemName === 'signUp') item.attrs.icon = 'fas fa-user-plus';
       if (item.itemName === 'logIn') item.attrs.icon = 'fas fa-sign-in-alt';
     }
     if (items.has('campus-publish')) items.setPriority('campus-publish', 11);
   });
+  // Keep the personal menu complete without a bell in the top bar.
+  import('flarum/forum/components/SessionDropdown').then(({ default: SessionDropdown }) => {
+    extend(SessionDropdown.prototype, 'items', items => {
+      if (app.session.user && app.routes.notifications && !items.has('campus-notifications')) {
+        items.add('campus-notifications', m(LinkButton, {
+          href: app.route('notifications'),
+          icon: 'fas fa-bell',
+          className: 'Button Button--link'
+        }, '通知'), 41);
+      }
+    });
+  });
+  // The brand theme follows the system color scheme through the core "auto"
+  // mode; the manual switcher button is simply removed from the top bar.
   // Home is the navigation root, even when reached from a discussion or tag.
   // Leave the history stack and the mobile drawer intact for subsequent pages.
   extend(Navigation.prototype, 'items', items => {

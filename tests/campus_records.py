@@ -13,7 +13,7 @@ def editable(record, **changes):
     return {**record,**record['fields'],'status':record['stored_status'],'related':[r['id'] for r in record['fields']['related']],'reason':'【示例】开发验收更新内容',**changes}
 
 def phase3(f, guest, admin):
-    sections=admin.call('/api/campus/catalog')['data']['sections']; news=next(s for s in sections if s['key']=='news')
+    sections=admin.call('/api/campus/catalog')['data']['sections']; news=next(s for s in sections if s['key']=='careers')
     owner, outsider=account(guest,admin),account(guest,admin)
     member, other=owner['api'],outsider['api']; body=information(admin,news['id'],deadline=(dt.datetime.now(dt.timezone.utc)+dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M'))
     guest.call('/api/campus/records','POST',body,expected=(401,403))
@@ -100,7 +100,7 @@ def phase6(f, guest, admin):
     owner, reader=account(guest,admin),account(guest,admin); member, other=owner['api'],reader['api']
     course={'name':'【示例】数学导论 '+secrets.token_hex(4),'type':'基础课程','grade':'示例一年级','semester':'2026 秋','nature':'示例必修','assessment':'【示例】过程练习与讨论','resources':'【示例】公共资料索引','reason':'【示例】维护课程记录'}
     member.call('/api/campus/courses','POST',course,expected=(401,403)); c=admin.call('/api/campus/courses','POST',course,expected=201)['data']
-    section=next(s for s in admin.call('/api/campus/catalog')['data']['sections'] if s['key']=='courses')
+    section={'id': admin.call('/api/campus/catalog')['data']['review_section_id']}
     body={'type':'review','title':'【示例】课程体验分享 '+secrets.token_hex(4),'body':'【示例】这是开发验收用的普通账号课程评价，并不代表真实教学评价。','category':'experience','section_id':section['id'],'course_id':c['id'],'semester':'2026 秋','overall':4,'difficulty':3,'workload':2,'assessment':'【示例】过程考核','gains':'【示例】学习方法','advice':'【示例】提前预习','related':[]}
     member.call('/api/campus/records','POST',{**body,'anonymous':True},expected=422)
     member.call('/api/campus/records','POST',{**body,'overall':6},expected=422)

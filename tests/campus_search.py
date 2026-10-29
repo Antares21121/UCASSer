@@ -5,10 +5,10 @@ import json
 from campus_records import information
 
 def phase8(f, guest, admin):
-    marker=secrets.token_hex(5); sections=admin.call('/api/campus/catalog')['data']['sections']; news=next(s for s in sections if s['key']=='news')
+    marker=secrets.token_hex(5); sections=admin.call('/api/campus/catalog')['data']['sections']; news=next(s for s in sections if s['key']=='careers')
     # Own the ordinary-discussion fixture rather than depending on a legacy
     # welcome/test post that development demo cleanup can legitimately hide.
-    chat=next(s for s in sections if s['key']=='chat')
+    chat=next(s for s in sections if s['key']=='life')
     ordinary=admin.call('/api/discussions','POST',{'data':{'type':'discussions','attributes':{'title':'【示例】普通讨论检索 '+marker,'content':'【示例】原生普通讨论的独立检索验收。'},'relationships':{'tags':{'data':[{'type':'tags','id':str(chat['tag_id'])}]}}}},expected=201)['data']
     # One bulk labelled fixture, saved via the exact publishing API used by users.
     for number in range(23):
