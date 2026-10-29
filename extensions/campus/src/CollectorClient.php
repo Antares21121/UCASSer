@@ -113,7 +113,11 @@ class CollectorClient
     public function subscribe(string $name, string $articleUrl): array
     {
         $host = strtolower((string) parse_url($articleUrl, PHP_URL_HOST));
-        if (!str_starts_with($articleUrl, 'https://') || $host !== 'mp.weixin.qq.com') {
+        // Both the short (/s/xxxx) and the classic long form (/s?__biz=...)
+        // are canonical article URLs; the collector accepts either.
+        $isArticle = str_starts_with($articleUrl, 'https://mp.weixin.qq.com/s/')
+            || str_starts_with($articleUrl, 'https://mp.weixin.qq.com/s?');
+        if ($host !== 'mp.weixin.qq.com' || !$isArticle) {
             throw new ValidationException(['article_url' => '请填写该公众号一篇原文的 https://mp.weixin.qq.com/s/... 链接']);
         }
         $token = $this->token();

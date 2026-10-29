@@ -37,22 +37,23 @@ class CollectorSubscribeCommand extends AbstractCommand
         foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
             $parts = str_getcsv($line);
             if (count($parts) < 2) continue;
-            $rows[] = [trim($parts[0]), trim($parts[1])];
+            // Excel-authored CSVs often start with a UTF-8 BOM on the first cell.
+            $rows[] = [trim(ltrim($parts[0], "\xEF\xBB\xBF")), trim($parts[1])];
         }
         $this->info('共 '.count($rows).' 行；已订阅：'.count(array_intersect(array_column($rows, 0), $this->collector->subscribed())).' 个');
         if ($this->input->getOption('dry-run')) return 0;
         $ok = $fail = 0;
         foreach ($rows as [$name, $url]) {
-            if (!in_array($name, $known, true)) { $this->warn('[跳过] 未登记账号：'.$name); $fail++; continue; }
+            if (!in_array($name, $known, true)) { $this->info('[跳过] 未登记账号：'.$name); $fail++; continue; }
             try {
                 $result = $this->collector->subscribe($name, $url);
                 $this->info('[成功] '.$name.'（'.$result['status'].'）');
                 $ok++;
             } catch (ValidationException $error) {
-                $this->warn('[失败] '.$name.'：'.implode('；', array_map(fn ($v) => is_array($v) ? implode('、', $v) : (string) $v, $error->getAttributes())));
+                $this->info('[失败] '.$name.'：'.implode('；', array_map(fn ($v) => is_array($v) ? implode('、', $v) : (string) $v, $error->getAttributes())));
                 $fail++;
             } catch (\Throwable $error) {
-                $this->warn('[失败] '.$name.'：'.mb_substr($error->getMessage(), 0, 120));
+                $this->info('[失败] '.$name.'：'.mb_substr($error->getMessage(), 0, 120));
                 $fail++;
             }
         }
