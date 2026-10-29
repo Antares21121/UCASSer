@@ -83,7 +83,10 @@ class CollectorClient
         $data = $this->call('GET', 'weread/qr/code', null, $this->token());
         $path = (string) (($data['data'] ?? [])['code'] ?? '');
         if ($path === '') throw new ValidationException(['collector' => '订阅服务未返回二维码']);
-        $url = str_starts_with($path, 'http') ? $path : $this->publicBase().'/'.ltrim($path, '/');
+        // The proxy fetches server-side, so it must use the server-reachable
+        // origin (host.docker.internal in Docker), never the browser one.
+        $serverRoot = preg_replace('#/api/v1/wx/$#', '', $this->base());
+        $url = str_starts_with($path, 'http') ? $path : $serverRoot.'/'.ltrim($path, '/');
         $response = (new Client(['timeout' => 10, 'http_errors' => false]))->request('GET', $url);
         $body = (string) $response->getBody();
         if ($response->getStatusCode() !== 200 || strlen($body) < 100) throw new ValidationException(['collector' => '无法读取二维码图片']);

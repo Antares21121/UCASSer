@@ -248,7 +248,7 @@ export default class ControlPage extends DataPage {
 
   async fetch() {
     this.tab = tabs.some(([name]) => name === this.params.tab) ? this.params.tab : 'overview';
-    if (this.tab === 'sources') await this.loadCollector();
+    if (this.tab === 'sources' || this.tab === 'overview') await this.loadCollector();
     this.page = Math.max(1, Math.min(10000, Number.parseInt(this.params.page, 10) || 1));
     const path = {
       review: `aggregation/queue?page=${this.page}`, sources: 'aggregation/sources',
@@ -323,13 +323,15 @@ export default class ControlPage extends DataPage {
     });
   }
 
-  collect(sourceId = null) {
+  async collect(sourceId = null) {
     // Collection is useless before the WeChat session is authorised, so the
     // first click hands the operator the QR instead of silently queueing.
+    // The overview tab does not prefetch the collector, so load it here.
+    if (!this.collector) await this.loadCollector();
     if (this.collector && this.collector.state !== 'ready') {
       app.alerts.show({ type: 'info' }, '公众号尚未授权：先扫码，授权后再采集。');
       this.showCollectorQr();
-      return Promise.resolve();
+      return;
     }
     return this.perform(() => api('control/collect', 'POST', sourceId ? { source_id: sourceId } : {}), {
       message: '采集任务已加入队列。学校官网若拒绝服务器连接，可改用本地快照。'
