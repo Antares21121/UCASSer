@@ -24,7 +24,7 @@ class Identity
     public function group(string $key): int { return (int)$this->settings->get('campus.group.'.$key); }
     public function moderator(User $actor, int $section): bool
     {
-        return $actor->isAdmin() || (!$actor->isGuest() && $this->db->table('campus_moderators')->where('user_id', $actor->id)->where('section_id', $section)->exists());
+        return $actor->isAdmin() || (AccountAccess::isConfirmed($actor) && $this->db->table('campus_moderators')->where('user_id', $actor->id)->where('section_id', $section)->exists());
     }
     public function audit(User $actor, string $action, string $target, ?string $reason = null): void
     {

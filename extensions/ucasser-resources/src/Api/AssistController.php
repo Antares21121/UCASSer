@@ -38,7 +38,8 @@ class AssistController extends Support implements RequestHandlerInterface
 
     private function answer(ServerRequestInterface $request): JsonResponse
     {
-        if (RequestUtil::getActor($request)->isGuest()) return $this->error('请先登录再使用自己的 API Key', 403);
+        $actor = RequestUtil::getActor($request);
+        if ($actor->isGuest() || ! $actor->is_email_confirmed) return $this->error('请登录并确认邮箱后再使用自己的 API Key', 403);
         $input = $this->input($request);
         $query = $this->text($input['q'] ?? null, 100);
         $provider = $input['provider'] ?? null;

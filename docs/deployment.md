@@ -62,7 +62,7 @@ docker compose --env-file .env.production -f compose.production.yaml ps
 
 应用以 www-data 运行，代码只读，只有 assets/storage 卷和 `/tmp` 可写。Web 只读挂载 assets 和证书目录。数据库卷只供 MariaDB 使用。生产 Web 的 `/healthz` 仅证明 Nginx 工作，PHP 健康检查验证已安装数据库，管理脚本再验证外部 HTTPS 首页/API。
 
-完成 [安全检查](security.md)，在后台配置 SMTP、关闭未经评估的公开注册、审核默认用户权限。确认 HTTPS、头像和登录正常后再公开地址。确认告警和备份周期后由运维定期执行 backup；当前没有自动调度或通知实现。
+完成 [安全检查](security.md)，在后台配置 SMTP、关闭未经评估的公开注册、审核默认用户权限。需要开放邮箱注册时，按 [邮箱注册与登录](email-accounts.md) 验证真实投递、确认和登录后再开启。确认 HTTPS、头像和登录正常后再公开地址。确认告警和备份周期后由运维定期执行 backup；当前没有自动调度或通知实现。
 
 ## 日志和日常操作
 

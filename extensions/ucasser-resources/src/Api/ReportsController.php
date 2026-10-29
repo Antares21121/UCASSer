@@ -49,8 +49,8 @@ class ReportsController extends Support implements RequestHandlerInterface
         }
 
         $actor = RequestUtil::getActor($request);
-        if ($actor->isGuest()) {
-            return $this->error('请先登录再反馈链接问题', 403);
+        if ($actor->isGuest() || ! $actor->is_email_confirmed) {
+            return $this->error('请登录并确认邮箱后再反馈链接问题', 403);
         }
 
         $input = $this->input($request);

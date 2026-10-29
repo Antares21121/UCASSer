@@ -8,7 +8,7 @@ $db=$c->make(Illuminate\Database\ConnectionInterface::class); $settings=$c->make
 $out=[];
 if ($input['action']==='inspect') {
     $u=Flarum\User\User::query()->findOrFail($input['user_id']);
-    $out=['groups'=>$u->groups->pluck('id')->all(),'password_hashed'=>$u->password!==$input['password'] && $u->checkPassword($input['password']), 'verifications'=>$db->table('campus_verifications')->where('user_id',$u->id)->get()->all(),'audit'=>$db->table('campus_audit')->where('target',(string)($input['target'] ?? ''))->get()->all(),'private_rows'=>$db->table('campus_discussion_bookmarks')->where('user_id',$u->id)->count()+$db->table('campus_cases')->where('reporter_id',$u->id)->count()+$db->table('campus_feedback')->where('user_id',$u->id)->count()];
+    $out=['groups'=>$u->groups->pluck('id')->all(),'is_email_confirmed'=>(bool)$u->is_email_confirmed,'password_hashed'=>$u->password!==$input['password'] && $u->checkPassword($input['password']), 'verifications'=>$db->table('campus_verifications')->where('user_id',$u->id)->get()->all(),'audit'=>$db->table('campus_audit')->where('target',(string)($input['target'] ?? ''))->get()->all(),'private_rows'=>$db->table('campus_discussion_bookmarks')->where('user_id',$u->id)->count()+$db->table('campus_cases')->where('reporter_id',$u->id)->count()+$db->table('campus_feedback')->where('user_id',$u->id)->count()];
 } elseif ($input['action']==='mail') {
     foreach (['mail_driver','mail_host','mail_port','mail_encryption','mail_username','mail_password','mail_from','mail_smtp_verify_peer'] as $key) { $out[$key]=$settings->get($key); if (array_key_exists($key,$input['values'])) $settings->set($key,$input['values'][$key]); }
 } elseif ($input['action']==='tokens') {

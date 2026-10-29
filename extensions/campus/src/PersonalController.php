@@ -12,7 +12,7 @@ class PersonalController implements RequestHandlerInterface
 {
     public function __construct(private Records $records) {}
     public function handle(Request $r): ResponseInterface {
-        $a=RequestUtil::getActor($r); $a->assertRegistered(); $db=$this->records->db; $q=$r->getQueryParams();
+        $a=RequestUtil::getActor($r); AccountAccess::assertConfirmed($a); $db=$this->records->db; $q=$r->getQueryParams();
         if (str_starts_with($r->getAttribute('routeName'),'campus.discussion.bookmark')) {
             $d=Discussion::query()->whereVisibleTo($a)->findOrFail((int)$q['id']);
             if ($r->getMethod()==='POST') { $enabled=$r->getParsedBody()['enabled'] ?? null; if (!is_bool($enabled)) throw new ValidationException(['enabled'=>'收藏状态无效']);

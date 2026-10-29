@@ -43,18 +43,64 @@ def phase1(f, guest, admin):
     assert guest.call('/api/campus/rules')['data']['rules']
     print('PASS phase 1: ten sections, real homepage, admin settings, direct URL/search/tag visibility and public rules')
 
+def confirm_email(url, token):
+    # Flarum 2.x renders a confirmation form on GET; activation is the CSRF-
+    # protected POST to the same URL. Keep the cookie jar for both requests.
+    browser=urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    path=url+'/confirm/'+token
+    html=browser.open(path).read().decode()
+    csrf=re.search(r'name="csrfToken" value="([^"]+)"',html)
+    assert csrf, 'Confirmation form must carry a CSRF token'
+    browser.open(urllib.request.Request(path,data=urllib.parse.urlencode({'csrfToken':csrf[1]}).encode())).read()
+
 def phase2(f, guest, admin):
     with local_mail(f) as mail:
         old = fixture(f, {'action':'mail','values':{'mail_driver':'smtp','mail_host':mail_host(f),'mail_port':str(mail.server_address[1]),'mail_encryption':'','mail_username':'','mail_password':'','mail_from':'forum@example.invalid'}})
         try:
+            # A member must pass through the actual email-confirmation state,
+            # without the administrator activation used by the other fixtures.
+            pending_name='email_'+secrets.token_hex(4)
+            pending_email=pending_name+'@example.invalid'
+            pending_password=secrets.token_urlsafe(24)
+            pending_id=int(guest.call('/api/users','POST',{'data':{'type':'users','attributes':{'username':pending_name,'email':pending_email,'password':pending_password}}},expected=201)['data']['id'])
+            before=fixture(f,{'action':'inspect','user_id':pending_id,'password':pending_password})
+            assert not before['is_email_confirmed'] and before['password_hashed']
+            confirmation=fixture(f,{'action':'tokens','user_id':pending_id})['email']
+            assert confirmation and any(pending_email.encode() in message for message in mail.messages)
+            pending=guest.login(pending_email,pending_password)
+            pending.call('/api/campus/identity','POST',{'consent':True,'evidence':'【示例】待确认账号不能提交身份材料'},expected=403)
+            pending.call('/api/campus/aggregation/submissions','POST',{'origin':'private_tip','show_submitter':False,'category':'notice','title':'【示例】待确认账号线索','summary':'待确认账号不应能将线索提交给审核队列','source_name':'开发示例'},expected=403)
+            pending.call('/api/campus/aggregation/mine',expected=403)
+            private=admin.call('/api/campus/aggregation/submissions','POST',{'origin':'private_tip','show_submitter':False,'category':'notice','title':'【示例】邮箱确认专属线索 '+secrets.token_hex(3),'summary':'仅在隔离开发实例验证未确认账号的成员内容权限。','source_name':'开发示例','source_url':''},expected=201)['data']['id']
+            private_id=admin.call('/api/campus/aggregation/candidates/'+str(private)+'/review','POST',{'action':'publish','verified':False,'reason':'确认流程验收'})['data']['item_id']
+            pending.call('/api/campus/aggregation/items/'+str(private_id),expected=404)
+            assert private_id not in {item['id'] for item in pending.call('/api/campus/aggregation/items')['data']}
+            assert pending.call('/api/campus/aggregation/items')['data']==guest.call('/api/campus/aggregation/items')['data']
+            assert not fixture(f,{'action':'inspect','user_id':pending_id,'password':pending_password})['is_email_confirmed']
+            sections=admin.call('/api/campus/sections')['data']
+            restricted=next(section for section in sections if section['key']=='chat')
+            original={key:restricted[key] for key in ('name','description','position','visibility')}
+            original['position']=int(original['position']); original['is_open']=bool(restricted['is_open'])
+            try:
+                admin.call('/api/campus/sections/'+str(restricted['id']),'PATCH',{**original,'visibility':'members','is_open':True})
+                assert not any(section['key']=='chat' for section in pending.call('/api/campus/home')['data']['sections'])
+                confirm_email(guest.url,confirmation)
+                confirmed=guest.login(pending_email,pending_password)
+                assert any(section['key']=='chat' for section in confirmed.call('/api/campus/home')['data']['sections'])
+                assert confirmed.call('/api/campus/aggregation/items/'+str(private_id))['data']['id']==private_id
+            finally:
+                admin.call('/api/campus/sections/'+str(restricted['id']),'PATCH',original)
+            after=fixture(f,{'action':'inspect','user_id':pending_id,'password':pending_password})
+            assert after['is_email_confirmed']
+            assert not fixture(f,{'action':'tokens','user_id':pending_id})['email']
+            guest.call('/api/token','POST',{'identification':pending_email,'password':'wrong-password'},expected=401)
+            assert guest.login(pending_email,pending_password).call('/api/users/'+str(pending_id))['data']['id']==str(pending_id)
             first, other = account(guest, admin, register=True), account(guest, admin, register=True)
             member, stranger = first['api'], other['api']
             uid = first['id']
             assert fixture(f, {'action':'inspect','user_id':uid,'password':first['password']})['password_hashed']
             tokens = fixture(f, {'action':'tokens','user_id':uid})
             assert tokens['email'] and len(mail.messages)>=2
-            # Exercise the real emailed confirmation route, even though fixtures were activated by admin.
-            Api(guest.url).call('/confirm/'+tokens['email'])
             payload={'consent':True,'evidence':'【示例】人工验证申请，仅用于开发验收'}
             guest.call('/api/campus/identity','POST',payload,expected=(401,403))
             member.call('/api/campus/identity','POST',{'consent':False,'evidence':'不应保存的验证说明'},expected=422)

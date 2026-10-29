@@ -32,8 +32,8 @@ class RecordController implements RequestHandlerInterface
             foreach (['type','category','course_id','semester','section_id'] as $key) if (!empty($q[$key])) $query->where($key,$q[$key]);
             if (!empty($q['status'])) Records::statusFilter($query,(string)$q['status']);
             foreach (['course','topic','grade','tags'] as $key) if (!empty($q[$key])) $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(data, '$.$key')) LIKE ?",['%'.addcslashes(mb_substr((string)$q[$key],0,100),'\\%_').'%']);
-            if (($q['bookmarked'] ?? '')==='1') { $a->assertRegistered(); $query->whereIn('id',$db->table('campus_bookmarks')->where('user_id',$a->id)->select('record_id')); }
-            if (($q['mine'] ?? '')==='1') { $a->assertRegistered(); $query->where('user_id',$a->id); }
+            if (($q['bookmarked'] ?? '')==='1') { AccountAccess::assertConfirmed($a); $query->whereIn('id',$db->table('campus_bookmarks')->where('user_id',$a->id)->select('record_id')); }
+            if (($q['mine'] ?? '')==='1') { AccountAccess::assertConfirmed($a); $query->where('user_id',$a->id); }
             if (!empty($q['search'])) {
                 $pattern='%'.addcslashes(mb_substr((string)$q['search'],0,100),'\\%_').'%';
                 $query->where(fn($b)=>$b->where('data','like',$pattern)->orWhereIn('discussion_id',Discussion::query()->whereVisibleTo($a)->where('title','like',$pattern)->select('id'))->orWhereIn('discussion_id',Post::query()->whereVisibleTo($a)->where('number',1)->where('content','like',$pattern)->select('discussion_id')));
@@ -47,7 +47,7 @@ class RecordController implements RequestHandlerInterface
             $row=$this->records->find($a,(int)$q['id']); $a->assertPermission($this->records->canEdit($a,$row)); $history=$db->table('campus_revisions')->where('record_id',$row->id)->where('version',(int)$q['version'])->first(); if (!$history) throw new \Illuminate\Database\Eloquent\ModelNotFoundException;
             $snapshot=json_decode($history->snapshot,true,512,JSON_THROW_ON_ERROR); return new JsonResponse(['data'=>['version'=>$history->version,'title'=>$snapshot['title'],'body'=>$snapshot['body'],'fields'=>json_decode($snapshot['data'],true,512,JSON_THROW_ON_ERROR),'reason'=>$history->reason]]);
         }
-        $a->assertRegistered();
+        AccountAccess::assertConfirmed($a);
         if ($route==='campus.records.create') {
             $v=$this->records->validate($a,$data);
             $id=$db->transaction(function () use ($r,$a,$v,$db,$data) {
