@@ -12,6 +12,7 @@
   --campus-mark:#C22A49;
   --campus-accent:#A71937;
   --campus-mist:#DFEAF2;
+  --campus-hero-top:rgba(247,244,238,.9);
 }
 :root[data-theme^="dark"] {
   --campus-canvas:#141A24;
@@ -25,6 +26,7 @@
   --campus-mark:#EF5D75;
   --campus-accent:#C22A49;
   --campus-mist:#23384D;
+  --campus-hero-top:rgba(20,26,36,.9);
 }
 .App { color:var(--campus-ink); background:var(--campus-canvas); }
 .Campus { --campus-accent:#A71937; }
@@ -60,7 +62,7 @@
 .IndexPage.Campus-feedPage .WelcomeHero {
   position:relative; overflow:hidden; color:var(--campus-ink);
   background:
-    linear-gradient(0deg,rgba(255,255,255,0) 70%,rgba(247,244,238,.9)),
+    linear-gradient(0deg,transparent 70%,var(--campus-hero-top)),
     repeating-linear-gradient(0deg,transparent 0 31px,rgba(194,42,73,.045) 32px 33px),
     var(--campus-canvas);
   border-bottom:1px solid var(--campus-divider);

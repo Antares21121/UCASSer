@@ -3,8 +3,14 @@ const { test, expect } = require('@playwright/test');
 test('visitor home makes the four main tasks reachable on desktop and phone', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
+  // Returning visitors may have closed Flarum's welcome message before the
+  // campus skin was deployed. The permanent masthead must still be visible.
+  await page.addInitScript(() => localStorage.setItem('welcomeHidden', 'true'));
   await page.goto('/campus');
   await expect(page.locator('.Campus-homeIdentity')).toContainText('非学校官方平台');
+  await expect(page.locator('.WelcomeHero')).toBeVisible();
+  await expect(page.locator('.WelcomeHero .Hero-close')).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem('welcomeHidden'))).toBe('true');
   // The hero image is meaningful content with a descriptive alt, not a
   // decorative aria-hidden ornament.
   await expect(page.locator('.Campus-homeArtwork img')).toHaveAttribute('alt', /书|笔记/);
@@ -35,3 +41,25 @@ test('visitor home makes the four main tasks reachable on desktop and phone', as
   await expect(page.locator('.LogInModal')).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+for (const colorScheme of ['light', 'dark']) {
+  test(`home masthead survives an empty welcome title in ${colorScheme} mode`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await page.addInitScript(() => localStorage.setItem('welcomeHidden', 'true'));
+    await page.route('**/campus', async route => {
+      const response = await route.fetch();
+      const html = await response.text();
+      expect(html).toMatch(/"welcomeTitle"\s*:\s*"/);
+      await route.fulfill({ response, body: html.replace(/"welcomeTitle"\s*:\s*"(?:[^"\\]|\\.)*"/, '"welcomeTitle":""') });
+    });
+    await page.goto('/campus');
+    await expect(page.locator('.WelcomeHero .Hero-title')).toHaveText(/校园公共论坛/);
+    await expect(page.locator('.Campus-homeSearch')).toBeVisible();
+    await expect(page.locator('.Campus-homeArtwork img')).toBeVisible();
+    await expect(page.locator('.WelcomeHero .Hero-close')).toHaveCount(0);
+    // A homepage exception must not erase a visitor's native welcome preference.
+    expect(await page.evaluate(() => localStorage.getItem('welcomeHidden'))).toBe('true');
+    await page.reload();
+    await expect(page.locator('.Campus-homeSearch')).toBeVisible();
+  });
+}

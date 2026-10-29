@@ -815,8 +815,16 @@ export function registerNative() {
     params.include ||= [];
     if (!params.include.includes('firstPost')) params.include.push('firstPost');
   });
+  // The campus masthead contains the home search and identity, so a legacy
+  // dismissed welcome message must not hide it. Keep native dismissal elsewhere.
+  override(WelcomeHero.prototype, 'isHidden', function (original) {
+    return isCampusHome() ? false : original();
+  });
+  extend(WelcomeHero.prototype, 'bodyItems', items => {
+    if (isCampusHome()) items.remove('dismiss-button');
+  });
   extend(WelcomeHero.prototype, 'contentItems', items => {
-    if (app.forum.attribute('welcomeTitle') === 'Welcome to Flarum') {
+    if (!app.forum.attribute('welcomeTitle')?.trim() || app.forum.attribute('welcomeTitle') === 'Welcome to Flarum') {
       items.setContent('title', m('h1.Hero-title', app.forum.attribute('title')));
       items.setContent('subtitle', m('div.Hero-subtitle', app.forum.attribute('description') || '共同维护校园信息，让经验与知识帮助更多同学。'));
     }
