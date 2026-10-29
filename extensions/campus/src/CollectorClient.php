@@ -97,7 +97,7 @@ class CollectorClient
     public function subscribed(): array
     {
         try {
-            $result = $this->call('GET', 'mps?limit=1000&offset=0&status=1', null, $this->token());
+            $result = $this->call('GET', 'mps?limit=100&offset=0', null, $this->token());
             return array_values(array_filter(array_map(fn ($row) => (string) ($row['mp_name'] ?? ''), $result['data']['list'] ?? [])));
         } catch (\Throwable $error) {
             return [];
@@ -152,7 +152,7 @@ class CollectorClient
     /** Current subscriptions (id + display name). */
     private function mpList(string $token): array
     {
-        $result = $this->call('GET', 'mps?limit=200&offset=0', null, $token);
+        $result = $this->call('GET', 'mps?limit=100&offset=0', null, $token);
         return $result['data']['list'] ?? [];
     }
 
