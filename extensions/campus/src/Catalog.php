@@ -126,6 +126,16 @@ class Catalog
         return $out;
     }
 
+    /** course-column subset that never writes NULL into the NOT NULL fields. */
+    private static function courseColumns(array $values): array
+    {
+        $out = array_intersect_key($values, array_flip(['name', 'type', 'grade', 'semester', 'nature', 'college_id']));
+        foreach (['type', 'grade', 'semester', 'nature'] as $key) {
+            if (array_key_exists($key, $out) && $out[$key] === null) $out[$key] = '';
+        }
+        return $out;
+    }
+
     public static function identityHash(?int $collegeId, string $code, string $semester): string
     {
         return hash('sha256', implode('|', [(string) $collegeId, mb_strtolower(trim($code)), trim($semester)]));
@@ -139,7 +149,7 @@ class Catalog
         $values = $this->validateCourse($d, $id !== null);
         // campus_courses holds the review-facing catalog fields; code and
         // import identity live on the offering row.
-        $courseValues = array_intersect_key($values, array_flip(['name', 'type', 'grade', 'semester', 'nature', 'college_id']));
+        $courseValues = self::courseColumns($values);
         $now = gmdate('Y-m-d H:i:s');
         $this->db->transaction(function () use ($actor, $id, $row, $values, $courseValues, $now, $d) {
             if ($id) {
@@ -347,7 +357,7 @@ class Catalog
             if (($values['name'] ?? $course->name) !== $course->name) { $conflicts++; return $this->step($line, $externalKey, 'conflict', (int) $offering->course_id, json_encode($current, JSON_UNESCAPED_UNICODE), json_encode($next, JSON_UNESCAPED_UNICODE), fn () => null, $results, '课程名称变化需人工处理，已跳过'); }
             $updated++;
             return $this->step($line, $externalKey, 'updated', (int) $offering->course_id, json_encode($current, JSON_UNESCAPED_UNICODE), json_encode($next, JSON_UNESCAPED_UNICODE), function () use ($offering, $course, $values, $now) {
-                $courseValues = array_intersect_key($values, array_flip(['name', 'type', 'grade', 'semester', 'nature', 'college_id']));
+                $courseValues = self::courseColumns($values);
                 $this->db->table('campus_courses')->where('id', $course->id)->update($courseValues + ['version' => $course->version + 1]);
                 $collegeName = isset($values['college_id']) ? $this->db->table('campus_colleges')->where('id', $values['college_id'])->value('name') : $offering->college;
                 $this->db->table('campus_course_offerings')->where('id', $offering->id)->update([
@@ -363,7 +373,7 @@ class Catalog
         }
         $new++;
         return $this->step($line, $externalKey, 'inserted', null, null, json_encode($values, JSON_UNESCAPED_UNICODE), function (User $actor) use ($values, $externalKey, $now) {
-            $courseValues = array_intersect_key($values, array_flip(['name', 'type', 'grade', 'semester', 'nature', 'college_id']));
+            $courseValues = self::courseColumns($values);
             $courseId = $this->db->table('campus_courses')->insertGetId($courseValues + ['version' => 1]);
             $collegeName = isset($values['college_id']) && $values['college_id'] ? $this->db->table('campus_colleges')->where('id', $values['college_id'])->value('name') : '';
             $this->db->table('campus_course_offerings')->insert([

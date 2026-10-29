@@ -62,3 +62,13 @@ php flarum campus:boards:migrate --apply    # 写入（重跑跳过已完成项�
 - CI：新增步骤运行以上验收（见 `.github/workflows/ci.yaml`）
 
 未完成/待用户提供：真实照片素材（当前使用自绘插画，若后续有明确授权的摄影素材可替换）；真实课程与学院数据（导入框架已就绪，需用户提供经核实、有权公开的数据文件）。
+
+## 工具箱数据（2026-10 增补）
+
+- `extensions/campus/resources/data/timetable.json`：教务系统排课导出（2026-10-29 快照），672 条排课 / 501 门课 / 18 个开课单位；按星期拆分多日课程，周次与单双周保留原始口径。
+- `extensions/campus/resources/data/calendars.json`：2026–2027 学年秋、春两学期校历（18 周、节假日标记、说明与重要日期），按教务处发布版本转录。
+- `extensions/campus/resources/data/shuttle.json`：摆渡车 24 班次与三段停运区间。
+- 前端经 `GET /api/campus/tools/data` 一次读取（10 分钟缓存），页面：`/campus/tools/timetable`、`/campus/tools/calendar`、`/campus/tools/shuttle`。
+- 课程目录导入素材：`data/import/2026-autumn/colleges.csv`（18 个开课单位）与 `courses.csv`（501 门课程，`semester=2026 秋`），走控制台「课程目录 → 预览导入」或 `campus:courses:import`；单批上限 500 行。
+- 资料目录的「校内资料」条目按运营要求暂不预置，待后续在控制台上传时再建（外链需 https + 来源/授权字段）。
+- 采集作业：控制台「一键采集」只负责入队，实际抓取由 `php flarum campus:aggregation:run-job`（或 `python scripts/aggregation_jobs.py --backend docker`）执行；队列中的任务超过 2 分钟会解锁按钮，可重新入队。

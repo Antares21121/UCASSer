@@ -110,6 +110,7 @@ return [
         ->post('/campus/control/catalog/resources/import','campus.control.catalog.resources.import',Campus\CatalogAdminController::class)
         ->post('/campus/control/catalog/import/{id}/rollback','campus.control.catalog.import.rollback',Campus\CatalogAdminController::class),
     (new Extend\Routes('api'))->get('/campus/assets/{file}','campus.asset',Campus\CampusAssetController::class),
+    (new Extend\Routes('api'))->get('/campus/tools/data','campus.tools.data',Campus\CampusToolsController::class),
     // Retired discussion boards keep their old URLs alive via 301s.
     (new Extend\Middleware('forum'))->add(Campus\LegacyBoardRedirect::class),
     (new Extend\Routes('api'))->get('/campus/governance','campus.governance',Campus\GovernanceController::class)->post('/campus/governance','campus.governance.publish',Campus\GovernanceController::class),

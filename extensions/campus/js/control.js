@@ -458,7 +458,11 @@ export default class ControlPage extends DataPage {
   content() {
     const d = this.data;
     const job = d.collection_job;
-    const running = job && ['queued', 'running'].includes(job.status);
+    // A queued job only blocks re-queueing while it is fresh. The worker that
+    // drains the queue runs outside the web process, so a stale queue (preview
+    // instance, paused cron) must not lock the button forever.
+    const jobQueued = job ? Date.now() - new Date(String(job.created_at).replace(' ', 'T') + 'Z').getTime() : Infinity;
+    const running = job && (job.status === 'running' || (job.status === 'queued' && jobQueued < 120000));
     return m('div.Campus-control', [
       m('header.Campus-controlHeader', [
         m('div', [m('h1', '运营后台'), m('p', '在这里采集、审核并处理校园社区的日常工作。')]),
@@ -494,7 +498,8 @@ export default class ControlPage extends DataPage {
             job ? m('div.Campus-controlJob', { role: 'status', 'aria-live': 'polite' }, [
               m('strong', `最近任务 #${job.id} · ${jobNames[job.status] || job.status}`),
               m('small', '发起于 ' + formatTime(job.created_at)),
-              job.result ? m('pre', job.result) : running ? m('p', '正在等待后台执行；可稍后刷新状态。') : null
+              job.result ? m('pre', job.result) : running ? m('p', '正在等待后台执行；可稍后刷新状态。') :
+                job.status === 'queued' ? m('p', '任务已入队但尚未执行。请确认采集任务计划已启用（python scripts/aggregation_jobs.py），或重新点击一键采集。') : null
             ]) : m('p.Campus-controlEmpty', '还没有由控制台发起的采集任务。')
           ]),
           m('section.Campus-controlSection', [
