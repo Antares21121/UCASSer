@@ -14,6 +14,13 @@ class SetupCommand extends AbstractCommand
             if (in_array($this->settings->get('theme_primary_color'),[null,'','#536F90','#536f90','#4d698e','#4D698E'],true)) $this->settings->set('theme_primary_color','#2563eb');
             $this->settings->set('ucasser-campus.theme_initialized','1');
         }
+        // Move only our previous blue default to the new campus-red visual system.
+        if (!$this->settings->get('ucasser-campus.redesign_initialized')) {
+            if (in_array(strtolower((string) $this->settings->get('theme_primary_color')), ['#2563eb','#4d698e','#536f90'], true)) {
+                $this->settings->set('theme_primary_color','#bd1838');
+            }
+            $this->settings->set('ucasser-campus.redesign_initialized','1');
+        }
         if (!$this->settings->get('ucasser-campus.tag_theme_initialized')) {
             \Flarum\Tags\Tag::query()->whereIn('id',$this->sections->db->table('campus_sections')->select('tag_id'))->where('color','#176d72')->update(['color'=>'#2563eb']);
             $this->settings->set('ucasser-campus.tag_theme_initialized','1');

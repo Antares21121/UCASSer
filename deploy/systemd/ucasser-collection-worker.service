@@ -1,0 +1,10 @@
+[Unit]
+Description=UCASSer operator collection queue
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/ucasser-test
+ExecStart=/usr/bin/flock -n /run/lock/ucasser-collection-worker.lock /usr/bin/python3 /opt/ucasser-test/scripts/aggregation_jobs.py --env-file /opt/ucasser-test/.env.test
+TimeoutStartSec=30min

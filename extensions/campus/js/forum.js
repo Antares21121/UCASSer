@@ -12,6 +12,7 @@ import GovernancePage from './governance';
 import ToolboxPage from './toolbox';
 import { AggregationPage, AggregationSubmitPage, AggregationReviewPage, AggregationSourcesPage } from './aggregation';
 import ControlPage from './control';
+import registerChatEditor from './chat';
 import { DataPage, api, pageHeading, link } from './ui';
 import { registerNative, NativeRecordsPage, RecordRedirect, ComposerEntry, NativeCollectionsPage } from './native';
 class RulesPage extends DataPage {
@@ -23,6 +24,7 @@ class RulesPage extends DataPage {
   }
 }
 app.initializers.add('ucasser-campus', () => {
+  registerChatEditor();
   registerNative();
   registerNavigation();
   registerNotifications();

@@ -9,7 +9,7 @@ class Aggregation
 {
     public const CATEGORIES = ['notice' => '通知', 'activity' => '活动', 'lecture' => '讲座', 'opportunity' => '机会', 'other' => '其他'];
 
-    public function __construct(public ConnectionInterface $db) {}
+    public function __construct(public ConnectionInterface $db, private OperatorAccess $operators) {}
 
     private function text(array $input, string $key, int $min, int $max): string
     {
@@ -122,7 +122,9 @@ class Aggregation
 
     public function review(User $actor, int $candidateId, array $input): array
     {
-        $actor->assertAdmin();
+        if (!$actor->isAdmin() && !$this->operators->allowed($actor)) {
+            throw new \Flarum\User\Exception\PermissionDeniedException();
+        }
         $action = $input['action'] ?? '';
         if (!in_array($action, ['publish', 'merge', 'update', 'reject'], true)) throw new ValidationException(['action' => '审核动作无效']);
         $reason = $this->text($input, 'reason', $action === 'reject' ? 5 : 0, 500);

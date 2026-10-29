@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class AggregationController implements RequestHandlerInterface
 {
-    public function __construct(private Aggregation $aggregation) {}
+    public function __construct(private Aggregation $aggregation, private OperatorAccess $operators) {}
 
     public function handle(Request $request): ResponseInterface
     {
@@ -36,7 +36,7 @@ class AggregationController implements RequestHandlerInterface
                 ->get(['id', 'title', 'status', 'item_id', 'review_reason', 'created_at']);
             return new JsonResponse(['data' => $rows->all()]);
         }
-        $actor->assertAdmin();
+        if (!$actor->isAdmin()) $this->operators->assert($actor);
         if ($route === 'campus.aggregation.queue') {
             $page = max(1, min(10000, (int) ($query['page'] ?? 1)));
             $pending = $db->table('campus_aggregation_candidates')->where('status', 'pending');

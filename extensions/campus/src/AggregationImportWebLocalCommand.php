@@ -11,7 +11,7 @@ class AggregationImportWebLocalCommand extends AbstractCommand
     protected function configure(): void
     {
         $this->setName('campus:aggregation:import-web-local')
-            ->setDescription('Import a local official website snapshot into the admin review queue');
+            ->setDescription('Import a local official website snapshot into the operator review queue');
     }
 
     protected function fire(): int
@@ -22,7 +22,20 @@ class AggregationImportWebLocalCommand extends AbstractCommand
             return 2;
         }
         try {
-            $snapshot = json_decode((string) file_get_contents($path), true, 32, JSON_THROW_ON_ERROR);
+            $result = $this->import((string) file_get_contents($path));
+            $this->info('本地快照：'.$result['sources'].' 个来源，跳过 '.$result['skipped'].' 个已暂停来源，新增 '.$result['added'].' 条待审候选；未自动发布');
+            return 0;
+        } catch (\Throwable $error) {
+            $this->error('导入失败：'.$error->getMessage());
+            return 2;
+        }
+    }
+
+    /** The CLI and operator upload use the same strict source and article validation. */
+    public function import(string $raw): array
+    {
+            if (strlen($raw) > 1024 * 1024) throw new \RuntimeException('快照超过 1 MB');
+            $snapshot = json_decode($raw, true, 32, JSON_THROW_ON_ERROR);
             if (!is_array($snapshot) || ($snapshot['version'] ?? null) !== 1
                 || !is_array($snapshot['sources'] ?? null) || !array_is_list($snapshot['sources'])
                 || count($snapshot['sources']) > count(OfficialSourceCatalog::WEB)) {
@@ -78,11 +91,6 @@ class AggregationImportWebLocalCommand extends AbstractCommand
                     'last_checked_at' => gmdate('Y-m-d H:i:s'), 'last_error' => null,
                 ]);
             }
-            $this->info('本地快照：'.count($validated)." 个来源，跳过 $skipped 个已暂停来源，新增 $added 条待审候选；未自动发布");
-            return 0;
-        } catch (\Throwable $error) {
-            $this->error('导入失败：'.$error->getMessage());
-            return 2;
-        }
+            return ['sources' => count($validated), 'skipped' => $skipped, 'added' => $added];
     }
 }

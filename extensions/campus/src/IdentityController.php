@@ -11,7 +11,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 class IdentityController implements RequestHandlerInterface
 {
-    public function __construct(private Identity $identity, private Sections $sections, private \Illuminate\Contracts\Events\Dispatcher $events,private \Flarum\Notification\NotificationSyncer $notices) {}
+    public function __construct(private Identity $identity, private Sections $sections, private \Illuminate\Contracts\Events\Dispatcher $events,private \Flarum\Notification\NotificationSyncer $notices, private OperatorAccess $operators) {}
+    private function assertOperator(User $actor): void { if (!$actor->isAdmin()) $this->operators->assert($actor); }
     private function reason(array $data): string
     {
         $reason = $data['reason'] ?? '';
@@ -37,7 +38,7 @@ class IdentityController implements RequestHandlerInterface
             return new JsonResponse(['data'=>['id'=>$id,'status'=>'pending']],201);
         }
         if ($route === 'campus.identity.review') {
-            $a->assertAdmin(); $id=(int)($r->getQueryParams()['id'] ?? 0); $reason=$this->reason($data);
+            $this->assertOperator($a); $id=(int)($r->getQueryParams()['id'] ?? 0); $reason=$this->reason($data);
             if (!in_array($data['status'] ?? null,['approved','rejected','revoked'],true)) throw new ValidationException(['status'=>'请选择批准、拒绝或撤销']);
             $db->transaction(function () use ($db,$a,$data,$id,$reason) {
                 $row=$db->table('campus_verifications')->where('id',$id)->lockForUpdate()->first(); if (!$row) throw new ModelNotFoundException;
@@ -51,19 +52,21 @@ class IdentityController implements RequestHandlerInterface
             return new JsonResponse(['data'=>['id'=>$id,'status'=>$data['status']]]);
         }
         if ($route === 'campus.identity.queue') {
-            $a->assertAdmin(); $rows=$db->table('campus_verifications')->where('status','pending')->orderBy('id')->limit(50)->get();
+            $this->assertOperator($a); $page=max(1,min(10000,(int)($r->getQueryParams()['page'] ?? 1)));
+            $query=$db->table('campus_verifications')->where('status','pending'); $total=(clone $query)->count();
+            $rows=$query->orderBy('id')->offset(($page-1)*50)->limit(50)->get();
             $users=User::query()->whereIn('id',$rows->pluck('user_id'))->get()->keyBy('id');
             foreach ($rows as $row) $row->display_name=$users->get($row->user_id)?->display_name ?? '已删除账号';
-            return new JsonResponse(['data'=>$rows->all()]);
+            return new JsonResponse(['data'=>$rows->all(),'meta'=>['total'=>$total,'page'=>$page,'page_size'=>50]]);
         }
         if (in_array($route,['campus.moderators','campus.moderators.list'],true)) {
             if ($r->getMethod()==='GET') {
-                $a->assertAdmin(); $rows=$db->table('campus_moderators')->orderBy('section_id')->orderBy('user_id')->get();
+                $this->assertOperator($a); $rows=$db->table('campus_moderators')->orderBy('section_id')->orderBy('user_id')->get();
                 $users=User::query()->whereIn('id',$rows->pluck('user_id'))->get()->keyBy('id');
                 foreach ($rows as $row) $row->display_name=$users->get($row->user_id)?->display_name ?? '已删除账号';
                 return new JsonResponse(['data'=>$rows->all()]);
             }
-            $a->assertAdmin(); $reason=$this->reason($data); $user=User::query()->findOrFail((int)($data['user_id'] ?? 0)); $s=$this->sections->byId((int)($data['section_id'] ?? 0));
+            $this->assertOperator($a); $reason=$this->reason($data); $user=User::query()->findOrFail((int)($data['user_id'] ?? 0)); $s=$this->sections->byId((int)($data['section_id'] ?? 0));
             if (!is_bool($data['enabled'] ?? null)) throw new ValidationException(['enabled'=>'请选择授权或撤销']);
             $db->transaction(function () use ($db,$data,$a,$user,$s,$reason) {
                 if ($data['enabled']) {
@@ -79,7 +82,7 @@ class IdentityController implements RequestHandlerInterface
         if ($route === 'campus.moderate') {
             $d=Discussion::query()->findOrFail((int)($data['discussion_id'] ?? 0)); $reason=$this->reason($data);
             $ids=$d->tags->pluck('id')->all(); $managed=array_filter($this->sections->rows(),fn($s)=>in_array($s->tag_id,$ids));
-            $a->assertPermission($a->isAdmin() || (!$d->is_private && count($managed)>0 && array_reduce($managed,fn($allowed,$s)=>$allowed && $this->identity->moderator($a,$s->id),true)));
+            $a->assertPermission($a->isAdmin() || $this->operators->allowed($a) || (!$d->is_private && count($managed)>0 && array_reduce($managed,fn($allowed,$s)=>$allowed && $this->identity->moderator($a,$s->id),true)));
             if (!in_array($data['action'] ?? null,['hide','restore'],true)) throw new ValidationException(['action'=>'仅支持隐藏与恢复']);
             $db->transaction(function () use ($d,$a,$data,$reason) {
                 if ($data['action']==='hide') $d->hide($a); else $d->restore(); $d->save();
@@ -88,6 +91,6 @@ class IdentityController implements RequestHandlerInterface
             });
             return new JsonResponse(['data'=>['id'=>$d->id,'action'=>$data['action']]]);
         }
-        $a->assertAdmin(); return new JsonResponse(['data'=>$db->table('campus_audit')->orderByDesc('id')->limit(100)->get()->all()]);
+        $this->assertOperator($a); return new JsonResponse(['data'=>$db->table('campus_audit')->orderByDesc('id')->limit(100)->get()->all()]);
     }
 }

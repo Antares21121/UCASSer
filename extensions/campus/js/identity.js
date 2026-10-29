@@ -12,7 +12,7 @@ export default class IdentityPage extends DataPage {
       className: 'Button'
     })), m('section.Campus-panel', [m('div.Campus-badges', [m('span.Campus-badge', {
       className: this.data.verified ? 'is-approved' : ''
-    }, this.data.verified ? '已通过人工审核' : pending ? '申请审核中' : '尚未通过校园审核')]), m('p', '请勿填写身份证号、学号、密码或上传证件。验证材料仅管理员可见；审核理由不应包含个人材料。'), pending ? m('p.Campus-hint', '申请已提交，请等待人工审核。无需重复申请，可在下方查看结果。') : !this.data.verified ? m('form', {
+    }, this.data.verified ? '已通过人工审核' : pending ? '申请审核中' : '尚未通过校园审核')]), m('p', '请勿填写身份证号、学号、密码或上传证件。验证材料仅获授权的运营人员可见；审核理由不应包含个人材料。'), pending ? m('p.Campus-hint', '申请已提交，请等待人工审核。无需重复申请，可在下方查看结果。') : !this.data.verified ? m('form', {
       onsubmit: e => {
         e.preventDefault();
         this.perform(() => api('identity', 'POST', {

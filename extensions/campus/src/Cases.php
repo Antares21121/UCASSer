@@ -4,10 +4,10 @@ use Flarum\Discussion\Discussion;
 use Flarum\User\User;
 class Cases
 {
-    public function __construct(public Records $records) {}
+    public function __construct(public Records $records, private OperatorAccess $operators) {}
     public function manages(User $a,object $case): bool {
         if ($a->id===$case->reporter_id || $a->id===$case->subject_user_id) return false;
-        if ($a->isAdmin()) return true;
+        if ($a->isAdmin() || $this->operators->allowed($a)) return true;
         $d=Discussion::query()->with('tags')->find($case->discussion_id); if (!$d || $d->is_private) return false;
         $tagIds=$d->tags->pluck('id')->all(); $sections=array_filter($this->records->sections->rows(),fn($s)=>in_array($s->tag_id,$tagIds));
         return count($sections)>0 && array_reduce($sections,fn($ok,$s)=>$ok && $this->records->identity->moderator($a,$s->id),true);
@@ -15,7 +15,7 @@ class Cases
     public function visible(User $a,object $case): bool { return $case->reporter_id===$a->id || $case->subject_user_id===$a->id || $this->manages($a,$case); }
     public function query(User $a) {
         $db=$this->records->db; $query=$db->table('campus_cases');
-        if ($a->isAdmin()) return $query;
+        if ($a->isAdmin() || $this->operators->allowed($a)) return $query;
         $assigned=$db->table('campus_sections')->whereIn('id',$db->table('campus_moderators')->where('user_id',$a->id)->select('section_id'))->pluck('tag_id')->all();
         $other=$db->table('campus_sections')->whereNotIn('tag_id',$assigned)->pluck('tag_id')->all();
         $managed=Discussion::query()->where('is_private',false)->whereHas('tags',fn($q)=>$q->whereIn('tags.id',$assigned))->whereDoesntHave('tags',fn($q)=>$q->whereIn('tags.id',$other))->select('discussions.id');

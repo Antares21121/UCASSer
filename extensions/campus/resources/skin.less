@@ -1,0 +1,141 @@
+// UCASSer's independent campus community: clear academic red, pale sky and paper.
+:root {
+  --campus-canvas:#f2f7fb;
+  --campus-surface:#fff;
+  --campus-ink:#1f2b38;
+  --campus-muted:#576b7e;
+  --campus-divider:#d9e4ec;
+  --campus-soft:#edf5fb;
+  --campus-skeleton:#e8eff5;
+  --campus-link:#a80f2b;
+  --campus-mark:#c8193b;
+  --campus-accent:#bd1838;
+}
+:root[data-theme^="dark"] {
+  --campus-canvas:#111c29;
+  --campus-surface:#1a293a;
+  --campus-ink:#edf2f8;
+  --campus-muted:#b5c3d2;
+  --campus-divider:#35475b;
+  --campus-soft:#23384d;
+  --campus-skeleton:#2a4055;
+  --campus-link:#ff8fa2;
+  --campus-mark:#ef5d75;
+  --campus-accent:#bf2848;
+}
+.App { color:var(--campus-ink); background:var(--campus-canvas); }
+.Campus { --campus-accent:#bd1838; }
+.App-content,.CampusApp .App-content { background:var(--campus-canvas); }
+.App-header { border-bottom:1px solid var(--campus-divider); box-shadow:0 8px 24px rgba(34,65,89,.08); }
+.Header { background:var(--campus-surface); }
+.Header-title a { border-left:0; padding-left:0; color:var(--campus-ink); font-weight:750; letter-spacing:-.03em; }
+.Header-title a::before { content:''; display:inline-block; width:10px; height:18px; margin-right:8px; border:2px solid var(--campus-mark); border-radius:3px 3px 5px 5px; transform:skewY(-7deg); vertical-align:-3px; }
+.Header-primary .Button.active,.Header-primary .Button:hover,.Header-secondary .Button:hover { color:var(--campus-link); }
+.App .Button--primary,.Campus .Button--primary { background:var(--campus-accent); color:#fff; border-color:transparent; }
+.App .Button--primary:hover,.Campus .Button--primary:hover { background:#a70d2c; color:#fff; }
+.App .FormControl,.Campus .FormControl { border-radius:11px; border-color:var(--campus-divider); background:var(--campus-surface); color:var(--campus-ink); }
+.App .FormControl:focus,.Campus .FormControl:focus { border-color:var(--campus-mark); box-shadow:0 0 0 3px rgba(200,25,59,.13); }
+.App ::selection { color:#fff; background:#b91536; }
+.App :is(a,button,input,textarea,select,summary):focus-visible { outline:3px solid var(--campus-mark); outline-offset:3px; }
+.App a { text-underline-offset:3px; }
+.Campus-pageHeader h1,.Campus-controlHeader h1 { font-size:clamp(26px,2.5vw,36px); letter-spacing:-.025em; }
+.Campus-pageHeader h1::after,.ResourceDirectory h1::after { width:54px; height:3px; background:var(--campus-mark); border-radius:3px; }
+.CampusPage .Campus-panel,.Campus-toolboxItem,.Campus-directoryCard,.Campus-controlCollectActions>div,
+.Campus-controlSummary,.Campus-controlSources { border:1px solid var(--campus-divider); border-radius:16px; background:var(--campus-surface); box-shadow:0 10px 26px rgba(36,72,94,.045); }
+.Campus .Button:not(.Button--primary),.Campus-empty { background:var(--campus-soft); color:var(--campus-ink); border-radius:10px; }
+.Campus .Button:not(.Button--primary):hover { background:#e1eef7; color:var(--campus-link); }
+.IndexPage-nav.sideNav,.IndexPage .DiscussionList,.Campus-nativeRecord { background:var(--campus-surface); border:1px solid var(--campus-divider); border-radius:16px; box-shadow:0 12px 30px rgba(32,67,92,.04); }
+.IndexPage .DiscussionListItem-content { border-color:var(--campus-divider); }
+.IndexPage .DiscussionListItem-title { color:var(--campus-ink); font-weight:650; }
+.IndexPage .DiscussionListItem-title:hover { color:var(--campus-link); }
+.Campus-boardIcon,.Campus-detailIcon,.Campus-rowMarker,.Campus-toolboxIcon { background:#fcecf0; color:var(--campus-link); }
+.Campus-listMetadata,.Campus-rowStatus.is-resolved,.Campus a:not(.Button--primary),.Campus .Button--link { color:var(--campus-link); }
+.Campus-badge,.Campus .Campus-badge { border-radius:999px; }
+
+// The home opens with a place to search and honest paths into the real forum.
+.IndexPage.Campus-feedPage .WelcomeHero {
+  position:relative; overflow:hidden; color:var(--campus-ink);
+  background:linear-gradient(110deg,rgba(248,252,255,.98),rgba(227,242,253,.88)),
+    repeating-linear-gradient(153deg,transparent 0 27px,rgba(121,178,213,.12) 28px 29px);
+  border-bottom:1px solid #d7e9f4;
+}
+.IndexPage.Campus-feedPage .WelcomeHero::before {
+  content:''; position:absolute; inset:auto -4% -155px -5%; height:320px; pointer-events:none;
+  background:radial-gradient(ellipse at 32% 70%,rgba(116,177,219,.17),transparent 65%),
+    linear-gradient(0deg,rgba(255,255,255,.82),transparent 80%);
+}
+.IndexPage.Campus-feedPage .WelcomeHero .container { padding:0 20px; }
+.IndexPage.Campus-feedPage .WelcomeHero .container::after { display:none; }
+.IndexPage.Campus-feedPage .WelcomeHero .containerNarrow {
+  max-width:1260px; margin:0 auto; padding:48px 20px 55px;
+  display:grid; grid-template-columns:minmax(0,1.3fr) minmax(310px,.85fr); column-gap:clamp(35px,6vw,100px);
+  grid-template-areas:'identity quick' 'title quick' 'subtitle quick' 'search quick' 'actions quick';
+  align-items:start; position:relative;
+}
+.IndexPage.Campus-feedPage .WelcomeHero .Hero-title { grid-area:title; color:var(--campus-ink); margin:12px 0 8px; font-size:clamp(34px,3.5vw,50px); font-weight:800; line-height:1.24; letter-spacing:-.035em; }
+.IndexPage.Campus-feedPage .WelcomeHero .Hero-subtitle { grid-area:subtitle; color:#40576a; max-width:48ch; margin:0 0 24px; font-size:16px; line-height:1.8; }
+.Campus-homeIdentity { grid-area:identity; align-self:end; display:inline-flex; width:fit-content; margin:0; padding:7px 13px; border-radius:999px; background:#fce9ec; color:#98122c; font-size:12px; font-weight:700; }
+.Campus-homeIdentity span { color:#c98c96; }
+.Campus-homeSearch { grid-area:search; display:flex; align-items:center; gap:8px; max-width:670px; min-height:72px; padding:8px 10px 8px 18px; border:2px solid var(--campus-mark); border-radius:18px; background:#fff; box-shadow:0 18px 32px rgba(81,124,149,.12); z-index:2; }
+.Campus-homeSearch label { display:flex; align-items:center; gap:11px; flex:1; min-width:0; color:var(--campus-mark); }
+.Campus-homeSearch input { width:100%; height:45px; border:0; outline:0; background:transparent; color:#203344; font-size:16px; }
+.Campus-homeSearch input::placeholder { color:#637b8b; }
+.Campus-homeSearch button { flex:none; display:grid; place-items:center; width:48px; height:48px; border:0; border-radius:12px; background:var(--campus-accent); color:#fff; font-size:18px; cursor:pointer; }
+.Campus-homeSearch button:hover { background:#9d0b28; }
+.Campus-homeHeroActions { grid-area:actions; margin-top:21px; }
+.Campus-homeHeroAction,.Campus-homeHeroAction--primary { border-radius:9px; border:1px solid #c9dbe7; background:#fff; color:var(--campus-link)!important; box-shadow:0 5px 14px rgba(38,76,104,.05); }
+.Campus-homeHeroAction:hover,.Campus-homeHeroAction--primary:hover { border-color:var(--campus-mark); background:#fff5f7; color:var(--campus-link)!important; }
+.Campus-homeArtwork { width:500px; height:280px; top:auto; right:auto; bottom:-50px; left:28%; color:#78a9ca; opacity:.22; }
+.Campus-artBook { stroke:#c8193b!important; }
+.Campus-homeQuick { grid-area:quick; align-self:center; position:relative; z-index:2; min-height:330px; padding:27px 30px 22px; border:1px solid #e0eaf1; border-radius:22px; background:rgba(255,255,255,.92); box-shadow:0 22px 46px rgba(39,87,121,.10); }
+.Campus-homeQuick h2 { margin:0 0 7px; color:var(--campus-link); font-size:22px; font-weight:750; }
+.Campus-homeQuick p { margin:0 0 17px; color:#5b7183; font-size:13px; line-height:1.65; }
+.Campus-homeQuick nav { display:grid; }
+.Campus-homeQuick nav a { display:flex; align-items:center; gap:13px; min-height:57px; border-top:1px solid #e7edf3; color:#273747; text-decoration:none; }
+.Campus-homeQuick nav a:hover { color:var(--campus-link); }
+.Campus-homeQuick nav a .fas:first-child { display:grid; place-items:center; width:30px; height:30px; border-radius:50%; background:#fbe9ed; color:var(--campus-link); font-size:13px; }
+.Campus-homeQuick nav a span { flex:1; font-size:15px; font-weight:650; }
+.Campus-homeQuick nav a .fas:last-child { color:#b8c6d2; font-size:12px; }
+.Campus-homeGuide { margin-top:25px; }
+.Campus-homeGuideHeading h2 { font-size:26px; font-weight:750; }
+.Campus-homePaths { gap:14px; border:0; }
+.Campus-homePath,.Campus-homePath--lead { min-height:100px; padding:20px 22px; border:1px solid var(--campus-divider); border-radius:15px; background:var(--campus-surface); box-shadow:0 10px 24px rgba(43,82,108,.04); }
+.Campus-homePath--lead { min-height:222px; background:linear-gradient(130deg,#fff6f6,#f7e9ee); }
+.Campus-homePathIcon,.Campus-homePath--lead .Campus-homePathIcon { color:var(--campus-link); background:#fce8ec; }
+.Campus-homePathText strong { font-size:17px; }
+.Campus-homePath--lead .Campus-homePathText strong { font-size:26px; }
+.Campus-homePathArrow { color:var(--campus-link); }
+.Campus-homePath:hover { border-color:#e9a9b6; box-shadow:0 18px 28px rgba(96,67,83,.09); }
+
+.Campus-control { max-width:1320px; }
+.Campus-controlHeader h1 { color:var(--campus-ink); }
+.Campus-controlCollectActions>div:first-child { background:linear-gradient(145deg,#fff,#fff4f6); }
+.Campus-controlCollectActions>div:nth-child(2) { background:linear-gradient(145deg,#fff,#eff7ff); }
+.Campus-controlWork { overflow:hidden; border-radius:15px; background:var(--campus-surface); }
+.Campus-controlWorkLink:hover { background:var(--campus-soft); }
+.Campus-controlUpload { background:var(--campus-accent); }
+.Campus-controlUpload:hover { background:#a70d2c; }
+
+@media(max-width:1000px) {
+  .IndexPage.Campus-feedPage .WelcomeHero .containerNarrow { column-gap:30px; grid-template-columns:minmax(0,1fr) minmax(280px,.78fr); }
+  .Campus-homeQuick { padding:22px; }
+}
+@media(max-width:767px) {
+  .IndexPage.Campus-feedPage .WelcomeHero .containerNarrow { display:block; padding:32px 4px 34px; }
+  .IndexPage.Campus-feedPage .WelcomeHero .Hero-title { font-size:30px; margin:14px 0 9px; }
+  .IndexPage.Campus-feedPage .WelcomeHero .Hero-subtitle { font-size:14px; }
+  .Campus-homeSearch { min-height:60px; padding:5px 6px 5px 13px; border-radius:14px; }
+  .Campus-homeSearch input { font-size:14px; }
+  .Campus-homeSearch button { width:42px; height:42px; }
+  .Campus-homeQuick { min-height:0; margin:30px 0 0; padding:20px; }
+  .Campus-homeQuick h2 { font-size:18px; }
+  .Campus-homeQuick nav a { min-height:48px; }
+  .Campus-homeArtwork { right:-80px; left:auto; bottom:170px; width:300px; opacity:.14; }
+  .Campus-homePaths { display:grid; grid-template-columns:1fr; }
+  .Campus-homePath,.Campus-homePath--lead { min-height:0; padding:17px; }
+  .Campus-homePath--lead .Campus-homePathText strong { font-size:18px; }
+  .Campus-controlCollectActions { grid-template-columns:1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .Campus-homePath,.Campus-homeHeroAction { transition:none; }
+}

@@ -42,6 +42,25 @@ const homePaths = [
   ['/t/campus-questions', '提出一个问题', '从已有问答里找经验，或向社区发起讨论。', 'comment-dots'],
   ['/campus/tools', '打开校园工具', '日历、食堂、课程与出行入口集中在这里。', 'th-large']
 ];
+const homeSearch = () => m('form.Campus-homeSearch', {
+  onsubmit: event => {
+    event.preventDefault();
+    const q = event.target.elements.q.value.trim();
+    if (q) m.route.set('/campus/search?q=' + encodeURIComponent(q));
+  }
+}, [m('label', [m('span.sr-only', '搜索论坛内容'), symbol('search'),
+  m('input', { name: 'q', type: 'search', placeholder: '搜索校园信息、课程经验与资料…', required: true })]),
+  m('button', { type: 'submit', 'aria-label': '开始搜索' }, symbol('arrow-right'))]);
+const homeQuick = () => m('aside.Campus-homeQuick', [
+  m('h2', '常用校园入口'),
+  m('p', '从正在发生的事开始，再找到需要的资料与同学经验。'),
+  m('nav', { 'aria-label': '常用校园入口' }, [
+    ['/campus/aggregation', '学校与学院通知', 'bullhorn'],
+    ['/campus/tools', '校历与校园工具', 'calendar-alt'],
+    ['/campus/courses', '课程目录与评价', 'graduation-cap'],
+    ['/t/campus-questions', '向同学提问', 'comment-dots']
+  ].map(([href, title, icon]) => link(href, [symbol(icon), m('span', title), symbol('arrow-right')])))
+]);
 const campusArtwork = () => m('svg.Campus-homeArtwork', {
   viewBox: '0 0 520 280',
   fill: 'none',
@@ -803,6 +822,8 @@ export function registerNative() {
       link('/campus/aggregation', [symbol('bullhorn'), '看校园信息'], { className: 'Campus-homeHeroAction Campus-homeHeroAction--primary' }),
       link('/resources', [symbol('book-open'), '找学习资料'], { className: 'Campus-homeHeroAction' })
     ]), -1000);
+    if (isCampusHome()) items.add('campus-home-search', homeSearch(), -800);
+    if (isCampusHome()) items.add('campus-home-quick', homeQuick(), -1200);
     if (isCampusHome()) items.add('campus-home-artwork', campusArtwork(), -1100);
   });
   override(GlobalSearchState.prototype, 'params', function (original) {
