@@ -46,6 +46,7 @@ return [
     (new Extend\Console())->command(Campus\BoardMigrateCommand::class),
     (new Extend\Console())->command(Campus\CourseImportCommand::class),
     (new Extend\Console())->command(Campus\ResourcesSyncCommand::class),
+    (new Extend\Console())->command(Campus\CollectorSubscribeCommand::class),
     (new Extend\Console())->command(Campus\AggregationPollCommand::class),
     (new Extend\Console())->command(Campus\AggregationSyncSourcesCommand::class),
     (new Extend\Console())->command(Campus\AggregationCollectorStatusCommand::class),
