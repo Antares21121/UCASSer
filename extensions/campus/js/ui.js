@@ -89,7 +89,9 @@ export const field = (name, label, value, onchange, options = {}) => {
     options: selectOptions,
     ...attrs
   } = options;
-  if (textarea) delete attrs.type;
+  // `type` is only meaningful for <input>; a <select> has a read-only type
+  // property, so passing it through makes Mithril throw while rendering.
+  if (textarea || selectOptions) delete attrs.type;
   const control = selectOptions ? m('select.FormControl', {
     name,
     value: value ?? '',
