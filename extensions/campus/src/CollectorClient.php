@@ -105,8 +105,10 @@ class CollectorClient
     }
 
     /**
-     * Verify one article belongs to the registered account, then subscribe it.
-     * The name must match exactly, so a look-alike account can never be added.
+     * Ask the collector to add the account behind one of its own articles.
+     * The collector resolves the publisher asynchronously, so we snapshot the
+     * current list, wait for the new row and only accept it when the name
+     * matches the registered account exactly.
      */
     public function subscribe(string $name, string $articleUrl): array
     {
@@ -115,26 +117,43 @@ class CollectorClient
             throw new ValidationException(['article_url' => '请填写该公众号一篇原文的 https://mp.weixin.qq.com/s/... 链接']);
         }
         $token = $this->token();
-        $lookup = $this->call('POST', 'mps/featured/article?url='.rawurlencode($articleUrl), [], $token);
-        if (($lookup['code'] ?? 1) !== 0) {
-            throw new ValidationException(['article_url' => '无法识别该文章所属公众号：'.(string) ($lookup['message'] ?? '请核对链接')]);
+        $existing = $this->mpList($token);
+        foreach ($existing as $row) {
+            if ((string) ($row['mp_name'] ?? '') === $name) {
+                return ['name' => $name, 'status' => 'subscribed', 'mp_id' => (string) $row['id']];
+            }
         }
-        $info = ($lookup['data'] ?? [])['mp_info'] ?? [];
-        $mpName = (string) ($info['mp_name'] ?? '');
-        $biz = (string) ($info['biz'] ?? (($lookup['data'] ?? [])['mp_id'] ?? ''));
-        if ($mpName === '' || $biz === '') throw new ValidationException(['article_url' => '文章缺少公众号身份信息，请换一篇该号发布的原文']);
-        if ($mpName !== $name) {
-            throw new ValidationException(['article_url' => '该文章属于「'.$mpName.'」，与登记名称「'.$name.'」不一致']);
-        }
-        $result = $this->call('POST', 'mps', [
-            'mp_name' => $mpName, 'mp_id' => $biz,
-            'mp_cover' => (string) ($info['logo'] ?? ''), 'avatar' => (string) ($info['logo'] ?? ''),
-            'mp_intro' => '',
-        ], $token);
+        $before = array_map(fn ($row) => (string) $row['id'], $existing);
+        $result = $this->call('POST', 'mps/featured/article', ['url' => $articleUrl], $token);
         if (($result['code'] ?? 1) !== 0) {
-            throw new ValidationException(['article_url' => '订阅失败：'.(string) ($result['message'] ?? '订阅服务拒绝该请求')]);
+            throw new ValidationException(['article_url' => '订阅服务未能解析该文章：'.(string) ($result['message'] ?? '请核对链接')]);
         }
-        return ['name' => $mpName, 'biz' => $biz];
+        $deadline = microtime(true) + 25;
+        $created = null;
+        while (microtime(true) < $deadline) {
+            usleep(1500000);
+            foreach ($this->mpList($token) as $row) {
+                if (!in_array((string) $row['id'], $before, true)) { $created = $row; break 2; }
+            }
+        }
+        if (!$created) {
+            // The collector accepted the task; the account may still be
+            // fetching. Treat it as queued instead of failing the operator.
+            return ['name' => $name, 'status' => 'pending'];
+        }
+        $actual = (string) ($created['mp_name'] ?? '');
+        if ($actual !== $name) {
+            try { $this->call('DELETE', 'mps/'.rawurlencode((string) $created['id']), null, $token); } catch (\Throwable $ignored) {}
+            throw new ValidationException(['article_url' => '该文章属于「'.$actual.'」，与登记名称「'.$name.'」不一致，已撤回订阅']);
+        }
+        return ['name' => $name, 'status' => 'subscribed', 'mp_id' => (string) $created['id']];
+    }
+
+    /** Current subscriptions (id + display name). */
+    private function mpList(string $token): array
+    {
+        $result = $this->call('GET', 'mps?limit=200&offset=0', null, $token);
+        return $result['data']['list'] ?? [];
     }
 
     private function token(): string

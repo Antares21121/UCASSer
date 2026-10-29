@@ -140,10 +140,12 @@ class CollectorSubscribeModal extends Modal {
     this.busy = account.name;
     this.errors[account.name] = '';
     try {
-      await api('control/collector/subscribe', 'POST', { name: account.name, article_url: url });
+      const { data } = await api('control/collector/subscribe', 'POST', { name: account.name, article_url: url });
       this.done.add(account.name);
       this.urls[account.name] = '';
-      app.alerts.show({ type: 'success' }, account.name + ' 已订阅');
+      app.alerts.show({ type: 'success' }, data.status === 'pending'
+        ? account.name + ' 已提交，采集器仍在处理，稍后刷新可看到'
+        : account.name + ' 已订阅');
       this.attrs.after?.();
     } catch (error) {
       this.errors[account.name] = errorMessage(error, '订阅失败，请核对链接');
