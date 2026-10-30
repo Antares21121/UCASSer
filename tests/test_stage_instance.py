@@ -1,6 +1,7 @@
 import importlib.util
 from pathlib import Path
 import tempfile
+import subprocess
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -10,6 +11,40 @@ spec.loader.exec_module(stage)
 
 
 class StagePolicyTest(unittest.TestCase):
+    def test_remote_only_candidate_is_fetched_after_clone_without_changing_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source=Path(directory)/'source';source.mkdir()
+            target=Path(directory)/'target'
+            def run(command):return subprocess.run([str(x) for x in command],stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.DEVNULL,check=True).stdout
+            run(['git','init','-q',str(source)])
+            run(['git','-C',str(source),'config','user.name','Stage Test'])
+            run(['git','-C',str(source),'config','user.email','stage@example.invalid'])
+            (source/'version.txt').write_text('old')
+            run(['git','-C',str(source),'add','.']);run(['git','-C',str(source),'commit','-qm','old'])
+            old=run(['git','-C',str(source),'rev-parse','HEAD']).decode().strip()
+            (source/'version.txt').write_text('candidate')
+            run(['git','-C',str(source),'commit','-qam','candidate'])
+            candidate=run(['git','-C',str(source),'rev-parse','HEAD']).decode().strip()
+            run(['git','-C',str(source),'reset','--hard',old])
+            run(['git','-C',str(source),'update-ref','refs/remotes/origin/2.x',candidate])
+            refs=run(['git','-C',str(source),'show-ref'])
+            run(['git','clone','--no-local','--no-checkout',str(source),str(target)])
+            missing=subprocess.run(['git','-C',str(target),'cat-file','-e',candidate+'^{tree}'],stdout=subprocess.PIPE,stderr=subprocess.PIPE).returncode
+            self.assertNotEqual(missing,0,'Fixture must actually omit the candidate from the clone')
+            stage.checkout_candidate(run,source,target,candidate)
+            self.assertEqual((target/'version.txt').read_text(),'candidate')
+            self.assertEqual((source/'version.txt').read_text(),'old')
+            self.assertEqual(run(['git','-C',str(source),'show-ref']),refs)
+
+    def test_resume_accepts_only_initial_clone_and_diagnostics(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source=Path(directory)/'source';source.mkdir()
+            target=Path(directory)/'ucasser-stage-check';target.mkdir()
+            (target/'.git').mkdir();(target/'.runtime').mkdir()
+            stage.validate_target(source,target,'ucasser-stage-check','live',18081,'live_db',True)
+            (target/'.env.stage').write_text('DB_NAME=partial')
+            with self.assertRaises(ValueError):stage.validate_target(source,target,'ucasser-stage-check','live',18081,'live_db',True)
+
     def test_mount_points_exist_before_source_is_mounted_read_only(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
