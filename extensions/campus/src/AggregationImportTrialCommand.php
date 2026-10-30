@@ -29,7 +29,7 @@ class AggregationImportTrialCommand extends AbstractCommand
         foreach ($rows as $row) {
             if (!is_array($row) || ($row['publisher'] ?? null) !== self::PUBLISHER
                 || !is_string($row['url'] ?? null)
-                || !preg_match('~^https://mp\.weixin\.qq\.com/s/[A-Za-z0-9_-]+$~D', $row['url'])
+                || !CollectorClient::isArticleUrl($row['url'], false)
                 || !is_string($row['article_title'] ?? null)
                 || mb_strlen(trim($row['article_title'])) < 3 || mb_strlen($row['article_title']) > 180
                 || !is_string($row['site_page'] ?? null)

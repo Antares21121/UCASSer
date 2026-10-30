@@ -93,8 +93,7 @@ class AggregationController implements RequestHandlerInterface
                 throw new ValidationException(['url' => '请输入不含账号密码的 HTTPS 链接']);
             }
             if ($kind === 'wechat') {
-                if ($host !== 'mp.weixin.qq.com' || !preg_match('~^/s(?:/[A-Za-z0-9_-]+|\?[A-Za-z0-9_=&%.-]+)$~D',
-                    ($parts['path'] ?? '').(isset($parts['query']) ? '?'.$parts['query'] : ''))) {
+                if (!CollectorClient::isArticleUrl($url)) {
                     throw new ValidationException(['url' => '请填写该公众号自行发布的一篇微信原文链接']);
                 }
             } elseif (!filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) || !str_contains($host, '.') || filter_var($host, FILTER_VALIDATE_IP)) {
