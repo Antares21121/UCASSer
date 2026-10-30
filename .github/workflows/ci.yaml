@@ -39,6 +39,7 @@ jobs:
           docker compose run --rm --no-deps app php tests/aggregation_vsb_parser.php
           docker compose run --rm --no-deps app php tests/aggregation_employment_parser.php
           docker compose run --rm --no-deps app php tests/course_csv_reader.php
+          docker compose run --rm --no-deps app php tests/collector_client_config.php
           docker compose run --rm --no-deps app composer validate --strict --no-check-all
           docker compose run --rm --no-deps app composer check-platform-reqs --no-dev
           docker compose up -d --wait

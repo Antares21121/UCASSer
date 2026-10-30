@@ -20,7 +20,7 @@ class CollectorClient
     /** Server-side base URL: defaults to the co-located service. */
     private function base(): string
     {
-        return rtrim(getenv('MP_RSS_URL') ?: 'http://127.0.0.1:8001', '/').'/api/v1/wx/';
+        return rtrim($this->settings['BASE_URL'] ?? (getenv('MP_RSS_URL') ?: 'http://127.0.0.1:8001'), '/').'/api/v1/wx/';
     }
 
     /** Browser-facing base URL for the QR image (the operator's own machine). */
@@ -29,9 +29,9 @@ class CollectorClient
         return rtrim(getenv('MP_RSS_PUBLIC_URL') ?: (getenv('MP_RSS_URL') ?: 'http://127.0.0.1:8001'), '/');
     }
 
-    public function __construct()
+    public function __construct(?string $settingsPath = null)
     {
-        $path = __DIR__.'/../../../.runtime/we-mp-rss.env';
+        $path = $settingsPath ?? __DIR__.'/../../../.runtime/we-mp-rss.env';
         $this->settings = null;
         if (is_file($path) && is_readable($path)) {
             $values = [];
