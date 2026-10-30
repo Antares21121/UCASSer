@@ -34,17 +34,33 @@ def private_write(path,content):
     path.chmod(0o600)
 
 
-def validate_target(source,target,project,source_project,port,source_db):
+def validate_target(source,target,project,source_project,port,source_db,resume_checkout=False):
     if not re.fullmatch(r'ucasser-stage-[a-z0-9-]{1,32}',project):
         raise ValueError('Stage project must start with ucasser-stage-')
     if project==source_project or target==source or target.parent!=source.parent or target.name!=project:
         raise ValueError('Stage must be a separate sibling directory named after its new project')
-    if target.exists() or target.is_symlink():
-        raise ValueError('Stage target already exists; it will not be overwritten')
+    if target.is_symlink():raise ValueError('Stage target cannot be a symlink')
+    if resume_checkout and not target.exists():raise ValueError('No incomplete checkout to resume')
+    if target.exists():
+        if not resume_checkout:raise ValueError('Stage target already exists; it will not be overwritten')
+        if not (target/'.git').is_dir() or (target/'.git').is_symlink() or (target/'.runtime').is_symlink():
+            raise ValueError('Not an incomplete checkout')
+        if {p.name for p in target.iterdir()}- {'.git','.runtime'}:
+            raise ValueError('Resume is limited to a checkout that has not created application files or data')
+        if (target/'.runtime').exists() and {p.name for p in (target/'.runtime').iterdir()}-{'stage-error.log'}:
+            raise ValueError('Resume will not reuse a stage that already contains snapshot or runtime data')
     if not 1024<=port<=65535: raise ValueError('Invalid stage port')
     database=project.replace('-','_')
     if database==source_db: raise ValueError('Stage database must differ from source')
     return database
+
+
+def checkout_candidate(run,source,target,ref):
+    # Cloning a live branch does not guarantee that a candidate reachable only
+    # from a remote-tracking ref was transferred, especially in shallow clones.
+    run(['git','-c','safe.directory='+str(source),'-c','safe.directory='+str(source/'.git'),
+         '-C',str(target),'fetch','--no-tags',str(source),ref])
+    run(['git','-C',str(target),'checkout','--detach',ref])
 
 
 def stage_compose(root,project,images,port,db_name):
@@ -110,7 +126,7 @@ class Stage:
         self.target=Path(args.stage_root).resolve()
         self.values=read_env(self.source/args.env_file)
         self.project=args.project
-        self.db_name=validate_target(self.source,self.target,self.project,self.values.get('COMPOSE_PROJECT_NAME'),args.port,self.values.get('DB_NAME'))
+        self.db_name=validate_target(self.source,self.target,self.project,self.values.get('COMPOSE_PROJECT_NAME'),args.port,self.values.get('DB_NAME'),args.resume_checkout)
         self.env={**os.environ,'FORUM_ENV_FILE':str(self.source/args.env_file)}
         self.source_dc=['docker','compose','--env-file',str(self.source/args.env_file),'-f',str(self.source/'compose.yaml'),'-p',self.values['COMPOSE_PROJECT_NAME']]
         self.stage_dc=['docker','compose','--env-file',str(self.target/'.env.stage'),'-f',str(self.target/'compose.stage.json'),'-p',self.project]
@@ -163,14 +179,18 @@ class Stage:
               'source_changes':'none; consistent DB dump and read-only volume copies only','stage_email':'disabled','stage_network':'app/db internal; web loopback only; no runner or scheduler','create':self.args.create}
         if not self.args.create:
             print(json.dumps(plan,ensure_ascii=False,indent=2));return
+        if self.args.resume_checkout:
+            origin=self.run(['git','-C',str(self.target),'remote','get-url','origin']).decode().strip()
+            if Path(origin).resolve()!=self.source:raise ValueError('Incomplete checkout has an unexpected origin')
         if shutil.disk_usage(self.source.parent).free<2*1024**3:raise ValueError('Stage requires at least 2 GiB free disk')
         if Path('/proc/meminfo').exists():
             available=re.search(r'MemAvailable:\s+(\d+)',Path('/proc/meminfo').read_text())
             if available and int(available[1])<512*1024:raise ValueError('Stage requires at least 512 MiB available memory')
         before=self.facts(services['app'][0])
         print('Creating isolated stage; live instance remains running',flush=True)
-        self.run(['git','-c','safe.directory='+str(self.source),'clone','--no-hardlinks','--no-checkout','--',str(self.source),str(self.target)])
-        self.run(['git','-C',str(self.target),'checkout','--detach',ref])
+        if not self.args.resume_checkout:
+            self.run(['git','-c','safe.directory='+str(self.source),'clone','--no-hardlinks','--no-checkout','--',str(self.source),str(self.target)])
+        checkout_candidate(self.run,self.source,self.target,ref)
         (self.target/'.runtime').mkdir(mode=0o700,exist_ok=True)
         self.values_for_stage={'APP_ENV':'development','APP_URL':plan['stage_url'],'APP_DEBUG':'false','FORUM_TITLE':'部署预览','TZ':'Asia/Shanghai',
             'HTTP_BIND':'127.0.0.1','HTTP_PORT':str(self.args.port),'COMPOSE_PROJECT_NAME':self.project,
@@ -235,6 +255,7 @@ def main():
     parser.add_argument('--port',type=int,default=18081)
     parser.add_argument('--ref',help='Full source-compatible commit SHA; defaults to current live commit')
     parser.add_argument('--create',action='store_true',help='Create the separate stage; without this flag only show a plan')
+    parser.add_argument('--resume-checkout',action='store_true',help='Continue only a failed initial clone containing .git and optional private diagnostics, no app files or volumes')
     args=parser.parse_args()
     if os.name!='nt':os.umask(0o022)
     try:Stage(args).create()
