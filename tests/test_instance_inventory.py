@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import shutil
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -16,6 +17,24 @@ inventory=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(inventory)
 
 class InventoryTest(unittest.TestCase):
+    @unittest.skipUnless(shutil.which('php'), 'PHP CLI is required for the embedded canonicalization check')
+    def test_course_relationships_ignore_database_ids_and_pdo_numeric_keys(self):
+        definitions=inventory.PHP.split('\ntry {',1)[0]
+        code=definitions+r'''
+$a=['code'=>'C1','name'=>'Course','college'=>'College','semester'=>'Term','resource_category_id'=>7,0=>'C1',1=>'Course',2=>'College',3=>'Term',4=>7];
+$b=$a; $b['resource_category_id']=91; $b[4]=91;
+echo json_encode([
+    inventoryCourseLink($a,[7=>'root/College/Course']),
+    inventoryCourseLink($b,[91=>'root/College/Course']),
+    inventoryCourseLink($b,[91=>'root/Another/Course'])
+]);
+'''
+        result=subprocess.run(['php'],input=code.encode(),stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True)
+        first,second,changed=json.loads(result.stdout)
+        self.assertEqual(first,second)
+        self.assertNotEqual(second,changed)
+        self.assertEqual(set(first),{'code','name','college','semester','category_path'})
+
     def test_collector_reads_counts_without_credentials_or_mutation(self):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory)/'collector.db'

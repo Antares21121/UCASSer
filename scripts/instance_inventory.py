@@ -11,6 +11,14 @@ import sys
 from urllib.parse import urlsplit
 
 PHP = r'''<?php
+function inventoryCourseLink(array $row, array $paths): array {
+    $values=[];
+    foreach (['code','name','college','semester'] as $key) {
+        $values[$key]=$row[$key]===null?null:(string)$row[$key];
+    }
+    $values['category_path']=$paths[$row['resource_category_id']]??null;
+    return $values;
+}
 try {
     $cfg = require getcwd().'/config/environment.php';
     $d = $cfg['database'];
@@ -80,12 +88,12 @@ try {
         if (isset($schema['campus_course_offerings']) && in_array('resource_category_id',array_column($schema['campus_course_offerings'],'COLUMN_NAME'),true)) {
             $links=[];
             foreach ($pdo->query('SELECT code,name,college,semester,resource_category_id FROM '.$q.$prefix.'campus_course_offerings'.$q) as $row) {
-                $row['category_path']=$paths[$row['resource_category_id']]??null;
-                unset($row['resource_category_id']);
-                $links[]=hash('sha256',json_encode($row,JSON_UNESCAPED_UNICODE));
+                // PDO's default FETCH_BOTH also includes numeric column keys.
+                // Select semantic fields explicitly so category IDs never enter the digest.
+                $links[]=hash('sha256',json_encode(inventoryCourseLink($row,$paths),JSON_UNESCAPED_UNICODE));
             }
             sort($links,SORT_STRING);
-            $out['content']['course_resource_links']=['digest'=>hash('sha256',implode("\n",$links))];
+            $out['content']['course_resource_links']=['method'=>'semantic-v2','digest'=>hash('sha256',implode("\n",$links))];
         }
     }
     foreach (['campus_aggregation_items'=>['visibility','verification'],'campus_aggregation_candidates'=>['status','origin','visibility'],'campus_aggregation_sources'=>['adapter','enabled'],'campus_import_batches'=>['kind','status']] as $table=>$fields) {
