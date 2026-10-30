@@ -53,7 +53,7 @@ class CollectorAPI:
         self.token = token
 
     def request(self, path, payload=None, content_type='application/json'):
-        if path not in ('/auth/login', '/weread', '/weread/test', '/weread/qr/code', '/weread/qr/status', '/weread/qr/over'):
+        if path not in ('/auth/login', '/weread', '/weread/test', '/weread/mp/test', '/weread/qr/code', '/weread/qr/status', '/weread/qr/over'):
             raise ValueError('Unsupported authorization operation')
         headers = {'Accept': 'application/json'}
         if self.token:
