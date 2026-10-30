@@ -1,10 +1,12 @@
 <?php
 /** Incremental, pending-only import of the reviewed historical public metadata bundle. */
 
-function ucasserReadPublicBundle(string $root): array
+function ucasserReadPublicBundle(string $root, bool $officialWeb = false): array
 {
-    $bytes = file_get_contents($root.'/data/reconciliation/public-content.json');
-    if ($bytes === false || hash('sha256', str_replace("\r\n", "\n", $bytes)) !== '0d9826543f565953f563cd481c568c53503ae84033e0387997461cee3d45d6b6') {
+    $file = $officialWeb ? 'official-web-index.json' : 'public-content.json';
+    $expected = $officialWeb ? 'cc95eaad6d2a1ebc70f17fd9877c8d28cad07980169494a40621f155eda22a38' : '0d9826543f565953f563cd481c568c53503ae84033e0387997461cee3d45d6b6';
+    $bytes = file_get_contents($root.'/data/reconciliation/'.$file);
+    if ($bytes === false || strlen($bytes) > 1024 * 1024 || hash('sha256', str_replace("\r\n", "\n", $bytes)) !== $expected) {
         throw new RuntimeException('Public metadata bundle missing or changed');
     }
     return json_decode($bytes, true, 32, JSON_THROW_ON_ERROR);
@@ -71,10 +73,16 @@ function ucasserValidatePublicBundle(array $bundle): array
     return $bundle['entries'];
 }
 
-function ucasserRestorePublicCandidates($container, array $bundle, string $actorName, bool $apply, bool $includeDisabled = false): array
+function ucasserRestorePublicCandidates($container, array $bundle, string $actorName, bool $apply, bool $includeDisabled = false, bool $requireOfficialWeb = false): array
 {
     // Validate everything before opening the write transaction. No network requests or credential transfer.
     $rows = ucasserValidatePublicBundle($bundle);
+    if ($requireOfficialWeb) {
+        foreach ($rows as $row) {
+            if (!in_array($row['adapter'], ['ucass-vsb', 'ucass-notices'], true)) throw new RuntimeException('Official website index contains a non-website source');
+        }
+        if ($bundle['public_subscriptions']) throw new RuntimeException('Official website index must not contain collector subscriptions');
+    }
     $actor = Flarum\User\User::where('username', $actorName)->first();
     if (!$actor) throw new RuntimeException('Audit actor not found');
     UCASSer\Campus\AccountAccess::assertConfirmed($actor);
@@ -95,6 +103,7 @@ function ucasserRestorePublicCandidates($container, array $bundle, string $actor
             $source = $matches->first();
             $adapters = $row['adapter'] === 'we-mp-rss' ? ['we-mp-rss', 'we-mp-rss-pending'] : [$row['adapter']];
             if (!in_array($source->adapter, $adapters, true) || $source->visibility !== 'public') throw new RuntimeException('Source configuration conflict: '.$key);
+            if ($requireOfficialWeb && $source->trust !== 'official') throw new RuntimeException('Website source is not registered as official: '.$key);
             $sources[$key] = $source;
         }
         foreach ($rows as $row) {
@@ -111,7 +120,7 @@ function ucasserRestorePublicCandidates($container, array $bundle, string $actor
         }
         if ($report['added']) {
             $db->table('campus_audit')->insert(['actor_id' => $actor->id, 'action' => 'aggregation.history.import',
-                'target' => 'aggregation_candidates', 'reason' => $report['added'].' pending; disabled snapshot inclusion='.(int) $includeDisabled,
+                'target' => 'aggregation_candidates', 'reason' => $report['added'].' pending; disabled snapshot inclusion='.(int) $includeDisabled.'; official website index='.(int) $requireOfficialWeb,
                 'created_at' => gmdate('Y-m-d H:i:s')]);
         }
         if ($apply) $db->commit(); else $db->rollBack();
@@ -126,17 +135,25 @@ if (!defined('UCASSER_PUBLIC_RECOVERY_LIBRARY')) {
     if (PHP_SAPI !== 'cli') throw new RuntimeException('CLI only');
     try {
         $args = array_slice($_SERVER['argv'] ?? [], 1);
-        $actor = null; $apply = false; $disabled = false;
+        $actor = null; $apply = false; $disabled = false; $officialWeb = false;
         for ($i = 0; $i < count($args); $i++) {
             if ($args[$i] === '--actor' && isset($args[$i + 1]) && $actor === null) $actor = $args[++$i];
             elseif ($args[$i] === '--apply') $apply = true;
             elseif ($args[$i] === '--include-disabled') $disabled = true;
-            else throw new RuntimeException('Usage: php scripts/restore_public_candidates.php --actor USER [--include-disabled] [--apply]');
+            elseif ($args[$i] === '--official-web') $officialWeb = true;
+            else throw new RuntimeException('Usage: php scripts/restore_public_candidates.php --actor USER [--official-web] [--include-disabled] [--apply]');
         }
         if (!$actor) throw new RuntimeException('Specify an existing confirmed operator as the audit actor');
         require getcwd().'/vendor/autoload.php';
         $container = (require getcwd().'/site.php')->bootApp()->getContainer();
-        echo json_encode(ucasserRestorePublicCandidates($container, ucasserReadPublicBundle(getcwd()), $actor, $apply, $disabled), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), "\n";
+        $bundle = ucasserReadPublicBundle(getcwd(), $officialWeb);
+        $report = ucasserRestorePublicCandidates($container, $bundle, $actor, $apply, $disabled, $officialWeb);
+        if ($officialWeb) {
+            $report['snapshot_captured_at'] = $bundle['captured_at'];
+            $report['snapshot_sources'] = $bundle['source_count'];
+            $report['live_website_connectivity_checked'] = false;
+        }
+        echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), "\n";
     } catch (Throwable $error) {
         fwrite(STDERR, 'Public metadata recovery failed: '.$error->getMessage()."\n");
         exit(1);
