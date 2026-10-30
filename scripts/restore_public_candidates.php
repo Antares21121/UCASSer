@@ -43,7 +43,7 @@ function ucasserValidatePublicBundle(array $bundle): array
         $host = preg_quote((string) parse_url($row['listing_url'], PHP_URL_HOST), '~');
         $pattern = match ($row['adapter']) {
             'ucass-employment' => '~^https://jyzd\.ucass\.edu\.cn/frontpage/ucass/html/newsDetail\.html\?id=[a-f0-9]{32}$~D',
-            'we-mp-rss' => '~^https://mp\.weixin\.qq\.com/s/[A-Za-z0-9_-]+$~D',
+            'we-mp-rss' => UCASSer\Campus\CollectorClient::ARTICLE_SHORT_PATTERN,
             default => '~^https://'.$host.'/info/\d+/\d+\.htm$~D',
         };
         if (!preg_match($pattern, $url) || isset($seen[$url])) throw new RuntimeException('Invalid or duplicate public article URL');

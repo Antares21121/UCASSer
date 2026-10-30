@@ -40,6 +40,7 @@ jobs:
           docker compose run --rm --no-deps app php tests/aggregation_employment_parser.php
           docker compose run --rm --no-deps app php tests/course_csv_reader.php
           docker compose run --rm --no-deps app php tests/collector_client_config.php
+          docker compose run --rm --no-deps app php tests/wechat_article_urls.php
           docker compose run --rm --no-deps app composer validate --strict --no-check-all
           docker compose run --rm --no-deps app composer check-platform-reqs --no-dev
           docker compose up -d --wait
@@ -69,6 +70,8 @@ jobs:
           docker compose exec -T -u www-data app php tests/catalog_recovery.php
           docker compose exec -T -u www-data app php tests/operator_provision.php
           docker compose exec -T -u www-data app php tests/public_candidate_recovery.php
+          # This regression creates its own host-side snapshot, like the root launcher.
+          docker compose exec -T -u 0 app php tests/wechat_tilde_import.php
           docker compose exec -T -u www-data app php tests/suffix_mention_parser.php
           python tests/redesign_smoke.py --backend docker
       - name: Isolated deployment rehearsal preserves the live instance

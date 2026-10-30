@@ -33,7 +33,7 @@ class AggregationImportFeedCommand extends AbstractCommand
         }
         foreach ($rows as $row) {
             if (!is_array($row) || !is_string($row['url'] ?? null)
-                || !preg_match('~^https://mp\.weixin\.qq\.com/s(?:/[A-Za-z0-9_-]+|\?[A-Za-z0-9_=&%.-]+)$~D', $row['url'])
+                || !CollectorClient::isArticleUrl($row['url'])
                 || !is_string($row['title'] ?? null)
                 || mb_strlen(trim($row['title'])) < 3 || mb_strlen($row['title']) > 180
                 || !is_string($row['summary'] ?? null)
@@ -70,7 +70,7 @@ class AggregationImportFeedCommand extends AbstractCommand
             if ($this->aggregation->ingestWeb($source, $entry)) $added++;
         }
         $db->table('campus_aggregation_sources')->where('id', $source->id)->update(['last_checked_at' => gmdate('Y-m-d H:i:s'), 'last_error' => null]);
-        $this->info("$name：新增 $added 条待审候选；读取 ".count($rows).' 篇，未自动发布');
+        $this->info("{$name}：新增 $added 条待审候选；读取 ".count($rows).' 篇，未自动发布');
         return 0;
     }
 }

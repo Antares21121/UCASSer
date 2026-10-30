@@ -49,10 +49,7 @@ def read_feed(feed_url, limit):
                 if node.get('rel', 'alternate') == 'alternate':
                     link = node.get('href', '')
                     break
-        url = urlsplit(link)
-        if (url.scheme != 'https' or url.hostname != 'mp.weixin.qq.com'
-                or not (re.fullmatch(r'/s/[A-Za-z0-9_-]+', url.path)
-                        or url.path == '/s' and re.fullmatch(r'[A-Za-z0-9_=&%.-]+', url.query))):
+        if not re.fullmatch(r'https://mp\.weixin\.qq\.com/s(?:/[A-Za-z0-9_~-]+|\?[A-Za-z0-9_=&%.-]+)', link):
             continue
         if not 3 <= len(title) <= 180:
             continue

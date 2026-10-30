@@ -1,0 +1,20 @@
+[
+  {"url":"https://mp.weixin.qq.com/s/AbCdEf123","valid":true},
+  {"url":"https://mp.weixin.qq.com/s/WkzGGbZ1~jAvxTR4N9s4OA","valid":true},
+  {"url":"https://mp.weixin.qq.com/s/XBaIwNAWwTCt~doNiBbLjw","valid":true},
+  {"url":"https://mp.weixin.qq.com/s/A1KIoyqgL3LNEx7N~394TQ","valid":true},
+  {"url":"https://mp.weixin.qq.com/s/cTva~7aoXmk24b4tvotNIA","valid":true},
+  {"url":"https://mp.weixin.qq.com/s/fYRiDU~fBYYYV11WaSXdBQ","valid":true},
+  {"url":"https://mp.weixin.qq.com/s/A-hYRXbJsB9ji9cz~ZZqDQ","valid":true},
+  {"url":"https://mp.weixin.qq.com/s?__biz=MzU0MTIzNDU2Nw==&mid=123&idx=1&sn=abcdef","valid":true},
+  {"url":"http://mp.weixin.qq.com/s/fixture~one","valid":false},
+  {"url":"https://mp.weixin.qq.com.evil.example/s/fixture~one","valid":false},
+  {"url":"https://mp.weixin.qq.com@evil.example/s/fixture~one","valid":false},
+  {"url":"https://user@mp.weixin.qq.com/s/fixture~one","valid":false},
+  {"url":"https://mp.weixin.qq.com:444/s/fixture~one","valid":false},
+  {"url":"https://mp.weixin.qq.com/s/fixture~one/extra","valid":false},
+  {"url":"https://mp.weixin.qq.com/s/fixture%2Fone","valid":false},
+  {"url":"https://mp.weixin.qq.com/s/fixture~one#fragment","valid":false},
+  {"url":"https://mp.weixin.qq.com/s/fixture~one\n","valid":false},
+  {"url":"https://mp.weixin.qq.com/s/fixture~one?redirect=https://evil.example","valid":false}
+]

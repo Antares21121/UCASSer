@@ -15,6 +15,14 @@ use GuzzleHttp\Client;
  */
 class CollectorClient
 {
+    public const ARTICLE_SHORT_PATTERN = '#^https://mp\.weixin\.qq\.com/s/[A-Za-z0-9_~-]+$#D';
+    public const ARTICLE_PATTERN = '#^https://mp\.weixin\.qq\.com/s(?:/[A-Za-z0-9_~-]+|\?[A-Za-z0-9_=&%.-]+)$#D';
+
+    public static function isArticleUrl(string $url, bool $allowQuery = true): bool
+    {
+        return preg_match($allowQuery ? self::ARTICLE_PATTERN : self::ARTICLE_SHORT_PATTERN, $url) === 1;
+    }
+
     private ?array $settings;
 
     /** Server-side base URL: defaults to the co-located service. */
@@ -112,12 +120,9 @@ class CollectorClient
      */
     public function subscribe(string $name, string $articleUrl): array
     {
-        $host = strtolower((string) parse_url($articleUrl, PHP_URL_HOST));
         // Both the short (/s/xxxx) and the classic long form (/s?__biz=...)
         // are canonical article URLs; the collector accepts either.
-        $isArticle = str_starts_with($articleUrl, 'https://mp.weixin.qq.com/s/')
-            || str_starts_with($articleUrl, 'https://mp.weixin.qq.com/s?');
-        if ($host !== 'mp.weixin.qq.com' || !$isArticle) {
+        if (!self::isArticleUrl($articleUrl)) {
             throw new ValidationException(['article_url' => '请填写该公众号一篇原文的 https://mp.weixin.qq.com/s/... 链接']);
         }
         $token = $this->token();
@@ -184,12 +189,17 @@ class CollectorClient
     /** Fetch and parse an RSS feed into import rows. */
     public function feedRows(string $url, int $limit = 5): array
     {
-        $xml = @simplexml_load_string((string) (new Client(['timeout' => 30, 'http_errors' => false]))->request('GET', $url)->getBody());
+        return self::parseFeedRows((string) (new Client(['timeout' => 30, 'http_errors' => false]))->request('GET', $url)->getBody(), $limit);
+    }
+
+    public static function parseFeedRows(string $body, int $limit = 5): array
+    {
+        $xml = @simplexml_load_string($body, \SimpleXMLElement::class, LIBXML_NONET);
         if (!$xml) return [];
         $rows = [];
         foreach ($xml->channel->item as $item) {
             $url = trim((string) $item->link);
-            if (!preg_match('~^https://mp\.weixin\.qq\.com/s(?:/[A-Za-z0-9_-]+|\?[A-Za-z0-9_=&%.-]+)$~D', $url)) continue;
+            if (!self::isArticleUrl($url)) continue;
             $rows[] = [
                 'url' => $url, 'title' => trim((string) $item->title),
                 'summary' => trim(strip_tags((string) $item->description)),
