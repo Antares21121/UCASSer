@@ -68,16 +68,27 @@ def subscriptions_from(manifest):
     return rows
 
 
-def verify_publishers(api, rows, output=print):
+def inspect_publishers(api, rows):
     if api.request('/weread/test', b'{}').get('ok') is not True:
         raise RuntimeError('Saved authorization has not passed the WeRead connection test')
+    identities = []
     for row in rows:
         payload = json.dumps({'mp_id': row['public_feed_id']}).encode()
         result = api.request('/weread/mp/test', payload)
-        if result.get('mp_id') != row['public_feed_id'] or result.get('mp_name') != row['publisher_name']:
-            output('发布者身份不一致，已停止；未写入任何订阅：' + row['publisher_name'], flush=True)
+        actual = result.get('mp_name')
+        if result.get('mp_id') != row['public_feed_id'] or not isinstance(actual, str) or not 2 <= len(actual) <= 120 or any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in actual):
+            raise RuntimeError('Collector returned an invalid public publisher identity')
+        identities.append({'public_feed_id': row['public_feed_id'], 'expected_name': row['publisher_name'],
+                           'current_name': actual, 'matches': actual == row['publisher_name']})
+    return identities
+
+
+def verify_publishers(api, rows, output=print):
+    for identity in inspect_publishers(api, rows):
+        if not identity['matches']:
+            output('发布者身份不一致，已停止；未写入任何订阅：' + identity['expected_name'] + ' → ' + identity['current_name'], flush=True)
             raise RuntimeError('Live publisher identity differs from the reviewed manifest')
-        output('发布者核验通过：' + row['publisher_name'], flush=True)
+        output('发布者核验通过：' + identity['expected_name'], flush=True)
 
 
 def main():
@@ -86,7 +97,10 @@ def main():
     parser.add_argument('--env-file', default='.env.test')
     parser.add_argument('--collector', default='ucasser-we-mp-rss')
     parser.add_argument('--apply', action='store_true')
+    parser.add_argument('--inspect-publishers', action='store_true', help='Read all current public publisher names; do not write subscriptions')
     args = parser.parse_args()
+    if args.inspect_publishers and args.apply:
+        parser.error('--inspect-publishers cannot be combined with --apply')
     if os.name != 'posix' or os.geteuid() != 0:
         parser.error('Run with sudo on the Linux server')
     root = Path(args.root).resolve()
@@ -126,6 +140,9 @@ def main():
     with (root / '.runtime' / 'collector-subscriptions.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         api = CollectorAPI(plan['host_url'], settings)
+        if args.inspect_publishers:
+            print(json.dumps({'publishers': inspect_publishers(api, rows), 'subscriptions_changed': False}, ensure_ascii=False))
+            return 0
         verify_publishers(api, rows)
         preview = seed(False)  # Real SQL validation, then rollback before taking any action.
         if not args.apply:

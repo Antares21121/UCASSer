@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from restore_collector_subscriptions import SEED_FEEDS, subscriptions_from, verify_publishers
+from restore_collector_subscriptions import SEED_FEEDS, inspect_publishers, subscriptions_from, verify_publishers
 
 
 class SubscriptionRecoveryTests(unittest.TestCase):
@@ -44,6 +44,9 @@ class SubscriptionRecoveryTests(unittest.TestCase):
         self.assertNotIn('PRIVATE_', out.getvalue())
         mismatched = copy.deepcopy(rows)
         mismatched[-1]['publisher_name'] = 'Wrong publisher'
+        identities = inspect_publishers(API(), mismatched)
+        self.assertEqual(identities[-1]['current_name'], rows[-1]['publisher_name'])
+        self.assertFalse(identities[-1]['matches'])
         with self.assertRaises(RuntimeError), contextlib.redirect_stdout(io.StringIO()):
             verify_publishers(API(), mismatched)
 
