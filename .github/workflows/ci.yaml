@@ -70,6 +70,7 @@ jobs:
           docker compose exec -T -u www-data app php tests/catalog_recovery.php
           docker compose exec -T -u www-data app php tests/operator_provision.php
           docker compose exec -T -u www-data app php tests/public_candidate_recovery.php
+          docker compose exec -T -u www-data app php tests/official_web_reconciliation.php
           # This regression creates its own host-side snapshot, like the root launcher.
           docker compose exec -T -u 0 app php tests/wechat_tilde_import.php
           docker compose exec -T -u www-data app php tests/suffix_mention_parser.php

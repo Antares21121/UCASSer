@@ -1,0 +1,790 @@
+{
+  "format": 1,
+  "captured_at": "2026-10-30T08:04:19+00:00",
+  "scope": "Official public website index; latest at most two articles per column. No full text or personal application lists.",
+  "source_snapshot_sha256": "c8ca943f97679566f028453e32f61838926ada544c811114b80117d5df3eb515",
+  "source_count": 40,
+  "entries": [
+    {
+      "title": "中国社会科学院大学中外合作办学项目2025年度办学报告公示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://www.ucass.edu.cn/info/1075/5807.htm",
+      "published_at": "2026-10-09 16:00:00",
+      "source_name": "学校通知公告",
+      "listing_url": "https://www.ucass.edu.cn/index/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于跨校参加第十五届“挑战杯”中国大学生创业计划竞赛东北振兴产业升级专项赛参赛情况的公示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://www.ucass.edu.cn/info/1075/5590.htm",
+      "published_at": "2026-08-18 16:00:00",
+      "source_name": "学校通知公告",
+      "listing_url": "https://www.ucass.edu.cn/index/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "马克思主义学院2027年接收推荐免试攻读研究生拟录取名单公示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://marxism.ucass.edu.cn/info/1011/4168.htm",
+      "published_at": "2026-09-28 16:00:00",
+      "source_name": "马克思主义学院通知公告",
+      "listing_url": "https://marxism.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "马克思主义学院2027年接收推荐免试攻读研究生入学考试复试结果公示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://marxism.ucass.edu.cn/info/1011/4167.htm",
+      "published_at": "2026-09-28 16:00:00",
+      "source_name": "马克思主义学院通知公告",
+      "listing_url": "https://marxism.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学文学院2027年硕士研究生招生专业目录",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://wenxue.ucass.edu.cn/info/1017/2952.htm",
+      "published_at": "2026-09-16 16:00:00",
+      "source_name": "文学院学院公告",
+      "listing_url": "https://wenxue.ucass.edu.cn/xwgg/xygg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学文学院2027年接收优秀应届本科毕业生免试攻读研究生工作的实施细则",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://wenxue.ucass.edu.cn/info/1017/2951.htm",
+      "published_at": "2026-09-16 16:00:00",
+      "source_name": "文学院学院公告",
+      "listing_url": "https://wenxue.ucass.edu.cn/xwgg/xygg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "参加翻硕预推免复试说明",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sfl.ucass.edu.cn/info/1017/1921.htm",
+      "published_at": "2026-09-15 16:00:00",
+      "source_name": "外国语学院通知公告",
+      "listing_url": "https://sfl.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "外国语学院2027年接收推荐免试攻读专业型研究生实施细则",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sfl.ucass.edu.cn/info/1017/1905.htm",
+      "published_at": "2026-09-10 16:00:00",
+      "source_name": "外国语学院通知公告",
+      "listing_url": "https://sfl.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "哲学院2026年国庆节值班安排",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://phil.ucass.edu.cn/info/1008/2078.htm",
+      "published_at": "2026-10-11 16:00:00",
+      "source_name": "哲学院院内通知",
+      "listing_url": "https://phil.ucass.edu.cn/xwtz/yntz.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "哲学院2026年暑假值班安排",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://phil.ucass.edu.cn/info/1008/2039.htm",
+      "published_at": "2026-07-08 16:00:00",
+      "source_name": "哲学院院内通知",
+      "listing_url": "https://phil.ucass.edu.cn/xwtz/yntz.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "讲座预告 | 马明辉：逻辑发展史上的“哥白尼革命”",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://phil.ucass.edu.cn/info/1009/2082.htm",
+      "published_at": "2026-10-25 16:00:00",
+      "source_name": "哲学院会议讲座",
+      "listing_url": "https://phil.ucass.edu.cn/xwtz/hyjz1.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "讲座预告 | 焦德明：朱子主敬工夫论的多重面向与一贯诠释",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://phil.ucass.edu.cn/info/1009/2079.htm",
+      "published_at": "2026-10-11 16:00:00",
+      "source_name": "哲学院会议讲座",
+      "listing_url": "https://phil.ucass.edu.cn/xwtz/hyjz1.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "历史学院2026年暑假值班安排",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://history.ucass.edu.cn/info/1015/5251.htm",
+      "published_at": "2026-07-09 16:00:00",
+      "source_name": "历史学院新闻公告",
+      "listing_url": "https://history.ucass.edu.cn/xwzx/xwgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于延长 2026 年博士研究生网上报名时间的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://history.ucass.edu.cn/info/1015/5139.htm",
+      "published_at": "2026-03-12 16:00:00",
+      "source_name": "历史学院新闻公告",
+      "listing_url": "https://history.ucass.edu.cn/xwzx/xwgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学2027年硕士研究生招生章程",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://se.ucass.edu.cn/info/1042/3742.htm",
+      "published_at": "2026-10-12 16:00:00",
+      "source_name": "经济学院通知公告",
+      "listing_url": "https://se.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学2027年硕士研究生招生专业目录",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://se.ucass.edu.cn/info/1042/3741.htm",
+      "published_at": "2026-10-12 16:00:00",
+      "source_name": "经济学院通知公告",
+      "listing_url": "https://se.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "讲座预告 | 商学院“企业家讲堂”：巨本省—AI 赋能企业经营：降本增效与风控的实战路径",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://bs.ucass.edu.cn/info/1242/5224.htm",
+      "published_at": "2026-10-26 16:00:00",
+      "source_name": "商学院教学通知及讲座",
+      "listing_url": "https://bs.ucass.edu.cn/jxyky/zyxw/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "讲座回顾｜郭晶晶：AI时代企业的战略重构、管理跃迁与制度适配",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://bs.ucass.edu.cn/info/1242/5220.htm",
+      "published_at": "2026-10-20 16:00:00",
+      "source_name": "商学院教学通知及讲座",
+      "listing_url": "https://bs.ucass.edu.cn/jxyky/zyxw/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学应用经济学院2027年硕士研究生招生专业目录",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://fae.ucass.edu.cn/info/1029/4028.htm",
+      "published_at": "2026-10-08 16:00:00",
+      "source_name": "应用经济学院公告",
+      "listing_url": "https://fae.ucass.edu.cn/index/gg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于举办第二届全国人工智能应用创新大赛校赛的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://fae.ucass.edu.cn/info/1029/4025.htm",
+      "published_at": "2026-10-07 16:00:00",
+      "source_name": "应用经济学院公告",
+      "listing_url": "https://fae.ucass.edu.cn/index/gg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学法学院2027年硕士研究生招生专业目录",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://law.ucass.edu.cn/info/1053/9167.htm",
+      "published_at": "2026-10-08 16:00:00",
+      "source_name": "法学院通知公告",
+      "listing_url": "https://law.ucass.edu.cn/xwzhong_xin/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学2027年硕士研究生招生章程",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://law.ucass.edu.cn/info/1053/9165.htm",
+      "published_at": "2026-10-08 16:00:00",
+      "source_name": "法学院通知公告",
+      "listing_url": "https://law.ucass.edu.cn/xwzhong_xin/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "2025年“政府管理学院-银华奖学金” 申报公告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sg.ucass.edu.cn/info/1332/4935.htm",
+      "published_at": "2025-05-25 16:00:00",
+      "source_name": "政府管理学院通知公告",
+      "listing_url": "https://sg.ucass.edu.cn/jxgl/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "​政府管理学院政治学与行政学专业2025届本科毕业论文答辩安排",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sg.ucass.edu.cn/info/1332/4919.htm",
+      "published_at": "2025-05-06 16:00:00",
+      "source_name": "政府管理学院通知公告",
+      "listing_url": "https://sg.ucass.edu.cn/jxgl/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "复杂系统理论和计算社会科学在群学研究中的应用",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://shymzxy.ucass.edu.cn/info/1167/6165.htm",
+      "published_at": "2026-10-14 16:00:00",
+      "source_name": "社会与民族学院通知公告",
+      "listing_url": "https://shymzxy.ucass.edu.cn/xwzx/tzgg1.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "讲座预告 | 温莹莹：选题与文献分析",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://shymzxy.ucass.edu.cn/info/1167/6164.htm",
+      "published_at": "2026-10-11 16:00:00",
+      "source_name": "社会与民族学院通知公告",
+      "listing_url": "https://shymzxy.ucass.edu.cn/xwzx/tzgg1.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "新闻传播学院2027年招收推免研究生复试结果公示（学术型硕士）",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://media.ucass.edu.cn/info/1019/2268.htm",
+      "published_at": "2026-09-23 16:00:00",
+      "source_name": "新闻传播学院通知公告",
+      "listing_url": "https://media.ucass.edu.cn/xwgg/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "新闻传播学院2027年招收推免研究生复试结果公示（专业型硕士）",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://media.ucass.edu.cn/info/1019/2267.htm",
+      "published_at": "2026-09-23 16:00:00",
+      "source_name": "新闻传播学院通知公告",
+      "listing_url": "https://media.ucass.edu.cn/xwgg/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "全球与区域国别学院2027年接收推荐免试攻读研究生综合考核成绩",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sipe.ucass.edu.cn/info/1012/2132.htm",
+      "published_at": "2026-09-23 16:00:00",
+      "source_name": "全球与区域国别学院通知公告",
+      "listing_url": "https://sipe.ucass.edu.cn/xwzx/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "全球与区域国别学院2027年接收推荐免试攻读研究生复试名单",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sipe.ucass.edu.cn/info/1012/2133.htm",
+      "published_at": "2026-09-20 16:00:00",
+      "source_name": "全球与区域国别学院通知公告",
+      "listing_url": "https://sipe.ucass.edu.cn/xwzx/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于参加2026年人工智能综合能力提升培训的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://jw.ucass.edu.cn/info/1150/2287.htm",
+      "published_at": "2026-05-31 16:00:00",
+      "source_name": "中国社会科学院大学教务处通知公告",
+      "listing_url": "https://jw.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-notices"
+    },
+    {
+      "title": "关于开展优质本科公开示范课活动的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://jw.ucass.edu.cn/info/1059/2278.htm",
+      "published_at": "2026-04-06 16:00:00",
+      "source_name": "中国社会科学院大学教务处通知公告",
+      "listing_url": "https://jw.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-notices"
+    },
+    {
+      "title": "关于中国社会科学院大学报考点（1172）资格审核的温馨提示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://skdzs.ucass.edu.cn/info/1041/2750.htm",
+      "published_at": "2026-10-29 16:00:00",
+      "source_name": "招生网通知公告",
+      "listing_url": "https://skdzs.ucass.edu.cn/index/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于中国社会科学院大学（1172）报考点上传材料的相关提示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://skdzs.ucass.edu.cn/info/1041/2746.htm",
+      "published_at": "2026-10-09 16:00:00",
+      "source_name": "招生网通知公告",
+      "listing_url": "https://skdzs.ucass.edu.cn/index/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于申请北京市边远山区基层就业学费补偿、贷款代偿的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://xgb.ucass.edu.cn/info/1016/2181.htm",
+      "published_at": "2026-09-01 16:00:00",
+      "source_name": "学生工作部通知公告",
+      "listing_url": "https://xgb.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于开展2026年第二批冬青计划的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://xgb.ucass.edu.cn/info/1016/2180.htm",
+      "published_at": "2026-09-01 16:00:00",
+      "source_name": "学生工作部通知公告",
+      "listing_url": "https://xgb.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于跨校参加第十五届“挑战杯”中国大学生创业计划竞赛东北振兴产业升级专项赛参赛情况的公示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://youth.ucass.edu.cn/info/1006/3163.htm",
+      "published_at": "2026-08-18 16:00:00",
+      "source_name": "校团委通知公告",
+      "listing_url": "https://youth.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于举办中国社会科学院大学2026级“励行担当”新生骨干训练营的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://youth.ucass.edu.cn/info/1006/3154.htm",
+      "published_at": "2026-07-20 16:00:00",
+      "source_name": "校团委通知公告",
+      "listing_url": "https://youth.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "转发《2026年国家社科基金文化遗产保护传承研究专项申报公告》",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://ky.ucass.edu.cn/info/1012/2583.htm",
+      "published_at": "2026-10-25 16:00:00",
+      "source_name": "科研处通知公告",
+      "listing_url": "https://ky.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "转发《国家社科基金中国历史研究院重大历史问题研究专项2026年度重大项目招标公告》",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://ky.ucass.edu.cn/info/1012/2581.htm",
+      "published_at": "2026-10-18 16:00:00",
+      "source_name": "科研处通知公告",
+      "listing_url": "https://ky.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于本科生参与2025-2026学年第二学期课堂教学期末评价的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://ghypgc.ucass.edu.cn/info/1023/1318.htm",
+      "published_at": "2026-06-07 16:00:00",
+      "source_name": "规划与评估处通知公告",
+      "listing_url": "https://ghypgc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于查询2025-2026学年第二学期本科课堂教学期中评价结果的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://ghypgc.ucass.edu.cn/info/1023/1303.htm",
+      "published_at": "2026-04-30 16:00:00",
+      "source_name": "规划与评估处通知公告",
+      "listing_url": "https://ghypgc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于开展2026年网络安全宣传周活动的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://nc.ucass.edu.cn/info/1055/1811.htm",
+      "published_at": "2026-09-13 16:00:00",
+      "source_name": "网络中心通知公告",
+      "listing_url": "https://nc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于正版软件服务平台金山杀毒软件到期下线的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://nc.ucass.edu.cn/info/1055/1812.htm",
+      "published_at": "2026-08-19 16:00:00",
+      "source_name": "网络中心通知公告",
+      "listing_url": "https://nc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于2026年秋季研究生学位论文答辩和学位授予工作的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://yjsjy.ucass.edu.cn/info/1003/1440.htm",
+      "published_at": "2026-07-02 16:00:00",
+      "source_name": "研究生教育管理部通知公告",
+      "listing_url": "https://yjsjy.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于疫情防控期间研究生成绩单办理的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://yjsjy.ucass.edu.cn/info/1003/1318.htm",
+      "published_at": "2022-12-11 16:00:00",
+      "source_name": "研究生教育管理部通知公告",
+      "listing_url": "https://yjsjy.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于中秋、国庆期间的安全温馨提示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://bwc.ucass.edu.cn/info/1015/1735.htm",
+      "published_at": "2026-09-20 16:00:00",
+      "source_name": "保卫处通知公告",
+      "listing_url": "https://bwc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于2026届毕业生户口迁移工作的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://bwc.ucass.edu.cn/info/1015/1707.htm",
+      "published_at": "2026-06-09 16:00:00",
+      "source_name": "保卫处通知公告",
+      "listing_url": "https://bwc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于良乡校区迎新交通保障的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://welcome.ucass.edu.cn/info/1003/1266.htm",
+      "published_at": "2026-08-27 16:00:00",
+      "source_name": "迎新网通知公告",
+      "listing_url": "https://welcome.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于2026级新生办理工行借记卡的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://welcome.ucass.edu.cn/info/1003/1265.htm",
+      "published_at": "2026-08-27 16:00:00",
+      "source_name": "迎新网通知公告",
+      "listing_url": "https://welcome.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "国际教育学院关于学生认领教师科研项目结果的公示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sged.ucass.edu.cn/info/1041/3339.htm",
+      "published_at": "2026-09-22 16:00:00",
+      "source_name": "国际教育学院学院公告",
+      "listing_url": "https://sged.ucass.edu.cn/xwgg/xygg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学2026年招收国际学生（中文项目）拟录取名单",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sged.ucass.edu.cn/info/1041/3311.htm",
+      "published_at": "2026-06-28 16:00:00",
+      "source_name": "国际教育学院学院公告",
+      "listing_url": "https://sged.ucass.edu.cn/xwgg/xygg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中外合作办学金融管理硕士项目和能源管理硕士项目2026年优秀毕业生奖学金获奖名单公示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sle.ucass.edu.cn/info/1138/2913.htm",
+      "published_at": "2026-10-13 16:00:00",
+      "source_name": "终身教育学院通知公告",
+      "listing_url": "https://sle.ucass.edu.cn/xwgg1/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于学校财务处收费管理系统登录网址变更的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://sle.ucass.edu.cn/info/1138/2692.htm",
+      "published_at": "2023-05-29 16:00:00",
+      "source_name": "终身教育学院通知公告",
+      "listing_url": "https://sle.ucass.edu.cn/xwgg1/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "​顺天乡大学2027年春季学期免费交换生项目通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://intl.ucass.edu.cn/info/1136/3544.htm",
+      "published_at": "2026-10-29 16:00:00",
+      "source_name": "国际交流与合作处海外学分项目",
+      "listing_url": "https://intl.ucass.edu.cn/cg_j_xx1/hwxfxm.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "​埃克塞特大学2027年春季学期学分项目通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://intl.ucass.edu.cn/info/1136/3539.htm",
+      "published_at": "2026-10-27 16:00:00",
+      "source_name": "国际交流与合作处海外学分项目",
+      "listing_url": "https://intl.ucass.edu.cn/cg_j_xx1/hwxfxm.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "全球视野大讲堂（第92讲）| 超越大国竞争：拉美视角下的国际秩序",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://intl.ucass.edu.cn/info/1123/3538.htm",
+      "published_at": "2026-10-13 16:00:00",
+      "source_name": "国际交流与合作处外专讲座",
+      "listing_url": "https://intl.ucass.edu.cn/wzyz1/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "全球视野大讲堂（第91讲）| 讲座预告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://intl.ucass.edu.cn/info/1123/3478.htm",
+      "published_at": "2026-07-01 16:00:00",
+      "source_name": "国际交流与合作处外专讲座",
+      "listing_url": "https://intl.ucass.edu.cn/wzyz1/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于国际学生暑假放假的通知 Notice on Summer Holiday for International Students",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://intl.ucass.edu.cn/info/1101/3482.htm",
+      "published_at": "2026-07-06 16:00:00",
+      "source_name": "国际交流与合作处国际学生通知",
+      "listing_url": "https://intl.ucass.edu.cn/lxskd1/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于国际学生端午节放假的通知 Notice on the Dragon Boat Festival Holiday For International Students",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://intl.ucass.edu.cn/info/1101/3474.htm",
+      "published_at": "2026-06-17 16:00:00",
+      "source_name": "国际交流与合作处国际学生通知",
+      "listing_url": "https://intl.ucass.edu.cn/lxskd1/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于公布中国社会科学院大学“应知应会”知识竞赛预赛结果的通知",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://gh.ucass.edu.cn/info/1030/1781.htm",
+      "published_at": "2026-04-26 16:00:00",
+      "source_name": "校工会通知公告",
+      "listing_url": "https://gh.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于对我校参加社科院第七届职工运动会的优秀个人和优秀集体进行表彰奖励的通报",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://gh.ucass.edu.cn/info/1030/1764.htm",
+      "published_at": "2025-12-11 16:00:00",
+      "source_name": "校工会通知公告",
+      "listing_url": "https://gh.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于谨防校外机构假冒我校名义开展在职高级课程培训班等活动的声明",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://cea.ucass.edu.cn/info/1043/1025.htm",
+      "published_at": "2022-07-20 16:00:00",
+      "source_name": "继续教育管理中心通知公告",
+      "listing_url": "https://cea.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于机票、火车票全面启用电子发票报销的重要提示 2025-09-30",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://cwc.ucass.edu.cn/info/1003/1454.htm",
+      "published_at": "2025-09-29 16:00:00",
+      "source_name": "财务处通知公告",
+      "listing_url": "https://cwc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "关于缴纳2025—2026学年住宿费的通知 2025-08-26",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://cwc.ucass.edu.cn/info/1003/1449.htm",
+      "published_at": "2025-08-25 16:00:00",
+      "source_name": "财务处通知公告",
+      "listing_url": "https://cwc.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "哲学社会科学界深入学习贯彻习近平文化思想——书写经世华章 展现中国气派",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://rsc.ucass.edu.cn/info/1230/1676.htm",
+      "published_at": "2026-05-16 16:00:00",
+      "source_name": "人事处通知公告",
+      "listing_url": "https://rsc.ucass.edu.cn/tzgg1.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "习近平就推动哲学社会科学高质量发展作出重要指示",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://rsc.ucass.edu.cn/info/1230/1675.htm",
+      "published_at": "2026-05-16 16:00:00",
+      "source_name": "人事处通知公告",
+      "listing_url": "https://rsc.ucass.edu.cn/tzgg1.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学招收2026年度博士后研究人员简章",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://rsc.ucass.edu.cn/info/1046/1664.htm",
+      "published_at": "2026-03-17 16:00:00",
+      "source_name": "人事处人才招聘",
+      "listing_url": "https://rsc.ucass.edu.cn/rczp1.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学2026年10至11月政府采购意向",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1034/2488.htm",
+      "published_at": "2026-10-19 16:00:00",
+      "source_name": "招投标和采购中心采购意向",
+      "listing_url": "https://zc.ucass.edu.cn/cgyxgk.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学2026年10至11月政府采购意向",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1034/2475.htm",
+      "published_at": "2026-10-08 16:00:00",
+      "source_name": "招投标和采购中心采购意向",
+      "listing_url": "https://zc.ucass.edu.cn/cgyxgk.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学科教融合智能育人平台二期算力服务器采购项目招标公告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1016/2484.htm",
+      "published_at": "2026-10-14 16:00:00",
+      "source_name": "招投标和采购中心货物公告",
+      "listing_url": "https://zc.ucass.edu.cn/cggg/hw.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学科教融合智能育人平台二期数智化设备采购项目招标公告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1016/2482.htm",
+      "published_at": "2026-10-14 16:00:00",
+      "source_name": "招投标和采购中心货物公告",
+      "listing_url": "https://zc.ucass.edu.cn/cggg/hw.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学良乡校区绿化养护服务采购项目更正公告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1017/2478.htm",
+      "published_at": "2026-10-11 16:00:00",
+      "source_name": "招投标和采购中心服务公告",
+      "listing_url": "https://zc.ucass.edu.cn/cggg/fw.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学良乡校区绿化养护服务采购项目招标公告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1017/2470.htm",
+      "published_at": "2026-09-29 16:00:00",
+      "source_name": "招投标和采购中心服务公告",
+      "listing_url": "https://zc.ucass.edu.cn/cggg/fw.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学良乡校区交通环境改善施工项目比选公告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1018/2486.htm",
+      "published_at": "2026-10-15 16:00:00",
+      "source_name": "招投标和采购中心工程公告",
+      "listing_url": "https://zc.ucass.edu.cn/cggg/gc.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "中国社会科学院大学良乡校区交通环境改善施工项目终止公告",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://zc.ucass.edu.cn/info/1018/2480.htm",
+      "published_at": "2026-10-13 16:00:00",
+      "source_name": "招投标和采购中心工程公告",
+      "listing_url": "https://zc.ucass.edu.cn/cggg/gc.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "2027年中国社会科学院大学应用经济学院税务专业学位研究生预推免复试考核结果",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://mt.ucass.edu.cn/info/1042/2981.htm",
+      "published_at": "2026-09-21 16:00:00",
+      "source_name": "税务硕士教育中心通知公告",
+      "listing_url": "https://mt.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    },
+    {
+      "title": "2027年中国社会科学院大学应用经济学院税务专业学位研究生预推免复试名单（二）",
+      "summary": "官网公告索引，办理要求、截止时间和完整内容请以原文为准。",
+      "category": "notice",
+      "url": "https://mt.ucass.edu.cn/info/1042/2980.htm",
+      "published_at": "2026-09-18 16:00:00",
+      "source_name": "税务硕士教育中心通知公告",
+      "listing_url": "https://mt.ucass.edu.cn/tzgg.htm",
+      "adapter": "ucass-vsb"
+    }
+  ],
+  "public_subscriptions": []
+}
