@@ -25,7 +25,7 @@ try {
     if ($db->table('campus_aggregation_items')->count() !== $original['campus_aggregation_items']) throw new RuntimeException('Import published content');
 } finally {
     $db->rollBack();
-    unlink($file);
+    if (is_file($file)) unlink($file);
     restore_error_handler();
 }
 foreach ($original as $t => $count) if ($db->table($t)->count() !== $count) throw new RuntimeException('Tilde fixture transaction did not roll back');
