@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from restore_collector_subscriptions import SEED_FEEDS, inspect_publishers, subscriptions_from, verify_publishers
+from restore_collector_subscriptions import REVIEWED_NAMES, SEED_FEEDS, inspect_publishers, subscriptions_from, verify_publishers
 
 
 class SubscriptionRecoveryTests(unittest.TestCase):
@@ -50,6 +50,19 @@ class SubscriptionRecoveryTests(unittest.TestCase):
         with self.assertRaises(RuntimeError), contextlib.redirect_stdout(io.StringIO()):
             verify_publishers(API(), mismatched)
 
+        class RenamedAPI(API):
+            def request(self, path, payload):
+                result = super().request(path, payload)
+                if result.get('mp_id') in REVIEWED_NAMES:
+                    result['mp_name'] = REVIEWED_NAMES[result['mp_id']][1]
+                return result
+
+        identities = inspect_publishers(RenamedAPI(), rows)
+        self.assertTrue(all(identity['matches'] for identity in identities))
+        self.assertEqual(sum(identity['reviewed_name_change'] for identity in identities), 3)
+        wrong_ids = [row | {'publisher_name': 'Other historical identity'} for row in rows]
+        self.assertFalse(any(identity['matches'] for identity in inspect_publishers(RenamedAPI(), wrong_ids)))
+
     def test_sql_preview_rollback_apply_repeat_and_preserve_disabled_subscriptions(self):
         with tempfile.TemporaryDirectory() as directory:
             database = Path(directory) / 'collector.sqlite'
@@ -63,12 +76,16 @@ class SubscriptionRecoveryTests(unittest.TestCase):
                     exec(compile(code, '<subscription-recovery>', 'exec'), {})
                 return json.loads(out.getvalue().split('UCASSER_RESULT:')[-1])
 
-            self.assertEqual(execute(False)['added'], 19)
+            reconciled = [row | {'current_name': REVIEWED_NAMES.get(row['public_feed_id'], (None, row['publisher_name']))[1]} for row in self.rows]
+            self.assertEqual(execute(False, reconciled)['added'], 19)
             self.assertEqual(c.execute('SELECT COUNT(*) FROM feeds').fetchone()[0], 0)
-            self.assertEqual(execute(True)['feeds_after'], 19)
+            self.assertEqual(execute(True, reconciled)['feeds_after'], 19)
+            renamed_id, (former, current) = next(iter(REVIEWED_NAMES.items()))
+            self.assertEqual(c.execute('SELECT mp_name,mp_intro FROM feeds WHERE id=?', (renamed_id,)).fetchone(), (former, '当前公开名称：' + current))
+            c.execute('UPDATE feeds SET mp_name=? WHERE id=?', (current, renamed_id)); c.commit()
             c.execute('UPDATE feeds SET status=0,mp_intro="owner note" WHERE id=?', (self.rows[0]['public_feed_id'],)); c.commit()
             before = c.execute('SELECT * FROM feeds ORDER BY id').fetchall()
-            again = execute(True)
+            again = execute(True, reconciled)
             self.assertEqual((again['added'], again['existing_preserved']), (0, 19))
             self.assertEqual(c.execute('SELECT * FROM feeds ORDER BY id').fetchall(), before)
             self.assertEqual(c.execute('SELECT * FROM articles').fetchall(), [('existing-article',)])

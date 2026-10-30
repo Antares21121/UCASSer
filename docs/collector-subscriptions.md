@@ -4,6 +4,18 @@
 
 前提是内部连接完成、所有者已亲自扫码授权。工具先测试保存的授权，再使用采集器的 `/weread/mp/test` 对每个编号核对当前发布者名称。任何编号、名称或访问错误都会停止，在全部通过前不写订阅。
 
+2026-10-30 所有者服务器逐个查询发现三处名称变化，工具只接受下面三个**指定编号、新旧名称同时匹配**的对应关系；其它名称变化仍会停止。保留历史来源标签用于匹配既有论坛来源及审核记录，在新增订阅的说明中注明当前名称；不为改名重复建立论坛来源。
+
+| 公开编号 | 历史来源标签 | 当前公开名称 |
+| --- | --- | --- |
+| MP_WXS_3894823465 | 中国社科大国际政治经济学院 | 中国社科大全球与区域国别学院 |
+| MP_WXS_3888538840 | 社科大哲学院 | 中国社会科学院大学哲学院 |
+| MP_WXS_3093663298 | 社科大科研处 | 中国社科大科研处 |
+
+依据包括同一编号的微信读书当前返回值；[学院官网简介](https://sipe.ucass.edu.cn/xygk/xyjj.htm)确认国际政治经济学院于 2026 年 3 月更名为全球与区域国别学院；[学校研创平台](https://xmjh.ucass.edu.cn/info/1036/1582.htm)明确列出“中国社会科学院大学哲学院”公众号。科研处当前名称依据此次实际接口查询，不据此扩大对其它账号的信任。
+
+`--inspect-publishers` 只列出当前公开名称和核对结果，不运行订阅写入；不能与 `--apply` 同用。
+
 ```bash
 sudo python3 scripts/restore_collector_subscriptions.py --root /opt/ucasser-test --env-file .env.test
 sudo python3 scripts/restore_collector_subscriptions.py --root /opt/ucasser-test --env-file .env.test --apply

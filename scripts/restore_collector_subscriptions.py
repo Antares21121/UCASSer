@@ -14,6 +14,14 @@ from authorize_collector import CollectorAPI
 from connect_collector import IMAGE, RESULT, SERVICE_EXEC, connection_plan, load_managed
 from forum import read_env
 
+# Same stable WeRead publisher IDs observed on the owner's server, 2026-10-30.
+# Keep the historical source label so existing forum source IDs and review links survive.
+REVIEWED_NAMES = {
+    'MP_WXS_3894823465': ('中国社科大国际政治经济学院', '中国社科大全球与区域国别学院'),
+    'MP_WXS_3888538840': ('社科大哲学院', '中国社会科学院大学哲学院'),
+    'MP_WXS_3093663298': ('社科大科研处', '中国社科大科研处'),
+}
+
 SEED_FEEDS = r'''
 import base64,json,sqlite3,sys
 from datetime import datetime,timezone
@@ -27,17 +35,18 @@ try:
     articles=c.execute('SELECT COUNT(*) FROM articles').fetchone()[0]
     added=0;preserved=0
     for row in x['subscriptions']:
-        feed_id=row['public_feed_id'];name=row['publisher_name']
+        feed_id=row['public_feed_id'];name=row['publisher_name'];current=row.get('current_name',name)
         assert feed_id.startswith('MP_WXS_') and feed_id[7:].isdigit() and 2<=len(name)<=120
+        assert 2<=len(current)<=120
         faker_id=base64.b64encode(feed_id[7:].encode()).decode()
         existing=c.execute('SELECT id,mp_name,faker_id FROM feeds WHERE id=? OR faker_id=?',(feed_id,faker_id)).fetchall()
         if existing:
-            assert len(existing)==1 and existing[0]==(feed_id,name,faker_id), 'Existing publisher identity conflict'
+            assert len(existing)==1 and existing[0][0]==feed_id and existing[0][1] in (name,current) and existing[0][2]==faker_id, 'Existing publisher identity conflict'
             preserved+=1
             continue
         now=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f')
         c.execute('INSERT INTO feeds(id,mp_name,mp_cover,mp_intro,status,sync_time,update_time,created_at,updated_at,faker_id) VALUES(?,?,?,?,?,?,?,?,?,?)',
-                  (feed_id,name,'','',1,0,0,now,now,faker_id))
+                  (feed_id,name,'','当前公开名称：'+current if current!=name else '',1,0,0,now,now,faker_id))
         added+=1
     after=c.execute('SELECT COUNT(*) FROM feeds').fetchone()[0]
     assert after==before+added and c.execute('SELECT COUNT(*) FROM articles').fetchone()[0]==articles
@@ -78,17 +87,22 @@ def inspect_publishers(api, rows):
         actual = result.get('mp_name')
         if result.get('mp_id') != row['public_feed_id'] or not isinstance(actual, str) or not 2 <= len(actual) <= 120 or any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in actual):
             raise RuntimeError('Collector returned an invalid public publisher identity')
+        reviewed = REVIEWED_NAMES.get(row['public_feed_id']) == (row['publisher_name'], actual)
         identities.append({'public_feed_id': row['public_feed_id'], 'expected_name': row['publisher_name'],
-                           'current_name': actual, 'matches': actual == row['publisher_name']})
+                           'current_name': actual, 'matches': actual == row['publisher_name'] or reviewed,
+                           'reviewed_name_change': reviewed})
     return identities
 
 
 def verify_publishers(api, rows, output=print):
-    for identity in inspect_publishers(api, rows):
+    identities = inspect_publishers(api, rows)
+    for identity in identities:
         if not identity['matches']:
             output('发布者身份不一致，已停止；未写入任何订阅：' + identity['expected_name'] + ' → ' + identity['current_name'], flush=True)
             raise RuntimeError('Live publisher identity differs from the reviewed manifest')
-        output('发布者核验通过：' + identity['expected_name'], flush=True)
+        suffix = '（现名：' + identity['current_name'] + '）' if identity['reviewed_name_change'] else ''
+        output('发布者核验通过：' + identity['expected_name'] + suffix, flush=True)
+    return identities
 
 
 def main():
@@ -143,7 +157,8 @@ def main():
         if args.inspect_publishers:
             print(json.dumps({'publishers': inspect_publishers(api, rows), 'subscriptions_changed': False}, ensure_ascii=False))
             return 0
-        verify_publishers(api, rows)
+        identities = verify_publishers(api, rows)
+        rows = [row | {'current_name': identity['current_name']} for row, identity in zip(rows, identities)]
         preview = seed(False)  # Real SQL validation, then rollback before taking any action.
         if not args.apply:
             print(json.dumps(preview | {'publishers_verified': len(rows), 'collection_started': False})); return 0
