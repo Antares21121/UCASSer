@@ -65,6 +65,9 @@ jobs:
           python tests/chat_image_smoke.py --backend docker
       - name: Board redesign, operator catalog and mention acceptance
         run: |
+          # Transaction fixtures must own the worker lease; the operator smoke
+          # above can leave a real queued job for the background service.
+          docker compose stop runner
           docker compose exec -T -u www-data app php -r 'exit((extension_loaded("gd") && (gd_info()["WebP Support"] ?? false)) ? 0 : 1);'
           docker compose exec -T -u www-data app php flarum campus:boards:migrate
           docker compose exec -T -u www-data app php tests/board_migration.php
