@@ -23,6 +23,6 @@ class AggregationWechatCommand extends AbstractCommand
     {
         $result = $this->import->run((int) $this->input->getOption('limit'));
         $this->info('完成：新增 '.$result['added'].' 条，失败 '.$result['failed'].' 个（'.$result['accounts'].' 个账号）');
-        return 0;
+        return $result['failed'] ? 1 : 0;
     }
 }
