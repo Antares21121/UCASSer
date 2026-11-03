@@ -1,0 +1,168 @@
+{
+  "prepared_client_date": "2026-11-03",
+  "code_baseline": "839edd6065aed85fc6616ecd36b4267b784cee39",
+  "scope": "Source continuity and anonymous public production read/navigation checks; authenticated operations are not claimed verified.",
+  "code_continuity": {
+    "gold_commit": "b39bccb",
+    "squashed_commit": "4bb674a",
+    "deployed_commit": "839edd6",
+    "gold_files": 306,
+    "squash_files": 306,
+    "missing_from_squash": [],
+    "extra_in_squash": [],
+    "different_in_squash": [],
+    "gold_paths_missing_from_deployed": [],
+    "gold_paths_changed_later": [
+      "extensions/campus/src/CollectorClient.php",
+      "tests/campus_smoke.py",
+      "extensions/campus/src/AggregationImportFeedCommand.php",
+      "tests/browser/modules.spec.cjs",
+      "tests/browser/home.spec.cjs",
+      "extensions/campus/src/BoardMigrator.php",
+      "scripts/aggregation_feed.py",
+      "tests/browser/redesign.spec.cjs",
+      "tests/smoke.py",
+      "extensions/campus/src/AggregationImportTrialCommand.php",
+      "extensions/campus/js/dist/forum.js.map",
+      "extensions/campus/js/dist/forum.js",
+      "extensions/campus/resources/skin.less",
+      "tests/operator_smoke.py",
+      "extensions/campus/src/AggregationController.php",
+      "tests/test_aggregation_feed.py",
+      "docs/control-console.md",
+      "tests/browser/helpers.cjs",
+      "tests/browser/navigation.spec.cjs",
+      "compose.yaml",
+      "extensions/campus/js/native.js",
+      ".github/workflows/ci.yaml",
+      "extensions/campus/src/Sections.php",
+      "extensions/campus/migrations/2026_10_29_000011_board_redesign.php"
+    ],
+    "current_files": 339
+  },
+  "anonymous_production_checks": {
+    "scope": "Anonymous production read/navigation only; no login, timetable subscription write, private dialog send, operator edit or publication was exercised.",
+    "checks": [
+      {
+        "feature": "toolbox_entries",
+        "count": 6
+      },
+      {
+        "feature": "published_schedule",
+        "status": 200,
+        "entries": 672,
+        "units": 18,
+        "categories": 13,
+        "buildings": 15,
+        "updated": "2026-10-29",
+        "source_snapshot_matches": true
+      },
+      {
+        "feature": "schedule_grid_modal",
+        "cells": 90,
+        "slot_courses": 14,
+        "subscribe_button_present": true
+      },
+      {
+        "feature": "calendar",
+        "images": [
+          {
+            "loaded": true,
+            "width": 1131,
+            "source": "/api/campus/assets/calendar-autumn.jpg"
+          },
+          {
+            "loaded": true,
+            "width": 1131,
+            "source": "/api/campus/assets/calendar-spring.jpg"
+          }
+        ]
+      },
+      {
+        "feature": "shuttle",
+        "images": [
+          {
+            "loaded": true,
+            "width": 1074,
+            "source": "/api/campus/assets/shuttle.jpg"
+          }
+        ]
+      },
+      {
+        "feature": "legacy_redirect",
+        "path": "/t/campus-courses",
+        "status": 301,
+        "location": "/campus/courses"
+      },
+      {
+        "feature": "legacy_redirect",
+        "path": "/t/campus-market",
+        "status": 301,
+        "location": "/t/campus-secondhand"
+      },
+      {
+        "feature": "legacy_redirect",
+        "path": "/t/campus-news",
+        "status": 301,
+        "location": "/campus/aggregation"
+      },
+      {
+        "feature": "legacy_redirect",
+        "path": "/t/campus-governance",
+        "status": 301,
+        "location": "/campus/governance"
+      },
+      {
+        "feature": "deployed_editor_assets",
+        "private_image_button": true,
+        "private_toolbar_reduction": true,
+        "public_image_button": true,
+        "public_mention_feature": true
+      },
+      {
+        "feature": "schedule_mobile",
+        "width": 390,
+        "overflow": false
+      },
+      {
+        "feature": "schedule_mobile",
+        "width": 320,
+        "overflow": false
+      }
+    ],
+    "page_errors": []
+  },
+  "last_owner_deployment_output": {
+    "evidence": "Owner returned Workbench output; not direct server execution",
+    "live_commit": "839edd6065aed85fc6616ecd36b4267b784cee39",
+    "backup": "/opt/ucasser-test/backups/forum-ucasser_test-20261030T172750Z-e6d34b.zip",
+    "official_web_entries": 78,
+    "added": 2,
+    "existing_urls_preserved": 76,
+    "repeat_added": 0,
+    "repeat_existing_urls_preserved": 78,
+    "published": 0,
+    "collector_configuration_changed": false,
+    "live_website_connectivity_checked": false,
+    "health_ok": true,
+    "runner_resumed": true,
+    "four_additional_accounts": "deferred by owner"
+  },
+  "last_owner_schedule_network_output": {
+    "evidence": "Owner Workbench output; no direct server access",
+    "service_result": "exit-code",
+    "exec_main_status": 1,
+    "start_reported": "Fri 2026-10-30 21:00:26 CST",
+    "exit_reported": "Fri 2026-10-30 21:10:55 CST",
+    "timer_enabled_next_reported": "Sat 2026-10-31 09:00:00 CST",
+    "dns_ipv4": {
+      "jw.ucass.edu.cn": "121.32.243.73",
+      "www.ucass.edu.cn": "121.32.243.73"
+    },
+    "http_https_connect": "both hosts timed out before TCP connection on ports 80 and 443",
+    "root_cause": "Not established: network route, endpoint policy or other connection filtering remain to distinguish"
+  },
+  "server_evidence_freshness": "Owner-reported historical execution results retained from the earlier recovery session; server version, schedule execution and outbound network were not re-read directly on 2026-11-03.",
+  "authenticated_production_operations_tested_this_round": false,
+  "production_data_modified_this_round": false
+}

@@ -68,13 +68,17 @@ class AggregationImportWebLocalCommand extends AbstractCommand
                         || !preg_match('/^20\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/D', $entry['published_at'])) {
                         throw new \RuntimeException('快照包含无效公告');
                     }
+                    $date = \DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $entry['published_at'], new \DateTimeZone('UTC'));
+                    if (!$date || $date->format('Y-m-d H:i:s') !== $entry['published_at']) throw new \RuntimeException('快照包含无效日期');
                 }
                 $validated[$listing] = $item['entries'];
             }
             $db = $this->aggregation->db;
+            return $db->transaction(function () use ($db, $validated, $catalog): array {
             $sources = [];
             foreach ($validated as $listing => $_) {
-                $source = $db->table('campus_aggregation_sources')->where('listing_url', $listing)->first();
+                $matches = $db->table('campus_aggregation_sources')->where('listing_url', $listing)->lockForUpdate()->get();
+                $source = $matches->count() === 1 ? $matches->first() : null;
                 if (!$source || $source->trust !== 'official'
                     || !in_array($source->adapter, ['ucass-vsb', 'ucass-notices'], true)) {
                     throw new \RuntimeException('来源未在服务器登记为官网：'.$catalog[$listing]);
@@ -92,5 +96,6 @@ class AggregationImportWebLocalCommand extends AbstractCommand
                 ]);
             }
             return ['sources' => count($validated), 'skipped' => $skipped, 'added' => $added];
+            });
     }
 }

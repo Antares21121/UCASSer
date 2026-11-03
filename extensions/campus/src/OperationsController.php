@@ -10,7 +10,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class OperationsController implements RequestHandlerInterface
 {
     public function __construct(private Aggregation $aggregation, private OperatorAccess $access,
-        private AggregationImportWebLocalCommand $webImport, private WechatImport $wechat) {}
+        private AggregationImportWebLocalCommand $webImport) {}
 
     public function handle(Request $request): ResponseInterface
     {
@@ -25,31 +25,32 @@ class OperationsController implements RequestHandlerInterface
                 ->where('enabled', true)->whereIn('adapter', ['ucass-notices', 'ucass-vsb', 'ucass-employment'])->exists())) {
                 throw new \Flarum\Foundation\ValidationException(['source_id' => '来源不存在或尚未启用']);
             }
-            // WeChat accounts are fetched inline: the collector already holds the
-            // session, so one click can put both channel types into review.
-            $wechat = ['added' => 0, 'failed' => 0, 'accounts' => 0];
-            try {
-                $wechat = $this->wechat->run(5);
-            } catch (\Throwable $error) {
-                $wechat['error'] = mb_substr($error->getMessage(), 0, 120);
-            }
-            $existing = $db->table('campus_collection_jobs')->whereIn('status', ['queued', 'running'])->first();
-            if ($existing) return new JsonResponse(['data' => ['id' => $existing->id, 'status' => $existing->status, 'wechat' => $wechat]], 202);
-            $id = $db->table('campus_collection_jobs')->insertGetId([
-                'requested_by' => $actor->id, 'status' => 'queued', 'source_id' => $sourceId,
-                'created_at' => gmdate('Y-m-d H:i:s'),
-            ]);
-            return new JsonResponse(['data' => ['id' => $id, 'status' => 'queued', 'wechat' => $wechat]], 202);
+            $job = $db->transaction(function () use ($db, $actor, $sourceId) {
+                // A durable row serializes an empty queue too, across operators.
+                $db->table('settings')->insertOrIgnore(['key' => 'ucasser.collection.queue_lock', 'value' => '1']);
+                $db->table('settings')->where('key', 'ucasser.collection.queue_lock')->lockForUpdate()->first();
+                $existing = $db->table('campus_collection_jobs')->whereIn('status', ['queued', 'running'])->orderBy('id')->first();
+                if ($existing) return ['id' => $existing->id, 'status' => $existing->status];
+                $id = $db->table('campus_collection_jobs')->insertGetId([
+                    'requested_by' => $actor->id, 'status' => 'queued', 'source_id' => $sourceId,
+                    'include_wechat' => $sourceId === null, 'created_at' => gmdate('Y-m-d H:i:s'),
+                ]);
+                return ['id' => $id, 'status' => 'queued'];
+            }, 3);
+            return new JsonResponse(['data' => $job], 202);
         }
         if ($route === 'campus.control.import') {
             $snapshot = $input['snapshot'] ?? null;
             if (!is_string($snapshot)) throw new \Flarum\Foundation\ValidationException(['snapshot' => '请选择本地官网快照文件']);
-            $result = $this->webImport->import($snapshot);
-            $db->table('campus_audit')->insert([
+            $result = $db->transaction(function () use ($snapshot, $db, $actor) {
+                $result = $this->webImport->import($snapshot);
+                $db->table('campus_audit')->insert([
                 'actor_id' => $actor->id, 'action' => 'aggregation.snapshot.import',
                 'target' => 'aggregation_sources', 'reason' => $result['added'].' candidates',
                 'created_at' => gmdate('Y-m-d H:i:s'),
-            ]);
+                ]);
+                return $result;
+            });
             return new JsonResponse(['data' => $result]);
         }
         if ($route === 'campus.control.source.update') {

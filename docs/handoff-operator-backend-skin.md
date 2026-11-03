@@ -1,5 +1,7 @@
 # 运营后台与新版前端交接
 
+这是当时的交接记录。后续常驻 Compose runner 已替代本文默认的每分钟 worker timer；现行运行方式见[运营后台](control-console.md)，历次功能及线上验收边界见[全量盘点](change-inventory.md)。
+
 本轮把日常运营工作集中到 `/campus/control`。运营者使用普通论坛账号登录，再由部署者通过 `campus:operator` 单独授权；无需成为 Flarum 管理员。初次安装、扩展设置及不可逆的删除或封禁仍通过底层平台权限管理。具体命令和部署步骤见[运营后台](control-console.md)。
 
 ## 已实现

@@ -3,6 +3,7 @@ namespace UCASSer\Campus;
 
 use Flarum\Foundation\ValidationException;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 
 /**
  * Thin client for the local we-mp-rss subscription service.
@@ -31,13 +32,7 @@ class CollectorClient
         return rtrim($this->settings['BASE_URL'] ?? (getenv('MP_RSS_URL') ?: 'http://127.0.0.1:8001'), '/').'/api/v1/wx/';
     }
 
-    /** Browser-facing base URL for the QR image (the operator's own machine). */
-    private function publicBase(): string
-    {
-        return rtrim(getenv('MP_RSS_PUBLIC_URL') ?: (getenv('MP_RSS_URL') ?: 'http://127.0.0.1:8001'), '/');
-    }
-
-    public function __construct(?string $settingsPath = null)
+    public function __construct(?string $settingsPath = null, private ?ClientInterface $http = null)
     {
         $path = $settingsPath ?? __DIR__.'/../../../.runtime/we-mp-rss.env';
         $this->settings = null;
@@ -63,13 +58,22 @@ class CollectorClient
     {
         if (!$this->configured()) return ['state' => 'unconfigured', 'message' => '缺少 .runtime/we-mp-rss.env（订阅服务账号密码）'];
         try {
-            $status = $this->call('GET', 'weread/qr/status', null, $this->token());
-            $logged = (bool) (($status['data'] ?? [])['login_status'] ?? false);
-            return $logged
-                ? ['state' => 'ready', 'message' => '微信读书已授权']
-                : ['state' => 'authorization_required', 'message' => (($status['data'] ?? [])['msg'] ?? '尚未扫码授权')];
+            $token = $this->token();
+            // QR status is transient singleton state, not the saved authorization.
+            // Never return this endpoint's cookies, tickets or account data.
+            $status = $this->call('GET', 'weread', null, $token);
+            if (($status['data']['mp_configured'] ?? false) !== true) {
+                return ['state' => 'authorization_required', 'message' => '尚未保存微信读书授权，请扫码授权'];
+            }
+            $test = $this->call('POST', 'weread/test', [], $token);
+            if (($test['data']['ok'] ?? null) === true) return ['state' => 'ready', 'message' => '微信读书授权已验证'];
+            // The upstream test conflates expired cookies and connection failures.
+            // Do not force a new QR merely because the network check failed.
+            return ['state' => 'unavailable', 'message' => '已保存授权，但连接校验未通过；请检查订阅服务网络或主动重新授权'];
+        } catch (CollectorAuthorizationRequired $error) {
+            return ['state' => 'authorization_required', 'message' => '微信读书要求重新授权，请扫码确认'];
         } catch (\Throwable $error) {
-            return ['state' => 'unavailable', 'message' => '订阅服务不可用：'.mb_substr($error->getMessage(), 0, 120)];
+            return ['state' => 'unavailable', 'message' => '订阅服务连接或认证失败，请检查服务状态'];
         }
     }
 
@@ -79,37 +83,62 @@ class CollectorClient
         $result = $this->call('GET', 'weread/qr/code', null, $this->token());
         $data = $result['data'] ?? [];
         if (empty($data['code'])) throw new ValidationException(['collector' => '订阅服务未返回二维码，请在本机订阅服务界面查看']);
-        $path = (string) $data['code'];
-        $image = str_starts_with($path, 'http') ? $path : $this->publicBase().'/'.ltrim($path, '/');
-        return ['image' => $image, 'uid' => $data['uid'] ?? ''];
+        $uid = (string) ($data['uid'] ?? '');
+        if (!preg_match('/^[A-Za-z0-9_-]{8,256}$/D', $uid)) throw new \RuntimeException('Unsupported QR identifier');
+        return ['path' => $this->qrPath((string) $data['code']), 'uid' => $uid];
+    }
+
+    /** Only an active operator QR flow may advance the upstream login handshake. */
+    public function qrState(): array
+    {
+        try {
+            $status = $this->call('GET', 'weread/qr/status', null, $this->token());
+            if (($status['data']['login_status'] ?? false) === true) return $this->state();
+            return ['state' => 'authorization_required', 'message' => '正在等待手机确认'];
+        } catch (\Throwable $error) {
+            return ['state' => 'unavailable', 'message' => '扫码状态暂不可用，请稍后重试'];
+        }
     }
 
     /** Raw QR image bytes, proxied so a cloud deployment needs no public port. */
-    public function qrImage(): string
+    public function qrImage(string $path): string
     {
-        $client = new Client(['base_uri' => $this->base(), 'timeout' => 10, 'connect_timeout' => 4, 'http_errors' => false]);
-        $data = $this->call('GET', 'weread/qr/code', null, $this->token());
-        $path = (string) (($data['data'] ?? [])['code'] ?? '');
-        if ($path === '') throw new ValidationException(['collector' => '订阅服务未返回二维码']);
-        // The proxy fetches server-side, so it must use the server-reachable
-        // origin (host.docker.internal in Docker), never the browser one.
+        $path = $this->qrPath($path);
         $serverRoot = preg_replace('#/api/v1/wx/$#', '', $this->base());
-        $url = str_starts_with($path, 'http') ? $path : $serverRoot.'/'.ltrim($path, '/');
-        $response = (new Client(['timeout' => 10, 'http_errors' => false]))->request('GET', $url);
-        $body = (string) $response->getBody();
-        if ($response->getStatusCode() !== 200 || strlen($body) < 100) throw new ValidationException(['collector' => '无法读取二维码图片']);
+        $response = $this->request('GET', $serverRoot.$path);
+        $body = $response->getBody()->read(1024 * 1024 + 1);
+        if ($response->getStatusCode() !== 200 || strlen($body) < 100 || strlen($body) > 1024 * 1024
+            || !str_starts_with($body, "\x89PNG\r\n\x1a\n")) throw new \RuntimeException('QR image unavailable');
         return $body;
+    }
+
+    private function qrPath(string $path): string
+    {
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            $url = parse_url($path); $base = parse_url($this->base());
+            if (!$url || ($url['scheme'] ?? '') !== $base['scheme'] || ($url['host'] ?? '') !== $base['host']
+                || ($url['port'] ?? null) !== ($base['port'] ?? null) || isset($url['user']) || isset($url['pass'])
+                || isset($url['query']) || isset($url['fragment'])) throw new \RuntimeException('Untrusted QR origin');
+            $path = $url['path'] ?? '';
+        }
+        if (!preg_match('~^/static/[A-Za-z0-9_/-]+\.png$~D', $path)) throw new \RuntimeException('Unsupported QR image path');
+        return $path;
     }
 
     /** Account names already subscribed in the collector. */
     public function subscribed(): array
     {
-        try {
-            $result = $this->call('GET', 'mps?limit=100&offset=0', null, $this->token());
-            return array_values(array_filter(array_map(fn ($row) => (string) ($row['mp_name'] ?? ''), $result['data']['list'] ?? [])));
-        } catch (\Throwable $error) {
-            return [];
+        $rows = $this->mpList($this->token());
+        $names = [];
+        foreach (OfficialSourceCatalog::WECHAT as [$name]) {
+            foreach ($rows as $row) {
+                if (self::publisherMatches((string) ($row['id'] ?? ''), $name, (string) ($row['mp_name'] ?? ''))) {
+                    $names[] = $name;
+                    break;
+                }
+            }
         }
+        return $names;
     }
 
     /**
@@ -120,82 +149,88 @@ class CollectorClient
      */
     public function subscribe(string $name, string $articleUrl): array
     {
-        // Both the short (/s/xxxx) and the classic long form (/s?__biz=...)
-        // are canonical article URLs; the collector accepts either.
-        if (!self::isArticleUrl($articleUrl)) {
-            throw new ValidationException(['article_url' => '请填写该公众号一篇原文的 https://mp.weixin.qq.com/s/... 链接']);
+        if (strlen($articleUrl) > 2048 || !self::isArticleUrl($articleUrl)) {
+            throw new ValidationException(['article_url' => '请填写该公众号自己的 https://mp.weixin.qq.com 微信原文链接']);
         }
         $token = $this->token();
-        // A canonical article URL carries the account's __biz id, which is all
-        // the collector needs to add it. This avoids depending on its async
-        // article resolver, which only understands short links.
-        if (preg_match('/[?&]__biz=([A-Za-z0-9+\/=]+)/', $articleUrl, $match)) {
-            $biz = urldecode($match[1]);
-            if (strlen($biz) >= 8) {
-                $result = $this->call('POST', 'mps', [
-                    'mp_name' => $name, 'mp_id' => $biz, 'mp_cover' => '', 'avatar' => '', 'mp_intro' => '',
-                ], $token);
-                if (($result['code'] ?? 1) === 0) {
-                    return ['name' => $name, 'status' => 'subscribed', 'mp_id' => $biz];
-                }
+        parse_str((string) parse_url($articleUrl, PHP_URL_QUERY), $query);
+        $biz = $query['__biz'] ?? null;
+        if ($biz === null) {
+            // This endpoint resolves public metadata without creating a feed.
+            // The featured-article endpoint creates a different virtual feed.
+            $info = $this->call('POST', 'mps/by_article?'.http_build_query(['url' => $articleUrl]), [], $token);
+            $biz = $info['data']['mp_info']['biz'] ?? null;
+        }
+        $numeric = is_string($biz) ? base64_decode($biz, true) : false;
+        if (!is_string($numeric) || !preg_match('/^[1-9][0-9]{0,19}$/D', $numeric)) {
+            throw new ValidationException(['article_url' => '无法核验发布者，请复制包含 __biz 的原文分享链接']);
+        }
+        $id = 'MP_WXS_'.$numeric;
+        $cover = $this->call('POST', 'weread/mp/test', ['mp_id' => $id], $token);
+        if (($cover['data']['mp_id'] ?? null) !== $id || !self::publisherMatches($id, $name, (string) ($cover['data']['mp_name'] ?? ''))) {
+            throw new ValidationException(['article_url' => '该链接的发布者与登记公众号不符，未添加订阅']);
+        }
+        foreach ($this->mpList($token) as $row) {
+            if ((string) ($row['id'] ?? '') === $id || (string) ($row['faker_id'] ?? '') === $id) {
+                return ['name' => $name, 'status' => 'subscribed', 'mp_id' => $id];
             }
         }
-        $existing = $this->mpList($token);
-        foreach ($existing as $row) {
-            if ((string) ($row['mp_name'] ?? '') === $name) {
-                return ['name' => $name, 'status' => 'subscribed', 'mp_id' => (string) $row['id']];
-            }
+        $this->call('POST', 'mps', [
+            'mp_name' => $name, 'mp_id' => base64_encode($numeric), 'mp_cover' => '', 'avatar' => '', 'mp_intro' => '',
+        ], $token);
+        return ['name' => $name, 'status' => 'subscribed', 'mp_id' => $id];
+    }
+
+    public static function publisherMatches(string $id, string $expected, string $actual): bool
+    {
+        if ($expected === $actual && $actual !== '') return true;
+        $renamed = [
+            'MP_WXS_3894823465' => ['中国社科大国际政治经济学院', '中国社科大全球与区域国别学院'],
+            'MP_WXS_3888538840' => ['社科大哲学院', '中国社会科学院大学哲学院'],
+            'MP_WXS_3093663298' => ['社科大科研处', '中国社科大科研处'],
+        ];
+        return isset($renamed[$id]) && $renamed[$id] === [$expected, $actual];
+    }
+
+    public static function sourceName(string $id, string $actual): string
+    {
+        foreach (OfficialSourceCatalog::WECHAT as [$name]) {
+            if (self::publisherMatches($id, $name, $actual)) return $name;
         }
-        $before = array_map(fn ($row) => (string) $row['id'], $existing);
-        $result = $this->call('POST', 'mps/featured/article', ['url' => $articleUrl], $token);
-        if (($result['code'] ?? 1) !== 0) {
-            throw new ValidationException(['article_url' => '订阅服务未能解析该文章：'.(string) ($result['message'] ?? '请核对链接')]);
-        }
-        $deadline = microtime(true) + 25;
-        $created = null;
-        while (microtime(true) < $deadline) {
-            usleep(1500000);
-            foreach ($this->mpList($token) as $row) {
-                if (!in_array((string) $row['id'], $before, true)) { $created = $row; break 2; }
-            }
-        }
-        if (!$created) {
-            // The collector accepted the task; the account may still be
-            // fetching. Treat it as queued instead of failing the operator.
-            return ['name' => $name, 'status' => 'pending'];
-        }
-        $actual = (string) ($created['mp_name'] ?? '');
-        if ($actual !== $name) {
-            try { $this->call('DELETE', 'mps/'.rawurlencode((string) $created['id']), null, $token); } catch (\Throwable $ignored) {}
-            throw new ValidationException(['article_url' => '该文章属于「'.$actual.'」，与登记名称「'.$name.'」不一致，已撤回订阅']);
-        }
-        return ['name' => $name, 'status' => 'subscribed', 'mp_id' => (string) $created['id']];
+        return $actual;
     }
 
     /** Subscribed accounts with their RSS ids. */
     public function feeds(): array
     {
-        return array_values(array_filter($this->mpList($this->token()), fn ($row) => preg_match('/^MP_WXS_[0-9]+$/', (string) ($row['id'] ?? ''))));
+        return array_values(array_filter($this->mpList($this->token()), fn ($row) => preg_match('/^MP_WXS_[0-9]+$/', (string) ($row['id'] ?? ''))
+            && (!array_key_exists('status', $row) || (int) $row['status'] === 1)));
     }
 
     /** Ask the collector to refresh one account, then return its RSS URL. */
     public function refreshFeed(string $id, string $name): string
     {
         $token = $this->token();
-        $this->call('POST', 'weread/collect', ['mp_id' => $id, 'faker_id' => $id, 'mp_name' => $name, 'max_page' => 1, 'gather_content' => false], $token);
+        $this->call('POST', 'weread/collect', ['mp_id' => $id, 'faker_id' => $id, 'mp_name' => $name, 'max_page' => 1, 'gather_content' => false], $token, 180);
         return preg_replace('#/api/v1/wx/$#', '', $this->base()).'/rss/'.$id;
     }
 
     /** Fetch and parse an RSS feed into import rows. */
     public function feedRows(string $url, int $limit = 5): array
     {
-        return self::parseFeedRows((string) (new Client(['timeout' => 30, 'http_errors' => false]))->request('GET', $url)->getBody(), $limit);
+        $root = preg_replace('#/api/v1/wx/$#', '', $this->base());
+        if (!preg_match('~^'.preg_quote($root, '~').'/rss/MP_WXS_\d+$~D', $url)) throw new \RuntimeException('Untrusted RSS origin');
+        $response = $this->request('GET', $url);
+        if ($response->getStatusCode() !== 200) throw new \RuntimeException('RSS request failed');
+        $body = $response->getBody()->read(1024 * 1024 + 1);
+        if (strlen($body) > 1024 * 1024) throw new \RuntimeException('RSS response too large');
+        return self::parseFeedRows($body, $limit);
     }
 
     public static function parseFeedRows(string $body, int $limit = 5): array
     {
         $xml = @simplexml_load_string($body, \SimpleXMLElement::class, LIBXML_NONET);
-        if (!$xml) return [];
+        if (!$xml || !$xml->channel) throw new \RuntimeException('RSS response is not a channel');
         $rows = [];
         foreach ($xml->channel->item as $item) {
             $url = trim((string) $item->link);
@@ -203,7 +238,7 @@ class CollectorClient
             $rows[] = [
                 'url' => $url, 'title' => trim((string) $item->title),
                 'summary' => trim(strip_tags((string) $item->description)),
-                'published_at' => ($t = strtotime((string) $item->pubDate)) ? gmdate('Y-m-d H:i:s', $t + 8 * 3600) : null,
+                'published_at' => ($t = strtotime((string) $item->pubDate)) !== false ? gmdate('Y-m-d H:i:s', $t) : null,
             ];
             if (count($rows) >= $limit) break;
         }
@@ -228,19 +263,37 @@ class CollectorClient
         return $token;
     }
 
-    private function call(string $method, string $path, ?array $json, string $token): array
+    private function call(string $method, string $path, ?array $json, string $token, int $timeout = 10): array
     {
-        $options = ['headers' => ['Authorization' => 'Bearer '.$token, 'Accept' => 'application/json']];
+        $options = ['headers' => ['Authorization' => 'Bearer '.$token, 'Accept' => 'application/json'], 'timeout' => $timeout];
         if ($json !== null) $options['json'] = $json;
         return $this->raw($method, $path, $options);
     }
 
     private function raw(string $method, string $path, array $options): array
     {
-        $client = new Client(['base_uri' => $this->base(), 'timeout' => 10, 'connect_timeout' => 4, 'http_errors' => false]);
-        $response = $client->request($method, $path, $options);
-        $body = json_decode((string) $response->getBody(), true);
+        $response = $this->request($method, $this->base().$path, $options);
+        $raw = $response->getBody()->read(1024 * 1024 + 1);
+        if (strlen($raw) > 1024 * 1024) throw new \RuntimeException('Collector response too large');
+        $body = json_decode($raw, true);
         if (!is_array($body)) throw new \RuntimeException('订阅服务返回了无法解析的内容');
+        $code = (string) ($body['code'] ?? '');
+        $upstreamCode = (string) ($body['data']['code'] ?? '');
+        if (in_array($code, ['-2012', '-2041', '-2010'], true) || in_array($upstreamCode, ['-2012', '-2041', '-2010'], true)) {
+            throw new CollectorAuthorizationRequired('WeRead authorization required');
+        }
+        if ($path === 'weread/test' && ($body['data']['ok'] ?? null) === false && in_array($response->getStatusCode(), [200, 400], true)) return $body;
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300 || $code !== '0') {
+            // Upstream messages can contain cookies/tokens. Only static text escapes.
+            throw new \RuntimeException('Collector request failed');
+        }
         return $body;
+    }
+
+    private function request(string $method, string $url, array $options = []): \Psr\Http\Message\ResponseInterface
+    {
+        return ($this->http ?? new Client())->request($method, $url, $options + [
+            'timeout' => 10, 'connect_timeout' => 4, 'http_errors' => false, 'allow_redirects' => false,
+        ]);
     }
 }

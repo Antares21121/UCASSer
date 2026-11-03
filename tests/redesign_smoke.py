@@ -80,7 +80,7 @@ def main():
         outsider['api'].call('/api/campus/control/collector', expected=(401, 403))
         qr = operator['api'].call('/api/campus/control/collector/qr', 'POST', {}, expected=(200, 422))
         if 'data' in qr:
-            assert qr['data']['image'].endswith('.png') and qr['data']['uid'], qr
+            assert qr['data']['image'].startswith('/api/campus/control/collector/qr-image?v=') and qr['data']['uid'], qr
         bad = operator['api'].call('/api/campus/control/collector/subscribe', 'POST',
             {'name': '中国社会科学院大学', 'article_url': 'https://example.com/not-weixin'}, expected=422)
         assert 'https://mp.weixin.qq.com' in bad['errors'][0]['detail'], bad

@@ -29,6 +29,7 @@ class TimetableController implements RequestHandlerInterface
         }
 
         if ($route === 'campus.timetable.subscribe') {
+            AccountAccess::assertConfirmed($actor);
             $input = json_decode((string) $request->getBody(), true);
             $entryId = trim((string) ($input['entry_id'] ?? ''));
             $enabled = $input['enabled'] ?? null;
@@ -38,6 +39,10 @@ class TimetableController implements RequestHandlerInterface
             if ($actor->isGuest()) throw new \Flarum\User\Exception\PermissionDeniedException();
             assert($actor instanceof User);
             if ($enabled) {
+                $schedule = json_decode((string) file_get_contents(__DIR__.'/../resources/data/timetable.json'), true, 64, JSON_THROW_ON_ERROR);
+                if (!in_array($entryId, array_column($schedule['entries'], 'id'), true)) {
+                    throw new ValidationException(['entry_id' => '该课程安排已不存在，请刷新课表后重试']);
+                }
                 $this->db->table('campus_course_subscriptions')->insertOrIgnore([
                     'user_id' => $actor->id, 'entry_id' => $entryId, 'created_at' => gmdate('Y-m-d H:i:s'),
                 ]);

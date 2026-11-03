@@ -97,7 +97,7 @@ class CatalogAdminController implements RequestHandlerInterface
         }
         if ($kind === 'courses') {
             $rows = $this->db->table('campus_courses')->leftJoin('campus_course_offerings', 'campus_course_offerings.course_id', '=', 'campus_courses.id')->leftJoin('campus_colleges', 'campus_colleges.id', '=', 'campus_courses.college_id')
-                ->select('campus_courses.*', 'campus_course_offerings.code', 'campus_course_offerings.nature AS offering_nature', 'campus_course_offerings.description AS offering_description', 'campus_course_offerings.external_key AS offering_external_key', 'campus_colleges.name AS college_name')
+                ->select('campus_courses.*', 'campus_course_offerings.code', 'campus_course_offerings.resource_category_id', 'campus_course_offerings.nature AS offering_nature', 'campus_course_offerings.description AS description', 'campus_course_offerings.external_key AS external_key', 'campus_colleges.name AS college_name')
                 ->when($search, fn ($q) => $q->where(fn ($b) => $b->where('campus_courses.name', 'like', "%$search%")->orWhere('campus_course_offerings.code', 'like', "%$search%")->orWhere('campus_colleges.name', 'like', "%$search%")))
                 ->orderBy('campus_courses.name');
             $total = (clone $rows)->count();
