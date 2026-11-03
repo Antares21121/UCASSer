@@ -61,3 +61,29 @@ test('profile pages show the permanent suffix and the Lv.1 baseline',async({page
   await expect(page.locator('.Campus-profileTags')).toContainText('#');
   await expect(page.locator('.Campus-profileTags')).toContainText('Lv.1');
 });
+
+test('private message editor offers text and image only, and sends a text reply', async ({page}) => {
+  const errors=[]; page.on('pageerror', error=>errors.push(error.message));
+  await login(page,'phase0_admin',fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim());
+  // chat_image_smoke creates a genuine participant dialog before browser checks.
+  await page.goto('/messages');
+  await expect(page.locator('.DialogListItem').first()).toBeVisible();
+  await page.locator('.DialogListItem').first().click();
+  await page.locator('.MessageStream .ReplyPlaceholder').click();
+  const composer=page.locator('#composer .ComposerBody--message');
+  await expect(composer).toBeVisible();
+  await expect(composer.locator('textarea')).toBeVisible();
+  await expect(composer.locator('.Campus-chatImageButton')).toBeVisible();
+  const visibleTools=await composer.locator('.TextEditor-toolbar > *').evaluateAll(nodes=>nodes.filter(node=>node.offsetWidth && getComputedStyle(node).display!=='none').map(node=>node.className));
+  expect(visibleTools).toEqual(['Campus-chatImageButton']);
+  for(const removed of ['粗体','斜体','删除线','引用','代码','链接','表情','预览']){
+    await expect(composer.getByRole('button',{name:removed,exact:true})).toHaveCount(0);
+  }
+  const body='【验收】私信文字与图片输入 '+Date.now();
+  await composer.locator('textarea').fill(body);
+  const sent=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/dialog-messages'&&response.request().method()==='POST');
+  await composer.locator('.item-submit button').click();
+  expect((await sent).status()).toBe(201);
+  await expect(page.locator('.MessageStream')).toContainText(body);
+  expect(errors).toEqual([]);
+});

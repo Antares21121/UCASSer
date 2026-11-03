@@ -4,7 +4,7 @@ import Button from './button';
 import Modal from 'flarum/common/components/Modal';
 import { DataPage, api, field, formatTime, link, symbol, errorMessage, loginPrompt, emptyState } from './ui';
 
-const jobNames = { queued: '等待执行', running: '正在采集', succeeded: '已完成', partial: '部分来源失败', failed: '部分或全部失败' };
+const jobNames = { queued: '等待执行', running: '正在采集', succeeded: '已完成', partial: '部分来源失败', failed: '采集失败' };
 const categories = { notice: '通知', activity: '活动', lecture: '讲座', opportunity: '机会', other: '其他' };
 const tabs = [
   ['overview', '总览与采集', 'tachometer-alt'],
@@ -81,18 +81,25 @@ class CollectorQrModal extends Modal {
     super.oninit(vnode);
     this.state = null;
     this.timer = window.setInterval(async () => {
+      if (this.checking) return;
+      this.checking = true;
+      const uid = this.attrs.uid;
       try {
-        this.state = (await api('control/collector')).data;
+        const response = await api('control/collector?qr=' + encodeURIComponent(uid));
+        if (uid !== this.attrs.uid || this.disposed) return;
+        this.state = response.data;
         if (this.state.state === 'ready' && this.timer) {
           window.clearInterval(this.timer);
           this.timer = null;
           this.attrs.after?.();
         }
         m.redraw();
-      } catch (_) { /* keep the modal open; the QR can still be scanned */ }
+      } catch (error) { this.error = errorMessage(error, '扫码状态暂不可用，请稍后重试'); m.redraw(); }
+      finally { this.checking = false; }
     }, 3000);
   }
   onremove(vnode) {
+    this.disposed = true;
     if (this.timer) window.clearInterval(this.timer);
     super.onremove(vnode);
   }
@@ -107,17 +114,19 @@ class CollectorQrModal extends Modal {
         m('small', ready ? '' : '二维码有有效期；过期后点「刷新二维码」重新获取。')
       ]),
       this.state ? m('p.Campus-hint', '当前状态：' + ({ ready: '已授权', authorization_required: '等待扫码', unavailable: '订阅服务不可用', unconfigured: '未配置' }[this.state.state] || this.state.state)) : null,
+      this.error ? m('p.Campus-error', { role: 'alert' }, this.error) : null,
       m('div.Campus-actions', [
         m(Button, { onclick: async () => {
           try {
             const { data } = await api('control/collector/qr', 'POST', {});
             this.attrs.image = data.image;
             this.attrs.uid = data.uid;
+            this.state = null;
+            this.error = '';
           } catch (error) {
             app.alerts.show({ type: 'error' }, errorMessage(error, '刷新二维码失败'));
           }
         } }, '刷新二维码'),
-        m('a.Button', { href: 'http://127.0.0.1:8001/', target: '_blank', rel: 'noopener noreferrer' }, '打开订阅服务页面 ↗'),
         m(Button, { type: 'button', onclick: () => this.hide() }, '关闭')
       ])
     ]);
@@ -267,12 +276,36 @@ export default class ControlPage extends DataPage {
     this.catalogOptions = null;
     this.collector = null;
     this.collectorBusy = false;
+    this.disposed = false;
     super.oninit(vnode);
+    this.jobTimer = window.setInterval(() => this.pollJob(), 3000);
+  }
+
+  onremove(vnode) {
+    this.disposed = true;
+    window.clearInterval(this.jobTimer);
+    super.onremove(vnode);
+  }
+
+  async load() {
+    await super.load();
+    if (!this.disposed && !this.error && app.session.user && ['overview', 'sources'].includes(this.tab)) this.loadCollector();
+  }
+
+  async pollJob() {
+    if (this.disposed || this.jobPolling || this.loading || this.busy || this.tab !== 'overview'
+      || !['queued', 'running'].includes(this.data?.collection_job?.status)) return;
+    this.jobPolling = true;
+    const epoch = this.epoch;
+    try {
+      const response = await api('control');
+      if (!this.disposed && epoch === this.epoch) { this.data = response.data; m.redraw(); }
+    } catch (_) { /* Keep the last result and the manual refresh action. */ }
+    finally { this.jobPolling = false; }
   }
 
   async fetch() {
     this.tab = tabs.some(([name]) => name === this.params.tab) ? this.params.tab : 'overview';
-    if (this.tab === 'sources' || this.tab === 'overview') await this.loadCollector();
     this.page = Math.max(1, Math.min(10000, Number.parseInt(this.params.page, 10) || 1));
     const path = {
       review: `aggregation/queue?page=${this.page}`, sources: 'aggregation/sources',
@@ -348,19 +381,8 @@ export default class ControlPage extends DataPage {
   }
 
   async collect(sourceId = null) {
-    // Collection is useless before the WeChat session is authorised, so the
-    // first click hands the operator the QR instead of silently queueing.
-    // The overview tab does not prefetch the collector, so load it here.
-    if (!this.collector) await this.loadCollector();
-    if (this.collector && this.collector.state === 'authorization_required') {
-      app.alerts.show({ type: 'info' }, '公众号尚未授权：先扫码，授权后再采集。');
-      this.showCollectorQr();
-      return;
-    }
-    if (this.collector && this.collector.state !== 'ready') {
-      app.alerts.show({ type: 'error' }, '订阅服务不可用：' + (this.collector.message || '请检查本机采集器'));
-      return;
-    }
+    // Queue immediately. Website-only requests do not depend on WeChat,
+    // and long collection work belongs in the background worker.
     return this.perform(() => api('control/collect', 'POST', sourceId ? { source_id: sourceId } : {}), {
       message: '采集任务已加入队列。学校官网若拒绝服务器连接，可改用本地快照。'
     });
@@ -452,18 +474,21 @@ export default class ControlPage extends DataPage {
   }
 
   async loadCollector() {
+    const epoch = this.epoch;
+    let state;
     try {
-      this.collector = (await api('control/collector')).data;
+        state = (await api('control/collector')).data;
     } catch (error) {
-      this.collector = { state: 'unavailable', message: errorMessage(error, '无法读取公众号授权状态'), accounts: [], subscribed_total: 0 };
+        state = { state: 'unavailable', message: errorMessage(error, '无法读取公众号授权状态'), accounts: [], subscribed_total: 0 };
     }
+    if (!this.disposed && epoch === this.epoch) { this.collector = state; m.redraw(); }
   }
 
   async showCollectorQr() {
     this.collectorBusy = true;
     try {
       const { data } = await api('control/collector/qr', 'POST', {});
-      app.modal.show(CollectorQrModal, { image: data.image, uid: data.uid, after: () => { this.loadCollector(); this.collect(); } });
+      app.modal.show(CollectorQrModal, { image: data.image, uid: data.uid, after: () => { this.loadCollector(); } });
     } catch (error) {
       app.alerts.show({ type: 'error' }, errorMessage(error, '无法获取二维码：请确认订阅服务正在本机运行'));
     } finally {
@@ -485,7 +510,7 @@ export default class ControlPage extends DataPage {
         state.message,
         state.state === 'ready' ? '；已订阅 ' + state.subscribed_total + ' 个账号' : '',
         m('br'),
-        '扫码必须在运行订阅服务的电脑上用微信完成；订阅时用该号一篇原文校验身份，名称不一致会被拒绝。'
+          '用手机微信扫描此后台展示的二维码；订阅时会先核验原文所属公众号，再添加订阅。'
       ]),
       m('div.Campus-actions', [
         m(Button, { className: 'Button Button--primary', disabled: this.collectorBusy, onclick: () => this.showCollectorQr() }, '扫码授权'),
@@ -719,11 +744,8 @@ export default class ControlPage extends DataPage {
   content() {
     const d = this.data;
     const job = d.collection_job;
-    // A queued job only blocks re-queueing while it is fresh. The worker that
-    // drains the queue runs outside the web process, so a stale queue (preview
-    // instance, paused cron) must not lock the button forever.
     const jobQueued = job ? Date.now() - new Date(String(job.created_at).replace(' ', 'T') + 'Z').getTime() : Infinity;
-    const running = job && (job.status === 'running' || (job.status === 'queued' && jobQueued < 120000));
+    const running = job && ['running', 'queued'].includes(job.status);
     return m('div.Campus-control', [
       m('header.Campus-controlHeader', [
         m('div', [m('h1', '运营后台'), m('p', '在这里采集、审核并处理校园社区的日常工作。')]),
@@ -735,7 +757,7 @@ export default class ControlPage extends DataPage {
         }))),
       m('p.Campus-controlTimestamp', d.generated_at ? '数据更新于 ' + formatTime(d.generated_at) : '当前为目录管理栏目'),
       d.sources?.collector?.state === 'authorization_required' ? m('div.Campus-notice.is-error', { role: 'alert' },
-        '公众号订阅授权已失效，请在采集器管理页面重新扫码；服务器上的本机地址需要安全转发才能访问。') :
+          '公众号需要重新授权，请在“公众号授权与订阅”中扫码确认。') :
       d.sources?.collector?.state === 'unavailable' ? m('div.Campus-notice.is-error', { role: 'alert' },
         '公众号订阅服务不可用，请检查采集工具和运行日志。') : null,
       this.tab === 'review' ? this.reviewPanel() : this.tab === 'sources' ? this.sourcesPanel() :
@@ -759,10 +781,12 @@ export default class ControlPage extends DataPage {
             job ? m('div.Campus-controlJob', { role: 'status', 'aria-live': 'polite' }, [
               m('strong', `最近任务 #${job.id} · ${jobNames[job.status] || job.status}`),
               m('small', '发起于 ' + formatTime(job.created_at)),
-              job.result ? m('pre', job.result) : running ? m('p', '正在等待后台执行；可稍后刷新状态。') :
-                job.status === 'queued' ? m('p', '任务已入队但尚未执行。请确认采集任务计划已启用（python scripts/aggregation_jobs.py），或重新点击一键采集。') : null
+              job.result ? m('pre', job.result) : job.status === 'queued' && jobQueued > 120000
+                ? m('p', '任务尚未开始，请检查后台执行器是否运行。页面会自动更新状态。')
+                : running ? m('p', '采集在后台执行，页面会自动更新状态。') : null
             ]) : m('p.Campus-controlEmpty', '还没有由控制台发起的采集任务。')
           ]),
+          this.collectorPanel(),
           m('section.Campus-controlSection', [
             m('div.Campus-controlSectionHead', [m('h2', '工作入口'), m('span', '所有日常处理集中在此')]),
             m('div.Campus-controlWork', [

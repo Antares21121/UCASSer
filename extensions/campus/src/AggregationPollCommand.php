@@ -3,10 +3,15 @@ namespace UCASSer\Campus;
 
 use Flarum\Console\AbstractCommand;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ConnectException;
 
 class AggregationPollCommand extends AbstractCommand
 {
-    public function __construct(private Aggregation $aggregation) { parent::__construct(); }
+    private array $lastResult = [];
+
+    public function result(): array { return $this->lastResult; }
+    public function __construct(private Aggregation $aggregation, private ?ClientInterface $http = null) { parent::__construct(); }
 
     protected function configure(): void
     {
@@ -15,7 +20,7 @@ class AggregationPollCommand extends AbstractCommand
             ->addOption('limit', null, \Symfony\Component\Console\Input\InputOption::VALUE_REQUIRED, 'Maximum articles per source', '5');
     }
 
-    private function fetch(Client $client, string $url, string $host): string
+    private function fetch(ClientInterface $client, string $url, string $host): string
     {
         $parts = parse_url($url);
         if (($parts['scheme'] ?? '') !== 'https' || strtolower($parts['host'] ?? '') !== $host || isset($parts['user']) || isset($parts['pass'])) {
@@ -36,7 +41,7 @@ class AggregationPollCommand extends AbstractCommand
         return $html;
     }
 
-    private function fetchEmploymentJson(Client $client, string $url, ?array $form = null, array $headers = []): string
+    private function fetchEmploymentJson(ClientInterface $client, string $url, ?array $form = null, array $headers = []): string
     {
         if (!in_array($url, [UcassEmploymentAdapter::TOKEN_URL, UcassEmploymentAdapter::API_LIST_URL], true)
             && !preg_match('~^https://jyzd\.ucass\.edu\.cn/f/newsCenter/ajax_view\?id=[a-f0-9]{32}$~D', $url)) {
@@ -62,19 +67,24 @@ class AggregationPollCommand extends AbstractCommand
 
     protected function fire(): int
     {
+        $this->lastResult = ['sources' => 0, 'succeeded' => 0, 'partial' => 0, 'failed' => 0, 'added' => 0];
         $db = $this->aggregation->db;
         $limit = (int) $this->input->getOption('limit');
         if ($limit < 1 || $limit > 10) { $this->error('limit 必须为 1–10'); return 2; }
-        $sources = $db->table('campus_aggregation_sources')->where('enabled', true);
+        $sources = $db->table('campus_aggregation_sources')->where('enabled', true)
+            ->whereIn('adapter', ['ucass-notices', 'ucass-vsb', 'ucass-employment']);
         if ($this->input->getOption('source')) $sources->where('id', (int) $this->input->getOption('source'));
         $sources = $sources->get();
         if ($sources->isEmpty()) { $this->comment('没有启用的来源'); return 0; }
-        $client = new Client(['allow_redirects' => false, 'http_errors' => false, 'timeout' => 15, 'connect_timeout' => 5,
+        $client = $this->http ?? new Client(['allow_redirects' => false, 'http_errors' => false, 'timeout' => 15, 'connect_timeout' => 5,
             'headers' => ['User-Agent' => 'UCASSer-aggregation/0.1 (+reviewed campus information index)', 'Accept' => 'text/html']]);
         $failed = false;
+        $unreachable = [];
         foreach ($sources as $source) {
+            $this->lastResult['sources']++;
+            $host = strtolower(parse_url($source->listing_url, PHP_URL_HOST) ?: '');
             try {
-                $host = strtolower(parse_url($source->listing_url, PHP_URL_HOST) ?: '');
+                if (isset($unreachable[$host])) throw new \RuntimeException('同一域名本轮连接失败，已跳过重复等待；下轮会重试，也可导入本地快照');
                 $employmentToken = null;
                 if ($source->adapter === 'ucass-notices') {
                     if ($host !== 'jw.ucass.edu.cn') throw new \RuntimeException('教务处适配器只接受教务处域名');
@@ -116,15 +126,21 @@ class AggregationPollCommand extends AbstractCommand
                         if ($this->aggregation->ingestWeb($source, $entry)) $added++;
                         usleep(250000);
                     } catch (\Throwable $error) {
+                        if ($error instanceof ConnectException) throw $error;
                         if (str_contains($error->getMessage(), 'HTTP 403') || str_contains($error->getMessage(), 'HTTP 429')) throw $error;
                         $unavailable++;
                         $this->comment('跳过不可用公告：'.$entry['url'].'（'.$error->getMessage().'）');
                     }
                 }
                 $db->table('campus_aggregation_sources')->where('id', $source->id)->update(['last_checked_at' => gmdate('Y-m-d H:i:s'), 'last_error' => $unavailable ? "$unavailable 条公告暂不可用" : null]);
+                $this->lastResult['added'] += $added;
+                $this->lastResult[$unavailable === count($listing) ? 'failed' : ($unavailable ? 'partial' : 'succeeded')]++;
+                if ($unavailable) $failed = true;
                 $this->info($source->name."：新增 $added 条待审候选，跳过 $unavailable 条不可用公告");
             } catch (\Throwable $error) {
+                if ($error instanceof ConnectException) $unreachable[$host] = true;
                 $failed = true;
+                $this->lastResult['failed']++;
                 $db->table('campus_aggregation_sources')->where('id', $source->id)->update(['last_checked_at' => gmdate('Y-m-d H:i:s'), 'last_error' => mb_substr($error->getMessage(), 0, 500)]);
                 $this->error($source->name.'：'.$error->getMessage());
             }

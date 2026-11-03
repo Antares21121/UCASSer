@@ -30,7 +30,7 @@ class Catalog
     {
         if (!is_string($value)) throw new ValidationException([$key => '请输入文本']);
         $value = trim($value);
-        if (mb_strlen($value) < $min || mb_strlen($value) > $max) throw new ValidationException([$key => "长度须在 $min–$max 字之间"]);
+        if (mb_strlen($value) < $min || mb_strlen($value) > $max) throw new ValidationException([$key => "长度须在 {$min}–{$max} 字之间"]);
         return $value;
     }
 
@@ -43,10 +43,10 @@ class Catalog
     // -------------------------------------------------------------- colleges
     public function validateCollege(array $d, bool $partial = false): array
     {
-        $name = $partial ? $this->optional($d['name'] ?? null, 120, 'name') : $this->text($d['name'] ?? null, 120, 2, 'name');
+        $name = $partial && !array_key_exists('name', $d) ? null : $this->text($d['name'] ?? null, 120, 2, 'name');
         $out = [];
         if (array_key_exists('name', $d)) $out['name'] = $name;
-        if (array_key_exists('code', $d)) $out['code'] = $partial ? $this->optional($d['code'] ?? null, 40, 'code') : $this->text($d['code'] ?? null, 40, 1, 'code');
+        if (array_key_exists('code', $d)) $out['code'] = $this->text($d['code'] ?? null, 40, 1, 'code');
         if (array_key_exists('aliases', $d)) $out['aliases'] = $this->optional($d['aliases'] ?? null, 300, 'aliases');
         if (array_key_exists('position', $d)) {
             if (!is_int($d['position']) || $d['position'] < 0) throw new ValidationException(['position' => '排序须为非负整数']);
@@ -68,7 +68,7 @@ class Catalog
         $table = $this->db->table('ucasser_resource_categories');
         $node = $table->where('kind', 'college')->where('name', $name)->first();
         if ($node) return (int) $node->id;
-        $root = $table->where('kind', 'root')->where('is_campus', 1)->whereNull('parent_id')->first();
+        $root = $this->db->table('ucasser_resource_categories')->where('kind', 'root')->where('is_campus', 1)->whereNull('parent_id')->first();
         if (!$root) return null;
         $now = gmdate('Y-m-d H:i:s');
         return (int) $table->insertGetId(['parent_id' => $root->id, 'kind' => 'college', 'name' => $name, 'position' => 100, 'created_at' => $now, 'updated_at' => $now]);
@@ -93,7 +93,7 @@ class Catalog
                 $values += ['resource_category_id' => $this->collegeCategoryNode($values['name']), 'created_at' => $now, 'updated_at' => $now];
                 $id = $this->db->table('campus_colleges')->insertGetId($values);
             }
-            $this->identity->audit($actor, $id ? 'college.update' : 'college.create', (string) $id, $d['reason'] ?? null);
+            $this->identity->audit($actor, $row ? 'college.update' : 'college.create', (string) $id, $d['reason'] ?? null);
             return ['id' => $id, 'before' => $before, 'values' => $values];
         });
         return ['data' => $this->db->table('campus_colleges')->where('id', $out['id'])->first()];
@@ -108,7 +108,7 @@ class Catalog
 
     public function validateCourse(array $d, bool $partial = false): array
     {
-        $name = $partial ? $this->optional($d['name'] ?? null, 80, 'name') : $this->text($d['name'] ?? null, 80, 2, 'name');
+        $name = $partial && !array_key_exists('name', $d) ? null : $this->text($d['name'] ?? null, 80, 2, 'name');
         $out = [];
         if (array_key_exists('name', $d)) $out['name'] = $name;
         if (array_key_exists('code', $d)) $out['code'] = $this->optional($d['code'] ?? null, 32, 'code');
@@ -151,7 +151,7 @@ class Catalog
         // import identity live on the offering row.
         $courseValues = self::courseColumns($values);
         $now = gmdate('Y-m-d H:i:s');
-        $this->db->transaction(function () use ($actor, $id, $row, $values, $courseValues, $now, $d) {
+        $savedId = $this->db->transaction(function () use ($actor, $id, $row, $values, $courseValues, $now, $d) {
             if ($id) {
                 $this->db->table('campus_courses')->where('id', $id)->update($courseValues + ['version' => $row->version + 1]);
             } else {
@@ -175,16 +175,17 @@ class Catalog
             ];
             if ($offering) $this->db->table('campus_course_offerings')->where('id', $offering->id)->update($payload);
             else $this->db->table('campus_course_offerings')->insert($payload);
-            $this->identity->audit($actor, $id ? 'course.update' : 'course.create', (string) $id, $d['reason'] ?? null);
+            $this->identity->audit($actor, $row ? 'course.update' : 'course.create', (string) $id, $d['reason'] ?? null);
+            return $id;
         });
-        return ['data' => $this->db->table('campus_courses')->where('id', $id)->first()];
+        return ['data' => $this->db->table('campus_courses')->where('id', $savedId)->first()];
     }
 
     // -------------------------------------------------------------- resources
     public function validateResource(array $d, bool $partial = false): array
     {
         $out = [];
-        if (array_key_exists('title', $d)) $out['title'] = $partial ? $this->optional($d['title'] ?? null, 180, 'title') : $this->text($d['title'] ?? null, 180, 2, 'title');
+        if (array_key_exists('title', $d)) $out['title'] = $this->text($d['title'] ?? null, 180, 2, 'title');
         if (array_key_exists('url', $d)) {
             $url = $this->text($d['url'] ?? null, 2048, 1, 'url');
             $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
@@ -234,7 +235,7 @@ class Catalog
         if ($id && !$row) throw new ValidationException(['id' => '资料不存在']);
         $values = $this->validateResource($d, $id !== null);
         $now = gmdate('Y-m-d H:i:s');
-        $this->db->transaction(function () use ($actor, $id, $row, $values, $now, $d) {
+        $savedId = $this->db->transaction(function () use ($actor, $id, $row, $values, $now, $d) {
             $previous = $id ? (array) $row : null;
             if ($id) {
                 $this->db->table('ucasser_resources')->where('id', $id)->update($values + ['updated_by' => $actor->id, 'updated_at' => $now]);
@@ -249,8 +250,9 @@ class Catalog
                 'reason' => $this->optional($d['reason'] ?? null, 255, 'reason'), 'created_at' => $now,
             ]);
             $this->identity->audit($actor, $previous ? 'resource.update' : 'resource.create', (string) $id, $d['reason'] ?? null);
+            return $id;
         });
-        return ['data' => $this->db->table('ucasser_resources')->where('id', $id)->first()];
+        return ['data' => $this->db->table('ucasser_resources')->where('id', $savedId)->first()];
     }
 
     // ----------------------------------------------------------- batch import

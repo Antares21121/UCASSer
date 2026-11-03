@@ -37,3 +37,32 @@ test('operations backend keeps daily work in one responsive workspace', async ({
   }
   expect(await page.locator('.Campus-control').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(1000);
 });
+
+test('slow collector cannot block the workspace and queued results update automatically', async ({page}) => {
+  await login(page,'phase0_admin',fs.readFileSync('.runtime/admin-initial-password.txt','utf8').trim());
+  let dashboard, status='queued', submitted=0;
+  await page.route('**/api/campus/control/collector',async route=>{
+    await new Promise(resolve=>setTimeout(resolve,1800));
+    await route.fulfill({json:{data:{state:'unavailable',message:'验收：服务暂不可用',accounts:[],subscribed_total:0}}});
+  });
+  await page.route('**/api/campus/control',async route=>{
+    if(!dashboard) dashboard=await (await route.fetch()).json();
+    const data={...dashboard.data,collection_job:submitted?{id:987654,status,created_at:new Date().toISOString().slice(0,19).replace('T',' '),result:status==='partial'?'官网连接失败；公众号已处理，文章进入待审。':null}:null};
+    await route.fulfill({json:{data}});
+  });
+  await page.route('**/api/campus/control/collect',async route=>{
+    submitted++;
+    await route.fulfill({status:202,json:{data:{id:987654,status:'queued'}}});
+  });
+  await page.goto('/campus/control');
+  await expect(page.getByRole('button',{name:'一键采集',exact:true})).toBeVisible({timeout:1500});
+  await expect(page.locator('.Campus-controlCollector')).toContainText('服务暂不可用');
+  await page.getByRole('button',{name:'一键采集',exact:true}).click();
+  await expect(page.locator('.Campus-controlJob')).toContainText('等待执行');
+  await expect(page.getByRole('button',{name:'一键采集',exact:true})).toBeDisabled();
+  status='partial';
+  await expect(page.locator('.Campus-controlJob')).toContainText('部分来源失败');
+  await expect(page.locator('.Campus-controlJob')).toContainText('公众号已处理');
+  await expect(page.getByRole('button',{name:'一键采集',exact:true})).toBeEnabled();
+  expect(submitted).toBe(1);
+});
