@@ -1,0 +1,1050 @@
+{
+  "baseline_commit": "839edd6065aed85fc6616ecd36b4267b784cee39",
+  "scope": "Source registrations, not a claim of completed production functional acceptance. Core/third-party extension routes are additional.",
+  "inventory_items": [
+    "ED-01",
+    "ED-02",
+    "ED-03",
+    "ED-04",
+    "ED-05",
+    "ED-06",
+    "ED-07",
+    "AC-01",
+    "AC-02",
+    "AC-03",
+    "AC-04",
+    "AC-05",
+    "AC-06",
+    "AC-07",
+    "UI-01",
+    "UI-02",
+    "UI-03",
+    "UI-04",
+    "UI-05",
+    "UI-06",
+    "UI-07",
+    "UI-08",
+    "BD-01",
+    "BD-02",
+    "BD-03",
+    "BD-04",
+    "BD-05",
+    "BD-06",
+    "CR-01",
+    "CR-02",
+    "CR-03",
+    "CR-04",
+    "CR-05",
+    "CR-06",
+    "CR-07",
+    "CR-08",
+    "CR-09",
+    "CR-10",
+    "CR-11",
+    "CR-12",
+    "CR-13",
+    "AI-01",
+    "AI-02",
+    "AI-03",
+    "TL-01",
+    "TL-02",
+    "TL-03",
+    "TL-04",
+    "TL-05",
+    "TL-06",
+    "TL-07",
+    "TL-08",
+    "TL-09",
+    "OP-01",
+    "OP-02",
+    "OP-03",
+    "OP-04",
+    "OP-05",
+    "OP-06",
+    "OP-07",
+    "OP-08",
+    "OP-09",
+    "AG-01",
+    "AG-02",
+    "AG-03",
+    "AG-04",
+    "AG-05",
+    "AG-06",
+    "AG-07",
+    "AG-08",
+    "AG-09",
+    "AG-10",
+    "AG-11",
+    "AG-12",
+    "BS-01",
+    "BS-02",
+    "BS-03",
+    "BS-04",
+    "BS-05",
+    "BS-06",
+    "BS-07",
+    "BS-08",
+    "BS-09",
+    "BS-10",
+    "IN-01",
+    "IN-02",
+    "IN-03",
+    "IN-04",
+    "IN-05",
+    "IN-06"
+  ],
+  "frontend_routes": [
+    {
+      "path": "/campus",
+      "name": "campus",
+      "file": "extensions/campus/extend.php",
+      "line": 26
+    },
+    {
+      "path": "/campus/rules",
+      "name": "campus.rules",
+      "file": "extensions/campus/extend.php",
+      "line": 26
+    },
+    {
+      "path": "/campus/identity",
+      "name": "campus.identity",
+      "file": "extensions/campus/extend.php",
+      "line": 26
+    },
+    {
+      "path": "/campus/moderation",
+      "name": "campus.moderation",
+      "file": "extensions/campus/extend.php",
+      "line": 26
+    },
+    {
+      "path": "/campus/records",
+      "name": "campus.records",
+      "file": "extensions/campus/extend.php",
+      "line": 27
+    },
+    {
+      "path": "/campus/record/{id}",
+      "name": "campus.record",
+      "file": "extensions/campus/extend.php",
+      "line": 27
+    },
+    {
+      "path": "/campus/publish",
+      "name": "campus.publish",
+      "file": "extensions/campus/extend.php",
+      "line": 27
+    },
+    {
+      "path": "/campus/courses",
+      "name": "campus.courses",
+      "file": "extensions/campus/extend.php",
+      "line": 28
+    },
+    {
+      "path": "/campus/me",
+      "name": "campus.me",
+      "file": "extensions/campus/extend.php",
+      "line": 29
+    },
+    {
+      "path": "/campus/search",
+      "name": "campus.search",
+      "file": "extensions/campus/extend.php",
+      "line": 30
+    },
+    {
+      "path": "/campus/cases",
+      "name": "campus.cases",
+      "file": "extensions/campus/extend.php",
+      "line": 31
+    },
+    {
+      "path": "/campus/governance",
+      "name": "campus.governance",
+      "file": "extensions/campus/extend.php",
+      "line": 32
+    },
+    {
+      "path": "/campus/tools",
+      "name": "campus.toolbox",
+      "file": "extensions/campus/extend.php",
+      "line": 33
+    },
+    {
+      "path": "/campus/tools/{tool}",
+      "name": "campus.toolbox.tool",
+      "file": "extensions/campus/extend.php",
+      "line": 33
+    },
+    {
+      "path": "/campus/aggregation",
+      "name": "campus.aggregation",
+      "file": "extensions/campus/extend.php",
+      "line": 34
+    },
+    {
+      "path": "/campus/aggregation/submit",
+      "name": "campus.aggregation.submit",
+      "file": "extensions/campus/extend.php",
+      "line": 34
+    },
+    {
+      "path": "/campus/aggregation/review",
+      "name": "campus.aggregation.review",
+      "file": "extensions/campus/extend.php",
+      "line": 34
+    },
+    {
+      "path": "/campus/aggregation/sources",
+      "name": "campus.aggregation.source.manage",
+      "file": "extensions/campus/extend.php",
+      "line": 34
+    },
+    {
+      "path": "/campus/control",
+      "name": "campus.control",
+      "file": "extensions/campus/extend.php",
+      "line": 35
+    },
+    {
+      "path": "/resources",
+      "name": "ucasser.resources",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 14
+    },
+    {
+      "path": "/resources/assist",
+      "name": "ucasser.resources.assist",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 15
+    }
+  ],
+  "api_routes": [
+    {
+      "method": "GET",
+      "path": "/api/campus/home",
+      "name": "campus.home",
+      "handler": "Campus\\Controller::class",
+      "file": "extensions/campus/extend.php",
+      "line": 37
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/rules",
+      "name": "campus.rules",
+      "handler": "Campus\\Controller::class",
+      "file": "extensions/campus/extend.php",
+      "line": 38
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/sections",
+      "name": "campus.sections",
+      "handler": "Campus\\Controller::class",
+      "file": "extensions/campus/extend.php",
+      "line": 39
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/sections/{id}",
+      "name": "campus.sections.update",
+      "handler": "Campus\\Controller::class",
+      "file": "extensions/campus/extend.php",
+      "line": 40
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/catalog",
+      "name": "campus.catalog",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 69
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/records",
+      "name": "campus.records",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 70
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records",
+      "name": "campus.records.create",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 70
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/records/{id}",
+      "name": "campus.record",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 71
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/records/{id}",
+      "name": "campus.record.update",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 71
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records/{id}/comments",
+      "name": "campus.comment",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 72
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records/{id}/bookmark",
+      "name": "campus.bookmark",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 73
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records/{id}/accept",
+      "name": "campus.accept",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 74
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records/{id}/convert",
+      "name": "campus.convert",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 74
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records/{id}/useful",
+      "name": "campus.useful",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 75
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/records/{id}/revisions/{version}",
+      "name": "campus.revision",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 76
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/categories",
+      "name": "campus.categories",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 77
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/categories",
+      "name": "campus.categories.update",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 77
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records/{id}/feedback",
+      "name": "campus.feedback",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 78
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/records/{id}/feedback/resolve",
+      "name": "campus.resolveFeedback",
+      "handler": "Campus\\RecordController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 78
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/courses",
+      "name": "campus.courses",
+      "handler": "Campus\\CourseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 79
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/courses",
+      "name": "campus.courses.create",
+      "handler": "Campus\\CourseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 79
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/courses/{id}",
+      "name": "campus.courses.update",
+      "handler": "Campus\\CourseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 79
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/me",
+      "name": "campus.me",
+      "handler": "Campus\\PersonalController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 80
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/discussions/{id}/bookmark",
+      "name": "campus.discussion.bookmark",
+      "handler": "Campus\\PersonalController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 81
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/discussions/{id}/bookmark",
+      "name": "campus.discussion.bookmark.update",
+      "handler": "Campus\\PersonalController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 81
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/search",
+      "name": "campus.search",
+      "handler": "Campus\\SearchController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 82
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/aggregation/items",
+      "name": "campus.aggregation.items",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 83
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/aggregation/items/{id}",
+      "name": "campus.aggregation.item",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 84
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/aggregation/submissions",
+      "name": "campus.aggregation.submit",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 85
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/aggregation/mine",
+      "name": "campus.aggregation.mine",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 86
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/aggregation/queue",
+      "name": "campus.aggregation.queue",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 87
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/aggregation/candidates/{id}/review",
+      "name": "campus.aggregation.review",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 88
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/aggregation/sources",
+      "name": "campus.aggregation.sources",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 89
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/aggregation/sources",
+      "name": "campus.aggregation.source.create",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 90
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/aggregation/sources/{id}",
+      "name": "campus.aggregation.source.update",
+      "handler": "Campus\\AggregationController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 91
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/control",
+      "name": "campus.control",
+      "handler": "Campus\\OperationsController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 92
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/collect",
+      "name": "campus.control.collect",
+      "handler": "Campus\\OperationsController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 93
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/import",
+      "name": "campus.control.import",
+      "handler": "Campus\\OperationsController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 94
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/control/sources/{id}",
+      "name": "campus.control.source.update",
+      "handler": "Campus\\OperationsController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 95
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/chat-images",
+      "name": "campus.chat.image.upload",
+      "handler": "Campus\\ChatImageController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 96
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/chat-images/{id}",
+      "name": "campus.chat.image",
+      "handler": "Campus\\ChatImageController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 97
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/post-images",
+      "name": "campus.post.image.upload",
+      "handler": "Campus\\PostImageController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 98
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/post-images/{id}",
+      "name": "campus.post.image",
+      "handler": "Campus\\PostImageController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 99
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/colleges",
+      "name": "campus.colleges",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 100
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/control/catalog/categories",
+      "name": "campus.control.catalog.categories",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 101
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/control/catalog/colleges",
+      "name": "campus.control.catalog.colleges",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 102
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/catalog/colleges",
+      "name": "campus.control.catalog.colleges.create",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 103
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/control/catalog/colleges/{id}",
+      "name": "campus.control.catalog.colleges.update",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 104
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/catalog/colleges/import",
+      "name": "campus.control.catalog.colleges.import",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 105
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/control/catalog/courses",
+      "name": "campus.control.catalog.courses",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 106
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/catalog/courses",
+      "name": "campus.control.catalog.courses.create",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 107
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/control/catalog/courses/{id}",
+      "name": "campus.control.catalog.courses.update",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 108
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/catalog/courses/import",
+      "name": "campus.control.catalog.courses.import",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 109
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/control/catalog/resources",
+      "name": "campus.control.catalog.resources",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 110
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/catalog/resources",
+      "name": "campus.control.catalog.resources.create",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 111
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/control/catalog/resources/{id}",
+      "name": "campus.control.catalog.resources.update",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 112
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/catalog/resources/import",
+      "name": "campus.control.catalog.resources.import",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 113
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/catalog/import/{id}/rollback",
+      "name": "campus.control.catalog.import.rollback",
+      "handler": "Campus\\CatalogAdminController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 114
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/assets/{file}",
+      "name": "campus.asset",
+      "handler": "Campus\\CampusAssetController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 115
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/tools/data",
+      "name": "campus.tools.data",
+      "handler": "Campus\\CampusToolsController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 116
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/control/collector",
+      "name": "campus.control.collector",
+      "handler": "Campus\\CollectorController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 117
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/collector/qr",
+      "name": "campus.control.collector.qr",
+      "handler": "Campus\\CollectorController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 118
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/control/collector/qr-image",
+      "name": "campus.control.collector.qr-image",
+      "handler": "Campus\\CollectorController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 119
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/control/collector/subscribe",
+      "name": "campus.control.collector.subscribe",
+      "handler": "Campus\\CollectorController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 120
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/timetable/subscriptions",
+      "name": "campus.timetable.subscriptions",
+      "handler": "Campus\\TimetableController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 123
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/timetable/subscriptions",
+      "name": "campus.timetable.subscribe",
+      "handler": "Campus\\TimetableController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 124
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/governance",
+      "name": "campus.governance",
+      "handler": "Campus\\GovernanceController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 125
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/governance",
+      "name": "campus.governance.publish",
+      "handler": "Campus\\GovernanceController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 125
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/cases",
+      "name": "campus.cases",
+      "handler": "Campus\\CaseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 126
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/cases",
+      "name": "campus.cases.create",
+      "handler": "Campus\\CaseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 126
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/cases/{id}",
+      "name": "campus.case",
+      "handler": "Campus\\CaseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 127
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/cases/{id}",
+      "name": "campus.case.update",
+      "handler": "Campus\\CaseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 127
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/cases/{id}/appeal",
+      "name": "campus.case.appeal",
+      "handler": "Campus\\CaseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 128
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/cases/{id}/supplement",
+      "name": "campus.case.supplement",
+      "handler": "Campus\\CaseController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 128
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/identity",
+      "name": "campus.identity",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 129
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/identity",
+      "name": "campus.identity.submit",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 130
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/identity/queue",
+      "name": "campus.identity.queue",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 131
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/campus/identity/{id}",
+      "name": "campus.identity.review",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 132
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/moderators",
+      "name": "campus.moderators.list",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 133
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/moderators",
+      "name": "campus.moderators",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 134
+    },
+    {
+      "method": "POST",
+      "path": "/api/campus/moderate",
+      "name": "campus.moderate",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 135
+    },
+    {
+      "method": "GET",
+      "path": "/api/campus/audit",
+      "name": "campus.audit",
+      "handler": "Campus\\IdentityController::class",
+      "file": "extensions/campus/extend.php",
+      "line": 136
+    },
+    {
+      "method": "GET",
+      "path": "/api/ucasser/categories",
+      "name": "ucasser.categories.index",
+      "handler": "CategoriesController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 17
+    },
+    {
+      "method": "POST",
+      "path": "/api/ucasser/categories",
+      "name": "ucasser.categories.create",
+      "handler": "CategoriesController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 18
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ucasser/categories/{id}",
+      "name": "ucasser.categories.update",
+      "handler": "CategoriesController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 19
+    },
+    {
+      "method": "GET",
+      "path": "/api/ucasser/resources",
+      "name": "ucasser.resources.index",
+      "handler": "ResourcesController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 20
+    },
+    {
+      "method": "GET",
+      "path": "/api/ucasser/resources/assist",
+      "name": "ucasser.resources.assist.search",
+      "handler": "AssistController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 21
+    },
+    {
+      "method": "POST",
+      "path": "/api/ucasser/resources/assist",
+      "name": "ucasser.resources.assist.answer",
+      "handler": "AssistController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 22
+    },
+    {
+      "method": "POST",
+      "path": "/api/ucasser/resources",
+      "name": "ucasser.resources.create",
+      "handler": "ResourcesController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 23
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ucasser/resources/{id}",
+      "name": "ucasser.resources.update",
+      "handler": "ResourcesController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 24
+    },
+    {
+      "method": "GET",
+      "path": "/api/ucasser/resources/{id}/revisions",
+      "name": "ucasser.resources.revisions",
+      "handler": "RevisionsController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 25
+    },
+    {
+      "method": "GET",
+      "path": "/api/ucasser/reports",
+      "name": "ucasser.reports.index",
+      "handler": "ReportsController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 26
+    },
+    {
+      "method": "POST",
+      "path": "/api/ucasser/reports",
+      "name": "ucasser.reports.create",
+      "handler": "ReportsController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 27
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/ucasser/reports/{id}",
+      "name": "ucasser.reports.update",
+      "handler": "ReportsController::class",
+      "file": "extensions/ucasser-resources/extend.php",
+      "line": 28
+    }
+  ],
+  "console_registrations": [
+    {
+      "class": "Campus\\SetupCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 45
+    },
+    {
+      "class": "Campus\\BoardMigrateCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 46
+    },
+    {
+      "class": "Campus\\CourseImportCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 47
+    },
+    {
+      "class": "Campus\\ResourcesSyncCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 48
+    },
+    {
+      "class": "Campus\\CollectorSubscribeCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 49
+    },
+    {
+      "class": "Campus\\AggregationWechatCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 50
+    },
+    {
+      "class": "Campus\\AggregationPollCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 51
+    },
+    {
+      "class": "Campus\\AggregationSyncSourcesCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 52
+    },
+    {
+      "class": "Campus\\AggregationCollectorStatusCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 53
+    },
+    {
+      "class": "Campus\\AggregationImportTrialCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 54
+    },
+    {
+      "class": "Campus\\AggregationImportFeedCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 55
+    },
+    {
+      "class": "Campus\\AggregationImportWebLocalCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 56
+    },
+    {
+      "class": "Campus\\OperatorGrantCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 57
+    },
+    {
+      "class": "Campus\\CollectionJobCommand::class",
+      "file": "extensions/campus/extend.php",
+      "line": 58
+    }
+  ]
+}
