@@ -80,3 +80,24 @@ php flarum campus:boards:migrate --apply    # 写入（重跑跳过已完成项�
 - 校历、摆渡车改为学校发布原图（`assets/calendar-*.jpg`、`shuttle.jpg`），由 `/api/campus/assets/{file}` 白名单提供；不再使用生成的表格与 JSON。
 - 课程目录筛选：新增院系、课程类别、开课学期下拉（`meta.types/semesters/colleges`）。
 - `php flarum campus:resources:sync`：按已导入课程生成「校内资料 → 学院 → 课程类型 → 课程」分类树，并把课程叶节点写回开课记录；CSV 导入现在会解析 `college_key`。
+
+
+## 主题色收敛（2026-11-04）
+
+旧版用一次性标记位迁移颜色，导致「本地预览是红色、云端是蓝色」这类环境差异：
+标记位一旦置位，后续代码再改也不再生效，而且不报错。
+
+现在统一由 `campus:theme:sync` 收敛：
+
+- 品牌色常量：主色 `#A71937`、辅色 `#C22A49`（`ThemeSync`）
+- 只覆盖空值或历史色值（`#2563eb`/`#536f90`/`#6d72` 等），管理员自定义色保留
+- `--force` 强制覆盖，`--check` 只报告差异（差异存在时退出码 1，便于部署流水线检查）
+- `campus:setup` 不再写 `*_initialized` 颜色标记，改为调用同一服务
+
+部署后执行：
+
+```bash
+php flarum campus:theme:sync          # 收敛
+php flarum campus:theme:sync --check  # 验收，应输出「颜色已与品牌规范一致」
+php flarum cache:clear
+```

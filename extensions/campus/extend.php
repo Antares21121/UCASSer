@@ -43,6 +43,7 @@ return [
     (new Extend\Policy())->modelPolicy(Discussion::class, Campus\SectionPolicy::class)->modelPolicy(Tag::class, Campus\SectionPolicy::class),
     (new Extend\Policy())->modelPolicy(Discussion::class,Campus\RecordPolicy::class)->modelPolicy(\Flarum\Post\Post::class,Campus\RecordPolicy::class),
     (new Extend\Console())->command(Campus\SetupCommand::class),
+    (new Extend\Console())->command(Campus\ThemeSyncCommand::class),
     (new Extend\Console())->command(Campus\BoardMigrateCommand::class),
     (new Extend\Console())->command(Campus\CourseImportCommand::class),
     (new Extend\Console())->command(Campus\ResourcesSyncCommand::class),
