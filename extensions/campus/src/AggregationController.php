@@ -41,7 +41,9 @@ class AggregationController implements RequestHandlerInterface
             $page = max(1, min(10000, (int) ($query['page'] ?? 1)));
             $pending = $db->table('campus_aggregation_candidates')->where('status', 'pending');
             $total = (clone $pending)->count();
-            $rows = $pending->orderByDesc('id')->offset(($page - 1) * 20)->limit(20)->get();
+            // Ten per page keeps the console responsive; the pager renders ten
+            // numbered steps from the same size.
+            $rows = $pending->orderByDesc('id')->offset(($page - 1) * 10)->limit(10)->get();
             // Candidates from a WeChat subscription share origin=web with crawled
             // pages; the channel column lets the console label them correctly.
             $wechat = $db->table('campus_aggregation_sources')->where('adapter', 'like', 'we-mp-rss%')->pluck('name')->all();
@@ -49,7 +51,7 @@ class AggregationController implements RequestHandlerInterface
                 $row->channel = in_array($row->source_name, $wechat, true) ? 'wechat' : 'web';
                 return $row;
             });
-            return new JsonResponse(['data' => $rows->all(), 'meta' => ['total' => $total, 'page' => $page, 'page_size' => 20]]);
+            return new JsonResponse(['data' => $rows->all(), 'meta' => ['total' => $total, 'page' => $page, 'page_size' => 10]]);
         }
         if ($route === 'campus.aggregation.review') {
             return new JsonResponse(['data' => $this->aggregation->review($actor, (int) ($query['id'] ?? 0), $input)]);

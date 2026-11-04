@@ -330,11 +330,22 @@ export default class ControlPage extends DataPage {
   pager(size = 20) {
     const total = Number(this.detailMeta?.total || 0);
     if (total <= size) return null;
+    const last = Math.max(1, Math.ceil(total / size));
+    const numbers = [...new Set([1, this.page - 1, this.page, this.page + 1, last])]
+      .filter(n => n >= 1 && n <= last).sort((a, b) => a - b);
     const href = page => `/campus/control?tab=${this.tab}&page=${page}`;
+    const steps = [];
+    numbers.forEach((n, i) => {
+      if (i && n > numbers[i - 1] + 1) steps.push(m('span.Campus-controlPagerGap', { 'aria-hidden': 'true' }, '…'));
+      steps.push(n === this.page
+        ? m('span.Campus-controlPagerCurrent', { 'aria-current': 'page' }, String(n))
+        : link(href(n), String(n)));
+    });
     return m('nav.Campus-controlPager', { 'aria-label': `${tabs.find(([name]) => name === this.tab)?.[1]}翻页` }, [
       this.page > 1 ? link(href(this.page - 1), '上一页') : m('span', '上一页'),
-      m('span', `第 ${this.page} 页 · 共 ${total} 条`),
-      this.page * size < total ? link(href(this.page + 1), '下一页') : m('span', '下一页')
+      ...steps,
+      this.page < last ? link(href(this.page + 1), '下一页') : m('span', '下一页'),
+      m('span.Campus-controlPagerTotal', `共 ${total} 条 / ${last} 页`)
     ]);
   }
 

@@ -272,3 +272,11 @@ table.Campus-tt th[scope=col]:first-child, table.Campus-tt tbody th[scope=row] {
 /* 控制台课程目录：按学院索引 */
 .Campus-courseIndex { display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 14px; padding:10px; border:1px solid var(--campus-divider); border-radius:12px; background:var(--campus-soft); max-height:180px; overflow:auto; }
 .Campus-courseIndex .Button { font-size:12px; padding:4px 10px; }
+
+/* 控制台分页索引 */
+.Campus-controlPager { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:14px; }
+.Campus-controlPager a, .Campus-controlPager .Campus-controlPagerCurrent {
+  min-width:32px; padding:4px 8px; text-align:center; border-radius:8px; border:1px solid var(--campus-divider);
+}
+.Campus-controlPager .Campus-controlPagerCurrent { background:var(--campus-accent); color:#fff; border-color:var(--campus-accent); }
+.Campus-controlPager .Campus-controlPagerGap, .Campus-controlPager .Campus-controlPagerTotal { color:var(--campus-muted); }
