@@ -515,7 +515,8 @@ export default class ControlPage extends DataPage {
       m('div.Campus-actions', [
         m(Button, { className: 'Button Button--primary', disabled: this.collectorBusy, onclick: () => this.showCollectorQr() }, '扫码授权'),
         m(Button, { disabled: state.state !== 'ready', onclick: () => this.showCollectorSubscribe() }, '订阅公众号'),
-        m(Button, { onclick: () => this.loadCollector() }, '刷新状态')
+        m(Button, { onclick: () => this.loadCollector() }, '刷新状态'),
+        m('a.Button', { href: '/api/campus/control/collector/qr-page', target: '_blank', rel: 'noopener noreferrer' }, '在新标签页扫码')
       ])
     ]);
   }

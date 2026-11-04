@@ -5,6 +5,7 @@ use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\User\User;
 use Laminas\Diactoros\Response;
+use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -68,6 +69,28 @@ class CollectorController implements RequestHandlerInterface
                 'uid' => $qr['uid'], 'image' => '/api/campus/control/collector/qr-image?v='.rawurlencode($qr['uid']),
                 'state' => $state['state'],
             ]], 200, ['Cache-Control' => 'no-store']);
+        }
+
+        if ($route === 'campus.control.collector.qr-page') {
+            // Plain HTML page: the operator can always reach the QR even when a
+            // POST from the console is blocked by CSRF or stale session state.
+            $qr = $this->collector->qr();
+            $cache = resolve(\Illuminate\Contracts\Cache\Repository::class);
+            $cache->put($this->qrKey($actor, $qr['uid']), $qr['path'], 300);
+            $cache->put('campus.collector.active_qr', $qr['uid'], 300);
+            $image = '/api/campus/control/collector/qr-image?v='.rawurlencode($qr['uid']);
+            $html = '<!doctype html><html lang="zh-Hans"><meta charset="utf-8">'
+                .'<meta name="viewport" content="width=device-width,initial-scale=1"><title>扫码授权公众号采集</title>'
+                .'<style>html,body{margin:0;min-height:100%;background:#141A24;color:#EDF2F8;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}'
+                .'main{max-width:420px;margin:0 auto;padding:32px 20px;text-align:center}h1{font-size:18px;margin:0 0 8px}'
+                .'p{color:#AAB7C6;font-size:13px;line-height:1.7;margin:8px 0}'
+                .'img{width:240px;height:240px;background:#fff;border-radius:12px;padding:8px;margin:12px 0}'
+                .'a{color:#FF8FA2}</style><main><h1>扫码授权公众号采集</h1>'
+                .'<p>用手机微信扫描下方二维码完成「微信读书」授权；二维码 5 分钟内有效。</p>'
+                .'<img src="'.$image.'" alt="微信读书授权二维码" width="240" height="240">'
+                .'<p><a href="">刷新二维码</a> · <a href="/campus/control">返回控制台</a></p>'
+                .'</main></html>';
+            return new HtmlResponse($html, 200, ['Cache-Control' => 'no-store']);
         }
 
         if ($route === 'campus.control.collector.qr-image') {
