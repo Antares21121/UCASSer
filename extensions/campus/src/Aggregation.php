@@ -108,7 +108,10 @@ class Aggregation
             $key = $row->url_hash ?: 'manual:'.$row->source_name.':'.$row->submitter_id;
             $data = [
                 'name' => $row->source_name,
-                'url' => $item->verification === 'verified' ? $row->source_url : null,
+                // Published items always expose their original link: the UI marks
+                // unverified entries and the operator can still confirm them, but
+                // hiding the URL left readers with no way to check the source.
+                'url' => $row->source_url ?: null,
                 'trust' => $row->trust,
                 'origin' => $row->origin,
                 'submitter' => $row->show_submitter && $row->submitter_id ? User::query()->find($row->submitter_id)?->display_name : null,
