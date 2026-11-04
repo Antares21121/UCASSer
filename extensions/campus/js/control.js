@@ -423,7 +423,7 @@ export default class ControlPage extends DataPage {
       m('p.Campus-hint', '核对来源和时间后发布。未核实的内容会明确标注，缴费与报名链接不会成为操作按钮。'),
       this.detail.length ? m('div.Campus-controlQueue', this.detail.map(candidate => m('article.Campus-controlQueueItem', { key: candidate.id }, [
         m('div.Campus-controlQueueMeta', [m('span.Campus-badge', categories[candidate.category] || '其他'),
-          m('span', candidate.origin === 'web' ? '网页采集' : '成员投稿'),
+          m('span', candidate.channel === 'wechat' ? '公众号' : (candidate.origin === 'web' ? '网页采集' : '成员投稿')),
           m('span', candidate.visibility === 'members' ? '仅成员可见' : '公开')]),
         m('h3', candidate.title), m('p', candidate.summary),
         m('p.Campus-controlQueueMeta', [candidate.source_name, candidate.source_url ? m('a', {

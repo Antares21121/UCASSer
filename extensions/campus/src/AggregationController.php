@@ -42,6 +42,13 @@ class AggregationController implements RequestHandlerInterface
             $pending = $db->table('campus_aggregation_candidates')->where('status', 'pending');
             $total = (clone $pending)->count();
             $rows = $pending->orderByDesc('id')->offset(($page - 1) * 20)->limit(20)->get();
+            // Candidates from a WeChat subscription share origin=web with crawled
+            // pages; the channel column lets the console label them correctly.
+            $wechat = $db->table('campus_aggregation_sources')->where('adapter', 'like', 'we-mp-rss%')->pluck('name')->all();
+            $rows = $rows->map(function ($row) use ($wechat) {
+                $row->channel = in_array($row->source_name, $wechat, true) ? 'wechat' : 'web';
+                return $row;
+            });
             return new JsonResponse(['data' => $rows->all(), 'meta' => ['total' => $total, 'page' => $page, 'page_size' => 20]]);
         }
         if ($route === 'campus.aggregation.review') {
