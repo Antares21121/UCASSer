@@ -274,6 +274,7 @@ export default class ControlPage extends DataPage {
     this.catalogForm = null;
     this.catalogImport = null;
     this.catalogOptions = null;
+    this.expanded = {};
     this.collector = null;
     this.collectorBusy = false;
     this.disposed = false;
@@ -429,20 +430,24 @@ export default class ControlPage extends DataPage {
           href: candidate.source_url, target: '_blank', rel: 'noopener noreferrer nofollow'
         }, '核对原链接 ↗') : null]),
         candidate.item_id ? m('p.Campus-hint', `已关联公开条目 #${candidate.item_id}，可批准更新或合并来源。`) : null,
-        m('label', [m('input[type=checkbox]', { checked: Boolean(this.reviewVerified[candidate.id]),
-          onchange: e => this.reviewVerified[candidate.id] = e.target.checked }), ' 已核实原始信息']),
-        field('reason', '审核说明（拒绝时至少 5 字）', this.reviewNotes[candidate.id] || '',
-          value => this.reviewNotes[candidate.id] = value, { maxlength: 500 }),
-        field('item_id', '合并目标条目编号', this.reviewTargets[candidate.id] || candidate.item_id || '',
-          value => this.reviewTargets[candidate.id] = value, { type: 'number', min: 1 }),
+        this.expanded[candidate.id] ? [
+          m('label', [m('input[type=checkbox]', { checked: Boolean(this.reviewVerified[candidate.id]),
+            onchange: e => this.reviewVerified[candidate.id] = e.target.checked }), ' 已核实原始信息']),
+          field('reason', '审核说明（拒绝时至少 5 字）', this.reviewNotes[candidate.id] || '',
+            value => this.reviewNotes[candidate.id] = value, { maxlength: 500 }),
+          field('item_id', '合并目标条目编号', this.reviewTargets[candidate.id] || candidate.item_id || '',
+            value => this.reviewTargets[candidate.id] = value, { type: 'number', min: 1 })
+        ] : m('p.Campus-hint', '需要补充审核说明或合并条目时，点「审核」展开。'),
         m('div.Campus-actions', [
+          m(Button, { onclick: () => { this.expanded[candidate.id] = !this.expanded[candidate.id]; m.redraw(); } },
+            this.expanded[candidate.id] ? '收起' : '审核'),
           m(Button, { className: 'Button Button--primary', onclick: () => this.decide(candidate, 'publish') }, '发布'),
           m(Button, { onclick: () => this.decide(candidate, 'merge') }, '合并来源'),
           candidate.item_id ? m(Button, { onclick: () => this.decide(candidate, 'update') }, '批准更新') : null,
           m(Button, { onclick: () => this.decide(candidate, 'reject') }, '拒绝')
         ])
       ]))) : emptyState('本页没有待审核信息', '新采集和成员投稿会在这里等待处理。'),
-      this.pager()
+      this.pager(10)
     ]);
   }
 
