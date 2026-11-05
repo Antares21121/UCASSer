@@ -76,6 +76,11 @@ try {
     $check(CollectionJobCommand::outcome($failedWeb, ['accounts' => 2, 'failed' => 0]) === 'partial', 'Healthy WeChat must be retained as partial success');
     $check(CollectionJobCommand::outcome(['succeeded' => 1, 'added' => 0], $emptyWechat) === 'succeeded', 'Zero new candidates is not an error');
     $check(CollectionJobCommand::outcome(['partial' => 1], $emptyWechat) === 'partial', 'Partial article failures must be visible');
+    $wechatCli = new UCASSer\Campus\AggregationWechatCommand($wechat);
+    foreach ([0, 1, 2] as $failures) {
+        $wechat->report = ['accounts' => 2, 'failed' => $failures, 'added' => 0];
+        $check($wechatCli->run(new ArrayInput([]), new BufferedOutput()) === ($failures ? 1 : 0), 'WeChat CLI must not return success after collection failures');
+    }
     $orphan = $enqueue();
     $db->table('campus_collection_jobs')->where('id', $orphan['id'])->update(['status' => 'running']);
     $check($run() === 0 && $db->table('campus_collection_jobs')->where('id', $orphan['id'])->value('status') === 'failed', 'Interrupted job must not block the queue forever');

@@ -16,6 +16,8 @@ use GuzzleHttp\ClientInterface;
  */
 class CollectorClient
 {
+    // A read-only publisher probe works before any subscriptions are created.
+    public const AUTH_PROBE_MP_ID = 'MP_WXS_3518809936';
     public const ARTICLE_SHORT_PATTERN = '#^https://mp\.weixin\.qq\.com/s/[A-Za-z0-9_~-]+$#D';
     public const ARTICLE_PATTERN = '#^https://mp\.weixin\.qq\.com/s(?:/[A-Za-z0-9_~-]+|\?[A-Za-z0-9_=&%.-]+)$#D';
 
@@ -65,11 +67,13 @@ class CollectorClient
             if (($status['data']['mp_configured'] ?? false) !== true) {
                 return ['state' => 'authorization_required', 'message' => '尚未保存微信读书授权，请扫码授权'];
             }
-            $test = $this->call('POST', 'weread/test', [], $token);
-            if (($test['data']['ok'] ?? null) === true) return ['state' => 'ready', 'message' => '微信读书授权已验证'];
-            // The upstream test conflates expired cookies and connection failures.
-            // Do not force a new QR merely because the network check failed.
-            return ['state' => 'unavailable', 'message' => '已保存授权，但连接校验未通过；请检查订阅服务网络或主动重新授权'];
+            // /weread/test checks the ordinary bookshelf. That API can fail
+            // while the MP cover/collection API accepts the same saved session.
+            $test = $this->call('POST', 'weread/mp/test', ['mp_id' => self::AUTH_PROBE_MP_ID], $token);
+            if (($test['data']['mp_id'] ?? null) === self::AUTH_PROBE_MP_ID) {
+                return ['state' => 'ready', 'message' => '公众号专用接口授权已验证'];
+            }
+            return ['state' => 'unavailable', 'message' => '公众号专用接口未返回有效校验结果，请检查订阅服务'];
         } catch (CollectorAuthorizationRequired $error) {
             return ['state' => 'authorization_required', 'message' => '微信读书要求重新授权，请扫码确认'];
         } catch (\Throwable $error) {
@@ -282,7 +286,6 @@ class CollectorClient
         if (in_array($code, ['-2012', '-2041', '-2010'], true) || in_array($upstreamCode, ['-2012', '-2041', '-2010'], true)) {
             throw new CollectorAuthorizationRequired('WeRead authorization required');
         }
-        if ($path === 'weread/test' && ($body['data']['ok'] ?? null) === false && in_array($response->getStatusCode(), [200, 400], true)) return $body;
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300 || $code !== '0') {
             // Upstream messages can contain cookies/tokens. Only static text escapes.
             throw new \RuntimeException('Collector request failed');

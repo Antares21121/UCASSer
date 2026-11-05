@@ -16,6 +16,7 @@ from connect_collector import IMAGE, RESULT, SERVICE_EXEC, connection_plan, load
 from forum import read_env
 
 MAX_RESPONSE = 1024 * 1024
+AUTH_PROBE_MP_ID = 'MP_WXS_3518809936'
 QR_MATRIX = r'''
 import json,qrcode,sys
 from PIL import Image
@@ -101,7 +102,7 @@ def authorize(api, matrix_builder, *, scan=False, wait=240, output=print, column
     if configured:
         # Validate saved credentials first. A valid session needs no replacement QR.
         try:
-            if api.request('/weread/test', b'{}').get('ok') is True:
+            if verify_mp_authorization(api):
                 output(json.dumps({'state': 'ready', 'authorization_verified': True, 'qr_requested': False}))
                 return 0
         except Exception:
@@ -124,7 +125,7 @@ def authorize(api, matrix_builder, *, scan=False, wait=240, output=print, column
             if (status.get('data') or {}).get('logicCode') == 'COOKIE_INVALID':
                 raise RuntimeError('WeRead rejected the fresh authorization; no subscription was added')
             if status.get('login_status') is True and api.request('/weread').get('mp_configured') is True:
-                verified = api.request('/weread/test', b'{}').get('ok') is True
+                verified = verify_mp_authorization(api)
                 if not verified:
                     raise RuntimeError('Fresh authorization has not passed the WeRead connection check')
                 output(json.dumps({'state': 'ready', 'authorization_verified': True,
@@ -139,6 +140,12 @@ def authorize(api, matrix_builder, *, scan=False, wait=240, output=print, column
             api.request('/weread/qr/over')
         except Exception:
             pass
+
+
+def verify_mp_authorization(api):
+    # The bookshelf endpoint is not a reliable gate for MP collection.
+    result = api.request('/weread/mp/test', json.dumps({'mp_id': AUTH_PROBE_MP_ID}).encode())
+    return result.get('mp_id') == AUTH_PROBE_MP_ID
 
 
 def main():

@@ -8,7 +8,7 @@ import threading
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from authorize_collector import CollectorAPI, authorize, confirm_url, terminal_qr
+from authorize_collector import AUTH_PROBE_MP_ID, CollectorAPI, authorize, confirm_url, terminal_qr
 
 
 class FakeCollector:
@@ -30,7 +30,10 @@ class FakeCollector:
             return {'login_status': logged, 'data': {'accessToken': 'PRIVATE_TOKEN', 'cookies': 'PRIVATE_COOKIE',
                                                     'logicCode': 'COOKIE_INVALID' if self.invalid else ''}}
         if path == '/weread/test':
-            return {'ok': not self.invalid, 'private_response_field': 'PRIVATE_DATA'}
+            raise AssertionError('Unrelated bookshelf test must not gate MP authorization')
+        if path == '/weread/mp/test':
+            if json.loads(payload) != {'mp_id': AUTH_PROBE_MP_ID}: raise AssertionError('Unexpected publisher probe')
+            return {'mp_id': AUTH_PROBE_MP_ID if not self.invalid else 'MP_WXS_wrong', 'private_response_field': 'PRIVATE_DATA'}
         if path == '/weread/qr/over':
             return {'cookies': 'PRIVATE_COOKIE', 'accessToken': 'PRIVATE_TOKEN'}
         raise AssertionError('Unexpected operation')
@@ -60,7 +63,7 @@ class TerminalAuthorizationTests(unittest.TestCase):
         result, text = self.execute(api, scan=True, sleep=lambda seconds: None)
         self.assertEqual(result, 0)
         self.assertIn('"authorization_verified": true', text)
-        self.assertEqual(api.paths[-2:], ['/weread/test', '/weread/qr/over'])
+        self.assertEqual(api.paths[-2:], ['/weread/mp/test', '/weread/qr/over'])
         self.assertEqual(api.paths.count('/weread/qr/code'), 1)
         self.assertEqual(api.paths.count('/weread/qr/status'), 2)
 
@@ -69,7 +72,7 @@ class TerminalAuthorizationTests(unittest.TestCase):
         result, text = self.execute(api, scan=True)
         self.assertEqual(result, 0)
         self.assertIn('"qr_requested": false', text)
-        self.assertEqual(api.paths, ['/weread', '/weread/test'])
+        self.assertEqual(api.paths, ['/weread', '/weread/mp/test'])
 
     def test_timeout_invalid_cookie_and_narrow_terminal_always_close_qr(self):
         api = FakeCollector([])

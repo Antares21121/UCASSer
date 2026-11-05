@@ -27,6 +27,8 @@ sudo python3 scripts/connect_collector.py --root /opt/ucasser-test --env-file .e
 
 ## 在阿里云所有者终端扫码
 
+授权校验使用 `/weread/mp/test` 的公众号发布者接口。2026-11-03 服务器实际检查发现：保存的授权存在、公众号接口成功，但 `/weread/test` 普通书架检查失败；不能用普通书架结果阻止公众号采集或要求替换有效授权。论坛后台和终端工具均验证固定公开公众号 ID 的响应；错误或缺少匹配 ID 时不会报已授权。普通状态检查仍不产生二维码。
+
 在已登录的阿里云 Workbench 终端中执行（保留终端的等宽字体，不要将输出重定向到文件）：
 
 ```bash

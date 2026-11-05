@@ -26,9 +26,16 @@ $fails = function (callable $call) use ($check): void {
 };
 try {
     $history = [];
-    $client = $make([$login(), $ok(['mp_configured' => true, 'cookie' => 'PRIVATE-MARKER']), $ok(['ok' => true])], $history);
+    $client = $make([$login(), $ok(['mp_configured' => true, 'cookie' => 'PRIVATE-MARKER']), $ok(['mp_id' => CollectorClient::AUTH_PROBE_MP_ID])], $history);
     $check($client->state()['state'] === 'ready' && count($history) === 3, 'Saved auth must survive absent QR singleton state');
     foreach ($history as $request) $check(!str_contains($request['request']->getUri()->getPath(), '/qr/'), 'State check requested a QR');
+    $check(str_ends_with($history[2]['request']->getUri()->getPath(), '/weread/mp/test')
+        && json_decode((string) $history[2]['request']->getBody(), true) === ['mp_id' => CollectorClient::AUTH_PROBE_MP_ID],
+        'MP authorization must not depend on the unrelated bookshelf API');
+    foreach ([[], ['ok' => true], ['mp_id' => 'MP_WXS_999']] as $invalid) {
+        $client = $make([$login(), $ok(['mp_configured' => true]), $ok($invalid)], $history);
+        $check($client->state()['state'] === 'unavailable', 'Missing or wrong publisher identity must not validate authorization');
+    }
     $client = $make([$login(), $ok(['mp_configured' => false])], $history);
     $check($client->state()['state'] === 'authorization_required', 'Missing saved authorization');
     $client = $make([$login(), $ok(['mp_configured' => true]), $json(['code' => 400, 'data' => ['ok' => false, 'error' => 'PRIVATE-MARKER']], 400)], $history);
@@ -47,7 +54,7 @@ try {
     $qr = $client->qr(); $check(count($history) === 2 && $qr['path'] === '/static/weread-fixture.png', 'QR metadata must be validated');
     $client = $make([$login(), $ok(['login_status' => false])], $history);
     $check($client->qrState()['state'] === 'authorization_required' && count($history) === 2, 'Unconfirmed QR must remain waiting');
-    $client = $make([$login(), $ok(['login_status' => true, 'cookie' => 'PRIVATE-MARKER']), $login(), $ok(['mp_configured' => true]), $ok(['ok' => true])], $history);
+    $client = $make([$login(), $ok(['login_status' => true, 'cookie' => 'PRIVATE-MARKER']), $login(), $ok(['mp_configured' => true]), $ok(['mp_id' => CollectorClient::AUTH_PROBE_MP_ID])], $history);
     $result = $client->qrState();
     $check($result['state'] === 'ready' && !str_contains(json_encode($result), 'PRIVATE-MARKER'), 'QR completion must verify saved auth without exposing session data');
     $png = "\x89PNG\r\n\x1a\n".str_repeat('x', 120);
